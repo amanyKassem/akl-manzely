@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator} from "react-native";
 import {
     Container,
     Content,
@@ -7,14 +7,15 @@ import {
     Button,
     Left,
     Body,
-    Title, Form, Textarea,
+    Title, Form, Textarea, Icon,
 } from 'native-base'
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getBankAcoounts , deleteBankAcoounts} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import Modal from "react-native-modal";
+import COLORS from "../consts/colors";
 
 class BankAccounts extends Component {
     constructor(props){
@@ -22,46 +23,30 @@ class BankAccounts extends Component {
         this.state = {
             spinner                     : false,
             Error                       : '',
-            massage                     : ''
+            massage                     : '',
+            loader: true
         }
     }
 
     componentWillMount() {
-
-        this.setState({spinner: true});
-
+        this.setState({loader: true});
+        this.props.getBankAcoounts(this.props.lang , this.props.user.token)
     }
 
-    validate = () => {
-
-        let isError     = false;
-        let msg         = '';
-
-        if (this.state.massage === '') {
-            isError     = true;
-            msg         = i18n.t('context');
-        }
-
-        if (msg !== '') {
-            this.setState({ Error : msg});
-        }
-
-        return isError;
-    };
-
-    toggleModalComment = () => {
-        this.setState({ isModalComment  : !this.state.isModalComment});
-    };
-
-    sentComment(){
-
-        const err = this.validate();
-
-        if (!err){
-            this.setState({ isModalComment  : !this.state.isModalComment});
-        }
-
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({loader: false});
     }
+
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
+    }
+
 
     static navigationOptions = () => ({
         header          : null,
@@ -69,11 +54,14 @@ class BankAccounts extends Component {
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/coin.png')} resizeMode={'contain'}/>)
     });
 
+    deleteBank(bankId){
+        this.props.deleteBankAcoounts( this.props.lang , bankId , this.props.user.token )
+    }
     render() {
 
         return (
             <Container>
-
+                {this.renderLoader()}
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -93,122 +81,50 @@ class BankAccounts extends Component {
 
                     <View style={[ styles.position_R, styles.zIndex, styles.bgFullWidth , styles.paddingVertical_10]}>
 
-                        <View style={[ styles.Border, styles.border_gray, styles.rowGroup, styles.bg_White, styles.marginHorizontal_15, styles.marginVertical_20, styles.paddingHorizontal_20 ]}>
-                            <View style={[ styles.centerContext ]}>
-                                <Text style={[ styles.textBold, styles.text_black ]}>{ i18n.t('monynow') }</Text>
-                                <Text style={[ styles.textBold, styles.text_black ]}> 334 ر.س</Text>
-                            </View>
-                            <View style={[ styles.overHidden ]}>
-                                <TouchableOpacity
-                                    style       = {[ styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40 ]}
-                                    onPress     = {() => this.toggleModalComment()}>
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                        { i18n.t('getmony') }
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <View style={[styles.paddingHorizontal_5, styles.marginHorizontal_15, styles.paddingVertical_25]}>
 
-                        <View style={[ styles.marginVertical_10, styles.paddingHorizontal_5, styles.marginHorizontal_15]}>
-                            <View style={[ styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 ]}>
-                                <View style={[ styles.overHidden ]}>
-                                    <Image style={[styles.icImg]} source={require('../../assets/img/sadad_logo.png')} resizeMode={'contain'}/>
-                                </View>
-                                <View style={[ styles.overHidden, styles.marginHorizontal_10 ]}>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('namebank') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>الراجحي</Text>
-                                    </View>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('accNum') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>010000</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={[ styles.marginVertical_10, styles.paddingHorizontal_5, styles.marginHorizontal_15]}>
-                            <View style={[ styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 ]}>
-                                <View style={[ styles.overHidden ]}>
-                                    <Image style={[styles.icImg]} source={require('../../assets/img/sadad_logo.png')} resizeMode={'contain'}/>
-                                </View>
-                                <View style={[ styles.overHidden, styles.marginHorizontal_10 ]}>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('namebank') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>الراجحي</Text>
-                                    </View>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('accNum') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>010000</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={[ styles.marginVertical_10, styles.paddingHorizontal_5, styles.marginHorizontal_15]}>
-                            <View style={[ styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 ]}>
-                                <View style={[ styles.overHidden ]}>
-                                    <Image style={[styles.icImg]} source={require('../../assets/img/sadad_logo.png')} resizeMode={'contain'}/>
-                                </View>
-                                <View style={[ styles.overHidden, styles.marginHorizontal_10 ]}>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('namebank') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>الراجحي</Text>
-                                    </View>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{ i18n.t('accNum') }</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray, styles.marginHorizontal_5]}>:</Text>
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>010000</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-
-                        <Modal isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
-                            <View style={[styles.overHidden, styles.bg_White , styles.Width_100, styles.position_R, styles.top_20]}>
-
-                                <View style={[styles.paddingVertical_15]}>
-                                    <Text style={[styles.textBold, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                        {i18n.t('getmony')}
-                                    </Text>
-                                </View>
-
-                                <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
-                                    <Form style={[styles.Width_100, styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
-
-                                        <View style={[styles.rowGroup, styles.Width_100]}>
-                                            <View style={[styles.position_R, styles.flex_1, styles.paddingHorizontal_10, styles.height_100]}>
-                                                <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full ]} />
-                                                <Textarea
-                                                    placeholder         = {i18n.t('anynotes')}
-                                                    onChangeText        = {(massage) => this.setState({massage})}
-                                                    style               = {[styles.textArea, styles.height_100, styles.paddingVertical_10, styles.bg_White, styles.Border, styles.border_gray]}
-                                                />
-                                            </View>
+                        {
+                            this.props.bankAcoounts.map((bank, i) => (
+                                    <View key={i} style={[styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 , {marginBottom:20}]}>
+                                        <View style={[styles.overHidden]}>
+                                            <Image style={[styles.icImg]}
+                                                   source={{uri : bank.bank_image}}
+                                                   resizeMode={'contain'}/>
                                         </View>
-
-                                        <Text style={[styles.textRegular, styles.textSize_14, styles.text_red, styles.textCenter]}>{ this.state.Error }</Text>
-
                                         <TouchableOpacity
-                                            style       = {[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
-                                            onPress     = {() => this.sentComment()}>
-                                            <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
-                                                {i18n.translate('sent')}
-                                            </Text>
+                                            onPress         = {() => this.props.navigation.navigate('editBankAcc' ,
+                                                {id:bank.id , national_id:bank.national_id , image:bank.image , account_number:bank.account_number ,
+                                                    iban_number : bank.iban_number , bank_id: bank.bank_id, bank: bank.bank_name})}
+                                            style={{width: 18, height: 18, position: 'absolute', right: 5, top: 5}}>
+                                            <Image style={{width: '100%', height: '100%'}}
+                                                   source={require('../../assets/img/edit.png')}
+                                                   resizeMode={'contain'}/>
                                         </TouchableOpacity>
 
-                                    </Form>
+                                        <TouchableOpacity
+                                            onPress={() => this.deleteBank(bank.id)}
+                                            style={{position: 'absolute', right: 5, bottom: 5}}>
+                                            <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign"
+                                                  name='closecircle'/>
+                                        </TouchableOpacity>
 
-                                </View>
+                                        <View style={[styles.overHidden, styles.marginHorizontal_10]}>
+                                            <View style={[styles.rowGroup]}>
+                                                <Text
+                                                    style={[styles.textRegular, styles.textSize_14, styles.text_black_gray , styles.width_150]}>{i18n.t('namebank')} :
+                                                    {bank.bank_name}</Text>
+                                            </View>
+                                            <View style={[styles.rowGroup]}>
+                                                <Text
+                                                    style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{i18n.t('accNum')} :
+                                                    {bank.account_number}</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                            ))
+                        }
 
-                            </View>
-                        </Modal>
+                        </View>
 
                         <TouchableOpacity
                             style       = {[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_25, styles.height_40, styles.zIndex]}
@@ -228,13 +144,12 @@ class BankAccounts extends Component {
     }
 }
 
-export default BankAccounts;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ bankAcoounts, lang , profile }) => {
+    return {
+        lang        : lang.lang,
+        user        : profile.user,
+        bankAcoounts : bankAcoounts.bankAcoounts,
+        loader      : bankAcoounts.loader
+    };
+};
+export default connect(mapStateToProps, {getBankAcoounts , deleteBankAcoounts})(BankAccounts);

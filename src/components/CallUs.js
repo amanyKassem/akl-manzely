@@ -12,7 +12,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getContactInfo} from "../actions";
+import {getContactInfo , complaint} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import Modal from "react-native-modal";
 import COLORS from "../consts/colors";
@@ -24,7 +24,7 @@ class CallUs extends Component {
         this.state = {
             loader                     : true,
             Error                       : '',
-            massage                     : ''
+            message                     : ''
         }
     }
 
@@ -52,7 +52,7 @@ class CallUs extends Component {
         let isError     = false;
         let msg         = '';
 
-        if (this.state.massage === '') {
+        if (this.state.message === '') {
             isError     = true;
             msg         = i18n.t('context');
         }
@@ -73,6 +73,8 @@ class CallUs extends Component {
         const err = this.validate();
 
         if (!err){
+            const { message } = this.state;
+            this.props.complaint(message , this.props.user.token);
             this.setState({ isModalComment  : !this.state.isModalComment});
         }
 
@@ -131,14 +133,20 @@ class CallUs extends Component {
                                     </View>
 
                                 </View>
-                                <TouchableOpacity
-                                    style       = {[ styles.marginVertical_30 , styles.width_250, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter,styles.marginHorizontal_5]}
-                                    onPress     = {() => this.toggleModalComment()}
-                                >
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_red, styles.textDecoration]}>
-                                        { i18n.t('FAsww') }
-                                    </Text>
-                                </TouchableOpacity>
+
+                                {
+                                    this.props.user.type !== 'user' && this.props.user.type !== 'provider' ?
+                                        null :
+                                        <TouchableOpacity
+                                            style       = {[ styles.marginVertical_30 , styles.width_250, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter,styles.marginHorizontal_5]}
+                                            onPress     = {() => this.toggleModalComment()}
+                                        >
+                                            <Text style={[styles.textRegular, styles.textSize_13, styles.text_red, styles.textDecoration]}>
+                                                { i18n.t('FAsww') }
+                                            </Text>
+                                        </TouchableOpacity>
+                                }
+
 
                                 <View style={[styles.rowCenter]}>
                                     <View style={[styles.overHidden]}>
@@ -193,7 +201,7 @@ class CallUs extends Component {
                                             <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full ]} />
                                             <Textarea
                                                 placeholder         = {i18n.t('textsent')}
-                                                onChangeText        = {(massage) => this.setState({massage})}
+                                                onChangeText        = {(message) => this.setState({message})}
                                                 style               = {[styles.textArea, styles.height_100, styles.paddingVertical_10, styles.bg_White, styles.Border, styles.border_gray]}
                                             />
                                         </View>
@@ -225,11 +233,12 @@ class CallUs extends Component {
     }
 }
 
-const mapStateToProps = ({ contactInfo, lang }) => {
+const mapStateToProps = ({ contactInfo, lang , profile }) => {
     return {
         lang        : lang.lang,
+        user        : profile.user,
         contactInfo : contactInfo.contactInfo,
         loader      : contactInfo.loader
     };
 };
-export default connect(mapStateToProps, {getContactInfo})(CallUs);
+export default connect(mapStateToProps, {getContactInfo , complaint})(CallUs);

@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    ActivityIndicator
+} from "react-native";
 import {
     Container,
     Content,
@@ -18,7 +27,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getNotifications , deleteNotifications} from "../actions";
 import COLORS from "../consts/colors";
 import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
@@ -31,21 +40,38 @@ class Notification extends Component {
     constructor(props){
         super(props);
         this.state = {
-            spinner                 : false,
+            loader: true
         }
     }
 
     componentWillMount() {
+        this.setState({loader: true});
+        this.props.getNotifications(this.props.lang , this.props.user.token)
+    }
 
-        this.setState({spinner: true});
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({loader: false});
+    }
 
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
+    }
+
+    deleteNotify(notify_id){
+        this.props.deleteNotifications( this.props.lang , notify_id , this.props.user.token )
     }
 
     render() {
 
         return (
             <Container>
-
+                { this.renderLoader() }
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -66,114 +92,38 @@ class Notification extends Component {
                     <View style={[ styles.position_R, styles.zIndex, { top : -30 } ]}>
 
                         <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.borderRed,styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.Width_100 ]}>
-                                                <View style={[ styles.rowGroup, styles.marginVertical_5]}>
-                                                    <Text style={[styles.textRegular, styles.text_black, styles.textSize_14]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شعوذه الندم
-                                                    </Text>
-                                                    <TouchableOpacity style={[ styles.paddingVertical_5, styles.paddingHorizontal_5 ]}>
-                                                        <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        3 : 00
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.borderBlack,styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.Width_100 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_black, styles.textSize_14]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شعوذه الندم
-                                                    </Text>
-                                                    <TouchableOpacity style={[ styles.paddingVertical_5, styles.paddingHorizontal_5 ]}>
-                                                        <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <View style={[ styles.rowGroup, styles.marginVertical_5]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        3 : 00
-                                                    </Text>
+
+                            {
+                                this.props.notifications.map((notification, i) => (
+                                    <View key={i} style={[ styles.marginVertical_10 ]}>
+                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
+                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                            <View>
+                                                <View style={[ styles.rowGroup, styles.bg_White, i % 2 === 0 ? styles.borderRed : styles.borderBlack ,styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                    <View style={[ styles.Width_100 ]}>
+                                                        <View style={[ styles.rowGroup, styles.marginVertical_5]}>
+                                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
+                                                                {notification.title}
+                                                            </Text>
+                                                            <TouchableOpacity  onPress = {() => this.deleteNotify(notification.id)} style={[ styles.paddingVertical_5, styles.paddingHorizontal_5 ]}>
+                                                                <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                        <View style={[ styles.rowGroup]}>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , styles.Width_86]}>
+                                                                {notification.body}
+                                                            </Text>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , {right:5 , position:'absolute' , bottom:0}]} >
+                                                                {notification.created_at}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
                                                 </View>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.borderRed,styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.Width_100 ]}>
-                                                <View style={[ styles.rowGroup, styles.marginVertical_5]}>
-                                                    <Text style={[styles.textRegular, styles.text_black, styles.textSize_14]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شعوذه الندم
-                                                    </Text>
-                                                    <TouchableOpacity style={[ styles.paddingVertical_5, styles.paddingHorizontal_5 ]}>
-                                                        <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        3 : 00
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.borderBlack,styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.Width_100 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_black, styles.textSize_14]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شعوذه الندم
-                                                    </Text>
-                                                    <TouchableOpacity style={[ styles.paddingVertical_5, styles.paddingHorizontal_5 ]}>
-                                                        <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <View style={[ styles.rowGroup, styles.marginVertical_5]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                        3 : 00
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
+                                        </Animatable.View>
+                                    </View>
+                                ))
+                            }
                         </View>
 
                     </View>
@@ -186,13 +136,12 @@ class Notification extends Component {
     }
 }
 
-export default Notification;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ notifications, lang , profile }) => {
+    return {
+        lang        : lang.lang,
+        user        : profile.user,
+        notifications : notifications.notifications,
+        loader      : notifications.loader
+    };
+};
+export default connect(mapStateToProps, {getNotifications , deleteNotifications})(Notification);

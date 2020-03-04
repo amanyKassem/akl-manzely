@@ -3,3 +3,8 @@ export * from './AuthAction';
 export * from './ProfileAction';
 export * from './ContactInfoAction';
 export * from './QuestionsAction';
+export * from './ComplaintAction';
+export * from './NotificationsAction';
+export * from './BankAcoountsAction';
+export * from './BanksAction';
+export * from './categoriesAction';

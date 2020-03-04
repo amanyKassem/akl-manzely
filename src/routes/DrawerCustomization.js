@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, I18nManager} from "react-native";
+import {View, Text, Image, TouchableOpacity, Share} from "react-native";
 import {Button, Container, Content, Icon} from 'native-base';
 import { DrawerItems } from 'react-navigation-drawer';
 
@@ -8,6 +8,17 @@ import COLORS from '../../src/consts/colors'
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
 import {logout, tempAuth, chooseLang} from "../actions";
+import Profile from "../components/Profile";
+import MyOrders from "../components/MyOrders";
+import Offers from "../components/Offers";
+import Favorite from "../components/Favorite";
+import BankAccounts from "../components/BankAccounts";
+import About from "../components/About";
+import Faq from "../components/Faq";
+import ShareApp from "../components/ShareApp";
+import Terms from "../components/Terms";
+import CallUs from "../components/CallUs";
+import Setting from "../components/Setting";
 
 class DrawerCustomization extends Component {
     constructor(props){
@@ -17,11 +28,32 @@ class DrawerCustomization extends Component {
         }
     }
 
+    onShare = async () => {
+        try {
+            const result = await Share.share({
+                message:'dddddd'
+                    // Platform.OS === 'ios'? 'https://apps.apple.com/us/app/reesh-ريش/id1490248883?ls=1' : 'https://play.google.com/store/apps/details?id=com.app.reesh',
+            })
+
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
     filterItems(item){
         if (this.props.user == null)
-            return item.routeName !== 'profile' && item.routeName !== 'Offers' && item.routeName !== 'MyOrders' && item.routeName !== 'Favorite' && item.routeName !== 'providerSubscriptions' && item.routeName !== 'bankAccounts' ;
+            return item.routeName !== 'Profile' && item.routeName !== 'MyOrders' && item.routeName !== 'Offers' && item.routeName !== 'Favorite' && item.routeName !== 'BankAccounts';
         else if(this.props.user.type === 'user' )
-            return  item.routeName !== 'providerSubscriptions' && item.routeName !== 'bankAccounts' ;
+            return item.routeName !== 'BankAccounts' && item.routeName !== 'Credit' ;
         else if(this.props.user.type === 'provider' )
             return  item.routeName !== 'Offers' && item.routeName !== 'Favorite' ;
     }
@@ -70,7 +102,7 @@ class DrawerCustomization extends Component {
                             <View style={[styles.bg_red, styles.width_150, styles.height_70, styles.position_A, styles.zIndexDown, styles.top_30]}/>
                             <TouchableOpacity style={[styles.position_R, styles.flexCenter, styles.Width_100, styles.marginHorizontal_25, styles.top_45]} onPress = {() => this.props.navigation.navigate('Profile')}>
                                 {/*<Image style={[styles.width_90, styles.height_90, styles.Radius_5]} source={{ uri: user.avatar }}/>*/}
-                                <Image style={[styles.width_90, styles.height_90, styles.Radius_5]} source={require('../../assets/img/girl.png')}/>
+                                <Image style={[styles.width_90, styles.height_90, styles.Radius_5]} source={{uri:user.avatar}}/>
                                 <View onPress={() => this.props.navigation.navigate('profile')}>
                                     <Text style={[styles.textRegular, styles.textSize_16, styles.text_red]}>{ user.name }</Text>
                                 </View>
@@ -86,7 +118,7 @@ class DrawerCustomization extends Component {
                                      if (route.route.key === 'logout') {
                                          this.logout()
                                      }else {
-                                         this.props.navigation.navigate(route.route.key);
+                                         route.route.key === 'ShareApp' ? this.onShare(): this.props.navigation.navigate(route.route.key)
                                      }
                                  }
                              }

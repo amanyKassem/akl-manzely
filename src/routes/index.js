@@ -41,6 +41,9 @@ import EditShop                 from "../components/EditShop";
 import AddProduct               from "../components/AddProduct";
 import NewProduct               from "../components/NewProduct";
 import InitScreen               from "../components/InitScreen";
+import ShareApp                 from "../components/ShareApp";
+import Credit                 from "../components/Credit";
+import EditBankAcc                 from "../components/EditBankAcc";
 import DrawerCustomization      from "./DrawerCustomization";
 
 const width = Dimensions.get('window').width;
@@ -53,8 +56,10 @@ const drawerNavigator = createDrawerNavigator({
     Offers              : Offers,
     Favorite            : Favorite,
     BankAccounts        : BankAccounts,
+    Credit              : Credit,
     About               : About,
     Faq                 : Faq,
+    ShareApp            : ShareApp,
     Terms               : Terms,
     CallUs              : CallUs,
     Setting             : Setting,
@@ -89,14 +94,32 @@ const AppNavigator = createStackNavigator({
             header: null
         }
     },
+    Credit : {
+        screen : Credit,
+        navigationOptions: {
+            header: null
+        }
+    },
     AddProduct : {
         screen : AddProduct,
         navigationOptions: {
             header: null
         }
     },
+    ShareApp : {
+        screen : ShareApp,
+        navigationOptions: {
+            header: null
+        }
+    },
     ViewProduct : {
         screen : ViewProduct,
+        navigationOptions: {
+            header: null
+        }
+    },
+    editBankAcc : {
+        screen : EditBankAcc,
         navigationOptions: {
             header: null
         }

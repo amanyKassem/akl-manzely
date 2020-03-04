@@ -12,27 +12,29 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {addBankAcoounts , getBanks} from "../actions";
+import {editBankAcoounts , getBanks} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import Modal from "react-native-modal";
 import COLORS from "../consts/colors";
+import {NavigationEvents} from "react-navigation";
 
-class FormBank extends Component {
+class EditBankAcc extends Component {
     constructor(props){
         super(props);
         this.state = {
-            numAcc                      : '',
-            nationalId                  : '',
-            IBANNo                  : '',
-            photo                       : '',
-            numAccStatus                : 0,
-            IBANNoStatus            : 0,
-            photoStatus                 : 0,
-            bankId                      : null,
-            bank                        : i18n.t('namebank'),
-            eventImg                    : i18n.translate('nationalImg'),
+            numAcc                      : this.props.navigation.state.params.account_number,
+            nationalId                  : this.props.navigation.state.params.national_id,
+            IBANNo                      : this.props.navigation.state.params.iban_number,
+            photo                       : this.props.navigation.state.params.iban_number,
+            numAccStatus                : 1,
+            IBANNoStatus                : 1,
+            photoStatus                 : 1,
+            nationalIdStatus            : 1,
+            bankId                      : this.props.navigation.state.params.bank_id,
+            bank                        : this.props.navigation.state.params.bank,
+            eventImg                    : this.props.navigation.state.params.image,
             base64                      : '',
             isSubmitted: false,
         }
@@ -115,11 +117,11 @@ class FormBank extends Component {
     onLoginPressed() {
 
         this.setState({ isSubmitted: true });
-        this.props.addBankAcoounts(this.state.nationalId , this.state.base64 , this.state.numAcc , this.state.IBANNo , this.state.bankId , this.props,  this.props.lang , this.props.user.token );
+        this.props.editBankAcoounts(this.props.navigation.state.params.id , this.state.nationalId , this.state.base64 , this.state.numAcc , this.state.IBANNo , this.state.bankId , this.props,  this.props.lang , this.props.user.token );
     }
 
     renderAddAcc(){
-        if (this.state.bankId === null || this.state.numAcc == '' || this.state.nationalId == '' || this.state.IBANNo == ''|| this.state.base64 == ''){
+        if (this.state.bankId === null || this.state.numAcc == '' || this.state.nationalId == '' || this.state.IBANNo == ''|| this.state.eventImg == ''){
             return (
                 <View
                     style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40 , {backgroundColor:"#999"}]}>
@@ -189,11 +191,16 @@ class FormBank extends Component {
         this.props.getBanks(this.props.lang )
     }
 
+    onFocus() {
+        this.componentWillMount();
+    }
+
     render() {
 
         return (
             <Container>
 
+                <NavigationEvents onWillFocus={() => this.onFocus()}/>
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -279,6 +286,7 @@ class FormBank extends Component {
                                                     onChangeText={(nationalId) => this.setState({nationalId})}
                                                     onBlur={() => this.unActiveInput('nationalId')}
                                                     onFocus={() => this.activeInput('nationalId')}
+                                                    value={this.state.nationalId}
                                                 />
                                             </Item>
                                         </View>
@@ -293,6 +301,7 @@ class FormBank extends Component {
                                                     onChangeText={(IBANNo) => this.setState({IBANNo})}
                                                     onBlur={() => this.unActiveInput('IBANNo')}
                                                     onFocus={() => this.activeInput('IBANNo')}
+                                                    value={this.state.IBANNo}
                                                 />
                                             </Item>
                                         </View>
@@ -307,6 +316,7 @@ class FormBank extends Component {
                                                     onChangeText={(numAcc) => this.setState({numAcc})}
                                                     onBlur={() => this.unActiveInput('numAcc')}
                                                     onFocus={() => this.activeInput('numAcc')}
+                                                    value={this.state.numAcc}
                                                 />
                                             </Item>
                                         </View>
@@ -350,4 +360,4 @@ const mapStateToProps = ({lang , profile , banks}) => {
         banks: banks.banks,
     };
 };
-export default connect(mapStateToProps, {addBankAcoounts , getBanks})(FormBank);
+export default connect(mapStateToProps, {editBankAcoounts , getBanks})(EditBankAcc);

@@ -143,8 +143,8 @@ class Home extends Component {
 
     componentWillMount() {
         this.setState({spinner: true});
-        this.props.getCategories(this.props.lang ,this.props.user.type === 'provider'? null : 0);
-        this.props.getProviderHome(this.props.lang , null , this.props.user.token);
+        this.props.getCategories(this.props.lang ,this.props.auth.data.type === 'provider'? null : 0);
+        this.props.getProviderHome(this.props.lang , null , this.props.auth.data.token);
     }
 
     static navigationOptions = () => ({
@@ -171,7 +171,7 @@ class Home extends Component {
                     </Left>
                     <Body style={styles.bodyText}>
                         {
-                            this.props.user.type !== 'provider'?
+                            this.props.user == null || this.props.user.type !== 'provider'?
                                 <View style={[styles.position_R, styles.SelfRight]}>
                                     <Item floatingLabel style={styles.item}>
                                         <Input
@@ -198,7 +198,7 @@ class Home extends Component {
                     </Body>
                     <Right style={styles.rightIcon}>
                         {
-                            this.props.user.type !== 'provider'?
+                            this.props.user || this.props.user.type !== 'provider'?
                                 <Button style={styles.Button} transparent onPress={() => this.toggleModalFilter()}>
                                     <Image style={[styles.headImage]} source={require('../../assets/img/controls.png')} resizeMode={'contain'}/>
                                 </Button>
@@ -209,7 +209,7 @@ class Home extends Component {
                             <Image style={[styles.headImage]} source={require('../../assets/img/alarm.png')} resizeMode={'contain'}/>
                         </Button>
                         {
-                            this.props.user.type !== 'provider'?
+                            this.props.user == null ||this.props.user.type !== 'provider'?
                                 <Button style={styles.Button} transparent onPress = {() => this.props.navigation.navigate('Cart')}>
                                     <Image style={[styles.headImage]} source={require('../../assets/img/shopping.png')} resizeMode={'contain'}/>
                                 </Button>

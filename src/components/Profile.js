@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView} from "react-native";
 import {
     Container,
     Content,
@@ -150,50 +150,72 @@ class Profile extends Component {
                         <View>
                             <View style={[ styles.overHidden,styles.Width_85, styles.height_200, styles.flexCenter]}>
                                 <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.overHidden,styles.Width_100, styles.height_200, styles.flexCenter]}>
-                                    <Image style={[styles.Width_100, styles.height_200]} source={require('../../assets/img/girl.png')}/>
+                                    <Image style={[styles.Width_100, styles.height_200]} source={{uri:this.props.user.avatar}}/>
                                 </Animatable.View>
                             </View>
-                            <Text style = {[styles.textRegular, styles.text_black, styles.textSize_16, styles.textCenter, styles.marginVertical_10]}>شعوذه الندم</Text>
+                            <Text style = {[styles.textRegular, styles.text_black, styles.textSize_16, styles.textCenter, styles.marginVertical_10]}>{ this.props.user.name }</Text>
                         </View>
 
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    01001846667
+                                    { this.props.user.phone }
                                 </Text>
                             </View>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    ذكر
+                                    { this.props.user.gender }
                                 </Text>
                             </View>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    84 / 12 /2020
+                                    { this.props.user.birthday }
                                 </Text>
                                 <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='calendar' />
                             </View>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    شيف
+                                    { this.props.user.qualification }
                                 </Text>
                             </View>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    السنبلاوين
+                                    { this.props.user.country }
                                 </Text>
                             </View>
 
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
-                                    السنبلاوين - شارع المعيـز
+                                    { this.props.user.address }
                                 </Text>
                                 <Icon style={[styles.textSize_14, styles.text_light_gray]} type="Feather" name='map-pin' />
+                            </View>
+                            <Text style={[styles.textRegular, styles.textSize_13, styles.text_black , styles.marginVertical_15, styles.Width_100]}>
+                                { i18n.t('delver') }
+                            </Text>
+                            <View style={[ styles.height_40 ]}>
+                                <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
+
+                                    {
+                                        this.props.user.delivery_types.map((type, i) => (
+                                            <View
+                                                key={i}
+                                                style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, styles.bg_black ]}>
+                                                <Text style     = {[ styles.textRegular, styles.textSize_12 , styles.text_White ]} >
+                                                    {type.name}
+                                                </Text>
+                                            </View>
+                                        ))
+                                    }
+
+
+
+                                </ScrollView>
                             </View>
 
                             <TouchableOpacity
@@ -285,13 +307,10 @@ class Profile extends Component {
     }
 }
 
-export default Profile;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ lang  , profile }) => {
+    return {
+        lang                    : lang.lang,
+        user                    : profile.user
+    };
+};
+export default connect(mapStateToProps, {})(Profile);

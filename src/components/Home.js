@@ -18,13 +18,14 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getCategories} from "../actions";
+import {getCategories , getProviderHome} from "../actions";
 import COLORS from "../consts/colors";
 import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
 import StarRating from "react-native-star-rating";
 import Modal from "react-native-modal";
-
+import {NavigationEvents} from "react-navigation";
+import Spinner from "react-native-loading-spinner-overlay";
 const isIOS = Platform.OS === 'ios';
 
 class Home extends Component {
@@ -35,7 +36,7 @@ class Home extends Component {
             isModalFilter           : false,
             isModalRate             : false,
             isModalSallery          : false,
-            active                  : 1,
+            active                  : null,
             projects                : '',
             projects_string         : '',
             totalCases              : '',
@@ -79,7 +80,7 @@ class Home extends Component {
             this.setState({cityName  : i18n.translate('mapname')});
         }
 
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        this.setState({ isModalFilter   : !this.state.isModalFilter , spinner : false});
 
     }
 
@@ -103,6 +104,7 @@ class Home extends Component {
 
     onSubCategories ( id ){
         this.setState({spinner: true, active : id });
+        this.props.getProviderHome(this.props.lang , id , this.props.user.token)
     }
 
     toggleModalFilter = () => {
@@ -140,7 +142,9 @@ class Home extends Component {
     }
 
     componentWillMount() {
-        this.props.getCategories(this.props.lang , this.props.user.type === 'provider'? null : 0)
+        this.setState({spinner: true});
+        this.props.getCategories(this.props.lang ,this.props.user.type === 'provider'? null : 0);
+        this.props.getProviderHome(this.props.lang , null , this.props.user.token);
     }
 
     static navigationOptions = () => ({
@@ -149,11 +153,16 @@ class Home extends Component {
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/home.png')} resizeMode={'contain'}/>)
     });
 
+    onFocus(){
+        this.componentWillMount();
+    }
     render() {
 
         return (
             <Container>
 
+                <Spinner visible = { this.state.spinner } />
+                <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={[styles.headerView]}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => { this.props.navigation.openDrawer()} }>
@@ -807,7 +816,7 @@ class Home extends Component {
                                         </TouchableOpacity>
                                     </Animatable.View>
                                     <Image style={[styles.Width_100, styles.height_200]}
-                                           source={require('../../assets/img/3.png')}/>
+                                           source={{uri : this.props.providerHome.provider.cover}}/>
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
                                                      style={[styles.blockContent, styles.top_35, styles.overlay_black]}>
                                         <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
@@ -820,14 +829,14 @@ class Home extends Component {
                                                 <Text
                                                     style={[styles.textBold, styles.text_White, styles.width_150, styles.textSize_12, styles.textLeft]}
                                                     numberOfLines={1} prop with ellipsizeMode="tail">
-                                                    اسم الشيف
+                                                    {this.props.providerHome.provider.provider_name}
                                                 </Text>
                                             </View>
                                             <View style={[styles.width_70]}>
                                                 <StarRating
                                                     disabled={true}
                                                     maxStars={5}
-                                                    rating={3}
+                                                    rating={this.props.providerHome.provider.rate}
                                                     fullStarColor={COLORS.red}
                                                     starSize={12}
                                                     starStyle={styles.starStyle}
@@ -836,7 +845,7 @@ class Home extends Component {
                                             <Text
                                                 style={[styles.textRegular, styles.text_White, styles.width_150, styles.textSize_12, styles.textLeft]}
                                                 numberOfLines={1} prop with ellipsizeMode="tail">
-                                                جميع انواع الاطعمه المميزه
+                                                {this.props.providerHome.provider.provider_details}
                                             </Text>
                                             <View style={[styles.rowGroup]}>
                                                 <Icon
@@ -845,7 +854,7 @@ class Home extends Component {
                                                 <Text
                                                     style={[styles.textRegular, styles.text_White, styles.textSize_12, styles.width_150,]}
                                                     numberOfLines={1} prop with ellipsizeMode="tail">
-                                                    السنبلاوين - المنصوره
+                                                    {this.props.providerHome.provider.address}
                                                 </Text>
                                             </View>
                                         </View>
@@ -855,10 +864,20 @@ class Home extends Component {
                                 <View style={[styles.height_40, styles.marginVertical_10]}>
                                     <ScrollView style={[styles.scroll]} horizontal={true}
                                                 showsHorizontalScrollIndicator={false}>
+
+                                        <TouchableOpacity
+                                            onPress={() => this.onSubCategories(null)}
+                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === null ? '#d3292a' : '#eee'}]}>
+                                            <Text
+                                                style={[styles.textRegular, styles.textSize_12, {color: this.state.active === null ? '#FFF' : '#a09f9f'}]}>
+                                                الكل
+                                            </Text>
+                                        </TouchableOpacity>
+
                                         {
                                             this.props.categories.map((cat, i) => (
                                                 <TouchableOpacity
-                                                     key={i}
+                                                    key={i}
                                                     onPress={() => this.onSubCategories(cat.id)}
                                                     style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
                                                     <Text
@@ -874,142 +893,41 @@ class Home extends Component {
 
                                 <View
                                     style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100]}>
-
-                                    <View
-                                        style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
+                                    {
+                                        this.props.providerHome.meals.map((meal, i) => (
                                             <View
-                                                style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('FilterCategory')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/1.png')}/>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر
-                                                            - لحم - سلطه</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10
-                                                            ر.س</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <View
-                                                style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('FilterCategory')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/2.png')}/>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر
-                                                            - لحم - سلطه</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10
-                                                            ر.س</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <View
-                                                style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('FilterCategory')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/3.png')}/>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر
-                                                            - لحم - سلطه</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10
-                                                            ر.س</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <View
-                                                style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('FilterCategory')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/4.png')}/>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر
-                                                            - لحم - سلطه</Text>
-                                                    </View>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10
-                                                            ر.س</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
+                                                key={i}
+                                                style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
+                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
+                                                                 style={[styles.Width_100]}>
+                                                    <View
+                                                        style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
+                                                    <TouchableOpacity
+                                                        onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
+                                                        style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
+                                                        <View style={[styles.Width_100, styles.position_R]}>
+                                                            <Image style={[styles.Width_100, styles.height_100]}
+                                                                   source={require('../../assets/img/1.png')}/>
+                                                        </View>
+                                                        <View style={[styles.Width_100, styles.marginVertical_5]}>
+                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_black, styles.textSize_12]}>{meal.title}</Text>
+                                                            </View>
+                                                            <View style={[styles.rowGroup]}>
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>{meal.description}</Text>
+                                                            </View>
+                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
+                                                            </View>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </Animatable.View>
+                                            </View>
+                                        ))
+                                    }
 
                                 </View>
 
@@ -1039,12 +957,13 @@ class Home extends Component {
 }
 
 
-const mapStateToProps = ({ auth, profile, lang , categories}) => {
+const mapStateToProps = ({ auth, profile, lang , categories , providerHome}) => {
     return {
         auth: auth.user,
         user: profile.user,
         lang: lang.lang,
         categories: categories.categories,
+        providerHome: providerHome.providerHome,
     };
 };
-export default connect(mapStateToProps, {getCategories})(Home);
+export default connect(mapStateToProps, {getCategories , getProviderHome})(Home);

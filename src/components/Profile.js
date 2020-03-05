@@ -30,6 +30,7 @@ class Profile extends Component {
             newStatus                   : 0,
             confirmStatus               : 0,
             Error                       : '',
+            birthday                    : '',
         }
     }
 
@@ -166,6 +167,19 @@ class Profile extends Component {
                             <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
                                 <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
                                     ذكر
+                                </Text>
+                            </View>
+
+                            <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
+                                <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
+                                    84 / 12 /2020
+                                </Text>
+                                <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='calendar' />
+                            </View>
+
+                            <View style={[ styles.marginVertical_10 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_red]}>
+                                <Text style={[styles.textRegular, styles.textSize_13, styles.text_black]}>
+                                    شيف
                                 </Text>
                             </View>
 

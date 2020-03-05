@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView} from "react-native";
 import {
     Container,
     Content,
@@ -17,6 +17,7 @@ import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 class EditProfile extends Component {
     constructor(props){
@@ -40,7 +41,8 @@ class EditProfile extends Component {
             userImage                   : '../../assets/img/girl.png',
             latitude                    : 11.11,
             longitude                   : 11.11,
-            base64                      : ''
+            base64                      : '',
+            active                      : 1,
         }
     }
 
@@ -112,6 +114,15 @@ class EditProfile extends Component {
 
     }
 
+    toggleDatePicker = () => {
+        this.setState({ isDatePickerVisible: !this.state.isDatePickerVisible });
+    };
+
+    doneDatePicker = date => {
+        let formatted_date = date.getFullYear() + "-" + ("0"+(date.getMonth() + 1)).slice(-2) + "-" + ("0" +date.getDate()).slice(-2);
+        this.setState({ date : formatted_date, isDatePickerVisible: false });
+    };
+
     toggleModalCountry = () => {
         this.setState({ isModalCountry: !this.state.isModalCountry});
     };
@@ -166,6 +177,10 @@ class EditProfile extends Component {
             this.setState({ userImage: result.uri ,base64:result.base64});
         }
     };
+
+    onSubCategories ( id ){
+        this.setState({spinner: true, active : id });
+    }
 
     componentWillReceiveProps(nextProps) {
 
@@ -326,6 +341,23 @@ class EditProfile extends Component {
                                 </Modal>
 
                                 <View style={[styles.overHidden, styles.rowGroup]}>
+                                    <TouchableOpacity onPress={this.toggleDatePicker} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.date !== '' ? styles.border_red :  styles.border_gray )]}>
+                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.date !== '' ? styles.text_red :  styles.text_black )]}>
+                                            {i18n.translate('birthday')} : {this.state.date}
+                                        </Text>
+                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='calendar' />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <DateTimePicker
+                                    isVisible       = {this.state.isDatePickerVisible}
+                                    onConfirm       = {this.doneDatePicker}
+                                    onCancel        = {this.toggleDatePicker}
+                                    mode            = {'date'}
+                                    minimumDate     = {new Date()}
+                                />
+
+                                <View style={[styles.overHidden, styles.rowGroup]}>
                                     <TouchableOpacity onPress={() => this.toggleModalCountry()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border,  (this.state.countryId !== null ? styles.border_red :  styles.border_gray )]}>
                                         <Text style={[styles.textRegular, styles.textSize_14, (this.state.countryId !== null ? styles.text_red :  styles.text_black )]}>
                                             { this.state.country }
@@ -409,6 +441,35 @@ class EditProfile extends Component {
                                         </Text>
                                         <Icon style={[styles.textSize_20, styles.text_light_gray]} type="Feather" name='map-pin' />
                                     </TouchableOpacity>
+                                </View>
+
+
+                                <View style={[ styles.height_40 ]}>
+                                    <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
+
+                                        <TouchableOpacity
+                                            onPress         = {() => this.onSubCategories(1)}
+                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 1  ? styles.bg_black : styles.bg_gray ) ]}>
+                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 1 ? styles.text_White : styles.text_black_gray )]} >
+                                                إستلام من الشيف
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress         = {() => this.onSubCategories(2)}
+                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 2  ? styles.bg_black : styles.bg_gray ) ]}>
+                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 2 ? styles.text_White : styles.text_black_gray )]} >
+                                                علي حسب المسافه
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress         = {() => this.onSubCategories(3)}
+                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 3  ? styles.bg_black : styles.bg_gray ) ]}>
+                                            <Text style     = {[ styles.textRegular, styles.textSize_12  , ( this.state.active === 3 ? styles.text_White : styles.text_black_gray )]} >
+                                                مجانيه
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                    </ScrollView>
                                 </View>
 
 

@@ -8,6 +8,8 @@ import notifications from './NotificationsReducer';
 import bankAcoounts from './BankAcoountsReducer';
 import banks from './BanksReducer';
 import categories from './CategoriesReducer';
+import providerHome from './ProviderHomeReducer';
+import mealInfo from './MealInfoReducer';
 
 export default combineReducers({
     lang,
@@ -19,4 +21,6 @@ export default combineReducers({
     bankAcoounts,
     banks,
     categories,
+    providerHome,
+    mealInfo,
 });

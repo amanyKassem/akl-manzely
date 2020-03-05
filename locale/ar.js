@@ -229,6 +229,8 @@ const ar = {
     'enternumAcc'               : 'ادخل رقم الحساب',
     'enternationalId'           : 'ادخل رقم الهوية',
     'enterIBANNo'               : 'ادخل رقم ايبان',
+    'availableProduct'               : 'المنتج متاح',
+    'viewComments'            : 'مشاهدة التعليقات',
 };
 
 export default ar;

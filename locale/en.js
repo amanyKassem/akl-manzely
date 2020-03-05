@@ -220,6 +220,8 @@ const en = {
     'enternumAcc'                       : 'enter account number',
     'enternationalId'                   : 'enter national number',
     'enterIBANNo'                       : 'enter IBAN number',
+    'availableProduct'               : 'Product available',
+    'viewComments'            : 'View comments',
 
 };
 

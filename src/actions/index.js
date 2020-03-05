@@ -8,3 +8,5 @@ export * from './NotificationsAction';
 export * from './BankAcoountsAction';
 export * from './BanksAction';
 export * from './categoriesAction';
+export * from './providerHomeAction';
+export * from './mealInfoAction';

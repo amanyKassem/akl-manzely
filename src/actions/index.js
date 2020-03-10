@@ -10,3 +10,7 @@ export * from './BanksAction';
 export * from './categoriesAction';
 export * from './providerHomeAction';
 export * from './mealInfoAction';
+export * from './deliveryTypesAction';
+export * from './countriesAction';
+export * from './ChangePasswordAction';
+export * from './gendersAction';

@@ -186,6 +186,7 @@ class FormBank extends Component {
     }
 
     componentWillMount() {
+        this.setState({ isSubmitted: false });
         this.props.getBanks(this.props.lang )
     }
 

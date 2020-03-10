@@ -198,7 +198,7 @@ const ar = {
     'namebank'                  : 'اسم البنك',
     'monynow'                   : 'المبلغ الحالي',
     'anynotes'                  : 'اي ملاحظات',
-    'newAcc'                    : 'حسساب جديد',
+    'newAcc'                    : 'حساب جديد',
     'transferred'               : 'اسم البنك المحول منه',
     'Holder'                    : 'اسم صاحب الحساب',
     'acountnumber'              : 'رقم الحساب',
@@ -229,8 +229,12 @@ const ar = {
     'enternumAcc'               : 'ادخل رقم الحساب',
     'enternationalId'           : 'ادخل رقم الهوية',
     'enterIBANNo'               : 'ادخل رقم ايبان',
-    'availableProduct'               : 'المنتج متاح',
-    'viewComments'            : 'مشاهدة التعليقات',
+    'availableProduct'          : 'المنتج متاح',
+    'viewComments'              : 'مشاهدة التعليقات',
+    'addCategory'               : 'اضافه قسم',
+    'nameAr'                    : 'الاسم بالعربية',
+    'nameEn'                    : 'الاسم بالانجليزية',
+    'mainCategory'              : 'القسم الرئيسي',
 };
 
 export default ar;

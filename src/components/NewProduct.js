@@ -21,67 +21,46 @@ class NewProduct extends Component {
         super(props);
         this.state = {
             selectFilter                : false,
-            filter                      : i18n.t('producer'),
+            filter                      : i18n.t('mainCategory'),
             filterId                    : null,
-            name                        : '',
-            nameStatus                  : 0,
+            nameAr                        : '',
+            nameEn                        : '',
+            nameArStatus                  : 0,
+            nameEnStatus                  : 0,
 
         }
     }
 
     activeInput(type) {
 
-        if (type === 'name' || this.state.name !== '') {
-            this.setState({nameStatus: 1})
+        if (type === 'nameAr' || this.state.nameAr !== '') {
+            this.setState({nameArStatus: 1})
+        }
+
+        if (type === 'nameEn' || this.state.nameEn !== '') {
+            this.setState({nameEnStatus: 1})
         }
 
     }
 
     unActiveInput(type) {
 
-        if (type === 'name' && this.state.name === '') {
-            this.setState({nameStatus: 0})
+        if (type === 'nameAr' || this.state.nameAr !== '') {
+            this.setState({nameArStatus: 0})
+        }
+
+        if (type === 'nameEn' || this.state.nameEn !== '') {
+            this.setState({nameEnStatus: 0})
         }
 
     }
 
-    validate = () => {
-        let isError     = false;
-        let msg         = '';
-
-
-        if (this.state.filterId === null) {
-            isError     = true;
-            msg         = i18n.t('kindpro');
-        } else if (this.state.name.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('namepro');
-        }
-        if (msg !== '') {
-            Toast.show({
-                text        : msg,
-                type        : "danger",
-                duration    : 3000,
-                textStyle       : {
-                    color       : "white",
-                    fontFamily  : 'cairo',
-                    textAlign   : 'center',
-                }
-            });
-        }
-        return isError;
-    };
 
     onEditPressed() {
 
         this.setState({spinner: true});
 
-        const err = this.validate();
-
-        if (!err){
-            this.props.navigation.navigate('Home');
-        }
-
+        this.props.navigation.navigate('Home');
     }
 
     toggleModalFilter = () => {
@@ -121,7 +100,7 @@ class NewProduct extends Component {
                     </Left>
                     <Body style={styles.bodyText}>
                         <Title style={[styles.textRegular , styles.text_red, styles.textSize_16, styles.textLeft, styles.Width_100, styles.paddingHorizontal_5, styles.paddingVertical_0]}>
-                            { i18n.t('addpro') }
+                            { i18n.t('addCategory') }
                         </Title>
                     </Body>
                 </Header>
@@ -135,6 +114,32 @@ class NewProduct extends Component {
                         <View style={[ styles.marginVertical_10, styles.Width_90, styles.flexCenter, styles.bg_White, styles.paddingHorizontal_10 ]}>
 
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
+
+                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                                        <Input
+                                            placeholder={i18n.translate('nameAr')}
+                                            style={[styles.input, styles.height_50, (this.state.nameArStatus === 1 ? styles.Active : styles.noActive)]}
+                                            onChangeText={(nameAr) => this.setState({nameAr})}
+                                            onBlur={() => this.unActiveInput('nameAr')}
+                                            onFocus= {() => this.activeInput('nameAr')}
+                                            value= {this.state.nameAr}
+                                        />
+                                    </Item>
+                                </View>
+
+                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                                        <Input
+                                            placeholder={i18n.translate('nameEn')}
+                                            style={[styles.input, styles.height_50, (this.state.nameEnStatus === 1 ? styles.Active : styles.noActive)]}
+                                            onChangeText={(nameEn) => this.setState({nameEn})}
+                                            onBlur={() => this.unActiveInput('nameEn')}
+                                            onFocus= {() => this.activeInput('nameEn')}
+                                            value= {this.state.nameEn}
+                                        />
+                                    </Item>
+                                </View>
 
                                 <View style={[styles.overHidden, styles.rowGroup]}>
                                     <TouchableOpacity onPress={() => this.toggleModalFilter()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.filterId !== null ? styles.border_red :  styles.border_gray )]}>
@@ -150,7 +155,7 @@ class NewProduct extends Component {
 
                                         <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
                                             <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('producer')}
+                                                {i18n.t('mainCategory')}
                                             </Text>
                                         </View>
 
@@ -192,19 +197,6 @@ class NewProduct extends Component {
 
                                     </View>
                                 </Modal>
-
-                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
-                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
-                                        <Input
-                                            placeholder={i18n.translate('nameproducer')}
-                                            style={[styles.input, styles.height_50, (this.state.nameStatus === 1 ? styles.Active : styles.noActive)]}
-                                            onChangeText={(name) => this.setState({name})}
-                                            onBlur={() => this.unActiveInput('name')}
-                                            onFocus= {() => this.activeInput('name')}
-                                            value= {this.state.name}
-                                        />
-                                    </Item>
-                                </View>
 
                                 <TouchableOpacity
                                     style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}

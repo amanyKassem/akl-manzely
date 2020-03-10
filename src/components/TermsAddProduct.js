@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator} from "react-native";
 import {
     Container,
     Content,
@@ -12,34 +12,48 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getContactInfo} from "../actions";
 import * as Animatable from 'react-native-animatable';
+import COLORS from "../consts/colors";
 
 class TermsAddProduct extends Component {
     constructor(props){
         super(props);
         this.state = {
-            spinner                 : false,
+            loader: true
         }
     }
 
     componentWillMount() {
 
-        this.setState({spinner: true});
+        this.setState({loader: true});
+        this.props.getContactInfo(this.props.lang)
 
     }
 
-    static navigationOptions = () => ({
-        header          : null,
-        drawerLabel     : (<Text style={[styles.textRegular, styles.textSize_16]}>{i18n.translate('terms')}</Text>) ,
-        drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/locked.png')} resizeMode={'contain'}/>)
-    });
+    // static navigationOptions = () => ({
+    //     header          : null,
+    //     drawerLabel     : (<Text style={[styles.textRegular, styles.textSize_16]}>{i18n.translate('terms')}</Text>) ,
+    //     drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/locked.png')} resizeMode={'contain'}/>)
+    // });
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({loader: false});
+    }
 
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
+    }
     render() {
 
         return (
             <Container>
-
+                { this.renderLoader() }
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -72,7 +86,7 @@ class TermsAddProduct extends Component {
                                             { i18n.t('termsPro') }
                                         </Text>
                                         <Text style={[styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_5]}>
-                                            هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة، لقد تم توليد هذا النص من مولد النص العربى، حيث يمكنك أن تولد مثل هذا النص أو العديد من النصوص الأخرى إضافة إلى زيادة عدد الحروف التى يولدها التطبيق.
+                                            {this.props.contactInfo.ad_product_terms}
                                         </Text>
                                     </Animatable.View>
                                 </View>
@@ -96,13 +110,11 @@ class TermsAddProduct extends Component {
     }
 }
 
-export default TermsAddProduct;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ contactInfo, lang }) => {
+    return {
+        lang        : lang.lang,
+        contactInfo : contactInfo.contactInfo,
+        loader      : contactInfo.loader
+    };
+};
+export default connect(mapStateToProps, {getContactInfo})(TermsAddProduct);

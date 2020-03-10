@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d658ac4b-2b40-4731-97e5-470a197671de" name="Default Changelist" comment="" />
+    <list default="true" id="d658ac4b-2b40-4731-97e5-470a197671de" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/actions/ChangePasswordAction.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/actions/countriesAction.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/actions/deliveryTypesAction.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/actions/gendersAction.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/reducers/ChangePasswordReducer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/reducers/CountriesReducer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/reducers/DeliveryTypesReducer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/reducers/gendersReducer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ReactotronConfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/ReactotronConfig.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/style/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/assets/style/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locale/ar.js" beforeDir="false" afterPath="$PROJECT_DIR$/locale/ar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locale/en.js" beforeDir="false" afterPath="$PROJECT_DIR$/locale/en.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actions/ProfileAction.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/actions/ProfileAction.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actions/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/actions/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/AddProduct.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AddProduct.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/EditProfile.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/EditProfile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FormBank.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormBank.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Home.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Home.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/NewProduct.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/NewProduct.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Profile.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Profile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TermsAddProduct.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TermsAddProduct.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/reducers/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/reducers/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/DrawerCustomization.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/DrawerCustomization.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,7 +42,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1YbnBxocAPQcPktW8szRXWMuGRf" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -63,6 +91,8 @@
       <workItem from="1581860622961" duration="152396000" />
       <workItem from="1583220032672" duration="6981000" />
       <workItem from="1583228204245" duration="45242000" />
+      <workItem from="1583738930325" duration="16805000" />
+      <workItem from="1583761822430" duration="10586000" />
     </task>
     <servers />
   </component>

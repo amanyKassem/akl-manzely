@@ -10,6 +10,10 @@ import banks from './BanksReducer';
 import categories from './CategoriesReducer';
 import providerHome from './ProviderHomeReducer';
 import mealInfo from './MealInfoReducer';
+import deliveryTypes from './DeliveryTypesReducer';
+import countries from './CountriesReducer';
+import changePassword from './ChangePasswordReducer';
+import genders from './gendersReducer';
 
 export default combineReducers({
     lang,
@@ -23,4 +27,8 @@ export default combineReducers({
     categories,
     providerHome,
     mealInfo,
+    deliveryTypes,
+    countries,
+    changePassword,
+    genders,
 });

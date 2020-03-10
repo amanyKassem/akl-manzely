@@ -472,7 +472,6 @@ class EditProfile extends Component {
                                     </ScrollView>
                                 </View>
 
-
                             <TouchableOpacity
                                 style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
                                 onPress     = {() => this.onEditPressed()}

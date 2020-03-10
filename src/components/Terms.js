@@ -81,9 +81,12 @@ class Terms extends Component {
                                 </View>
                                 <View style={[styles.overHidden]}>
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}>
-                                        <Text style={[styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15]}>
-                                            {this.props.contactInfo.terms}
-                                        </Text>
+                                        {
+											this.props.contactInfo ?
+												<Text style={[styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15]}>
+													{this.props.contactInfo.terms}
+												</Text> : null
+                                        }
                                     </Animatable.View>
                                 </View>
                             </View>

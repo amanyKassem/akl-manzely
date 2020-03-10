@@ -134,7 +134,7 @@ class DrawerCustomization extends Component {
                         />
 
                         {
-                            this.props.user.type !== 'user' && this.props.user.type !== 'provider' ?
+                            this.props.auth == null || this.props.user == null ?
                                 <TouchableOpacity  onPress= {() => this.registerChef()} style={{ flexDirection: 'row', top: 0, marginLeft: 35 }}>
                                     <Image style={[styles.headImage]} source={require('../../assets/img/logout.png')} resizeMode={'contain'}/>
                                     <Text style={[styles.textRegular, styles.textSize_16, { marginLeft: 20 , top:-3 }]}>{ i18n.translate('AsChef') }</Text>

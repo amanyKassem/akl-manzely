@@ -21,32 +21,36 @@ export const profile = (token) => {
 export const updateProfile = (data) => {
     return (dispatch) => {
         axios({
-            url: CONST.url + 'update-profile',
+            url: CONST.url + 'edit-profile',
             method      : 'POST',
             headers     : {Authorization: data.token },
             data        : {
                 name                : data.name,
+                email               : data.email,
                 phone               : data.phone,
-                city_id             : data.city_id,
-                lat                 : data.lat,
-                lng                 : data.lng,
+                country_id          : data.country_id,
+                gender              : data.gender,
+                latitude            : data.latitude,
+                longitude           : data.longitude,
                 avatar              : data.avatar,
-                address             : data.address,
-                category_id         : data.category_id,
                 provider_details    : data.provider_details,
+                available           : data.available,
+                delivery_types      : data.delivery_types,
+                qualification       : data.qualification,
+                address             : data.address,
                 lang                : data.lang,
             }}).then(response => {
 
             if (response.data.success) {
 
-                data.props.navigation.navigate('profile');
+                data.props.navigation.navigate('Profile');
 
                 dispatch({type: 'update_profile', data:response.data.data});
 
             }
 
             Toast.show({
-                text        : response.data.msg,
+                text        : response.data.message,
                 type        : response.data.success ? "success" : "danger",
                 duration    : 3000,
                 textStyle       : {

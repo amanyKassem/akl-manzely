@@ -991,6 +991,11 @@ const styles = ({
     shapeBlock : {
         top                 : -10,
         left                : -10,
+    },
+    flexColumnCenter: {
+        flexDirection:'column',
+        justifyContent:'center',
+        alignItems:'center'
     }
 
 });

@@ -12,12 +12,13 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getDeliveryTypes , getCategories} from "../actions";
 import Modal from "react-native-modal";
 import { NavigationEvents } from "react-navigation";
 import {ImageBrowser,CameraBrowser} from 'expo-multiple-imagepicker';
 import * as Permissions from 'expo-permissions';
 import * as Animatable from "react-native-animatable";
+import CategoryPicker from "./CategoryPicker"
 
 let base64   = [];
 
@@ -29,23 +30,22 @@ class AddProduct extends Component {
             filter                      : i18n.t('filtermon'),
             filterId                    : null,
             selectKind                  : false,
-            kind                        : i18n.t('producer'),
-            kindId                      : null,
             selectSubKind               : false,
             subKind                     : i18n.t('filtersub'),
             subKindId                   : null,
             selectTimeOut               : false,
-            timeOut                     : i18n.t('timeeat'),
-            timeOutId                   : null,
+            timeOut                     : '',
             price                       : '',
             priceStatus                 : 0,
             discount                    : '',
             discountStatus              : 0,
+            timeOutStatus              : 0,
             active                      : 1,
             imageBrowserOpen            : false,
             cameraBrowserOpen           : false,
             photos                      : [],
             arrayInputs                 : [],
+            mainCat                 : null,
 
         }
     }
@@ -60,6 +60,10 @@ class AddProduct extends Component {
             this.setState({discountStatus: 1})
         }
 
+        if (type === 'timeOut' || this.state.timeOut !== '') {
+            this.setState({timeOutStatus: 1})
+        }
+
     }
 
     unActiveInput(type) {
@@ -72,6 +76,10 @@ class AddProduct extends Component {
             this.setState({discountStatus: 0})
         }
 
+        if (type === 'timeOut' || this.state.timeOut !== '') {
+            this.setState({timeOutStatus: 0})
+        }
+
     }
 
     joinData = () => {
@@ -81,57 +89,11 @@ class AddProduct extends Component {
 
     }
 
-    validate = () => {
-        let isError     = false;
-        let msg         = '';
-
-
-        if (this.state.photos.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('infoimage');
-        } else if (this.state.filterId === null) {
-            isError     = true;
-            msg         = i18n.t('namepro');
-        } else if (this.state.kindId === null) {
-            isError     = true;
-            msg         = i18n.t('kindpro');
-        } else if (this.state.subKindId === null) {
-            isError     = true;
-            msg         = i18n.t('filrsub');
-        } else if (this.state.price.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('monypro');
-        } else if (this.state.discount.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('discount');
-        } else if (this.state.timeOutId === null) {
-            isError     = true;
-            msg         = i18n.t('timeeat');
-        }
-        if (msg !== '') {
-            Toast.show({
-                text        : msg,
-                type        : "danger",
-                duration    : 3000,
-                textStyle       : {
-                    color       : "white",
-                    fontFamily  : 'cairo',
-                    textAlign   : 'center',
-                }
-            });
-        }
-        return isError;
-    };
-
     onEditPressed() {
 
         this.setState({spinner: true});
 
-        const err = this.validate();
-
-        if (!err){
-            this.props.navigation.navigate('Home');
-        }
+        this.props.navigation.navigate('Home');
 
     }
 
@@ -164,53 +126,34 @@ class AddProduct extends Component {
         this.setState({ selectFilter: !this.state.selectFilter});
     };
 
-    selectFilter(id, name) {
+    selectFilter(id, name , cat) {
         this.setState({
             filterId        : id,
-            filter          : name
+            filter          : name,
+            mainCat          : cat,
         });
         this.setState({ selectFilter: !this.state.selectFilter});
-    }
-
-    toggleModalKind = () => {
-        this.setState({ selectKind: !this.state.selectKind});
-    };
-
-    selectKindId(id, name) {
-        this.setState({
-            kindId          : id,
-            kind            : name
-        });
-        this.setState({ selectKind: !this.state.selectKind});
     }
 
     toggleModalSubKind = () => {
         this.setState({ selectSubKind: !this.state.selectSubKind});
     };
 
-    selectSubKind(id, name) {
+    selectSubKind(id, name , child) {
         this.setState({
-            subKindId        : id,
-            subKind          : name
+            subKindId      : id,
+            subKind        : name,
+            child          : child,
         });
         this.setState({ selectSubKind: !this.state.selectSubKind});
     }
 
-    toggleModalTimeOut = () => {
-        this.setState({ selectTimeOut: !this.state.selectTimeOut});
-    };
 
-    selectTimeOut(id, name) {
-        this.setState({
-            timeOutId        : id,
-            timeOut          : name
-        });
-        this.setState({ selectTimeOut: !this.state.selectTimeOut});
-    }
 
     componentWillMount() {
-
         this.setState({spinner: true});
+        this.props.getDeliveryTypes(this.props.lang);
+        this.props.getCategories(this.props.lang ,null);
 
     }
 
@@ -353,176 +296,107 @@ class AddProduct extends Component {
 
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={() => this.toggleModalFilter()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.filterId !== null ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.filterId !== null ? styles.text_red :  styles.text_black )]}>
-                                            { this.state.filter }
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
-                                    </TouchableOpacity>
-                                </View>
+                                <CategoryPicker categories={this.props.categories} />
 
-                                <Modal isVisible={this.state.selectFilter} onBackdropPress={() => this.toggleModalFilter()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('filtermon')}
-                                            </Text>
-                                        </View>
+                                {/*<View style={[styles.overHidden, styles.rowGroup]}>*/}
+                                    {/*<TouchableOpacity onPress={() => this.toggleModalFilter()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.filterId !== null ? styles.border_red :  styles.border_gray )]}>*/}
+                                        {/*<Text style={[styles.textRegular, styles.textSize_14, (this.state.filterId !== null ? styles.text_red :  styles.text_black )]}>*/}
+                                            {/*{ this.state.filter }*/}
+                                        {/*</Text>*/}
+                                        {/*<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />*/}
+                                    {/*</TouchableOpacity>*/}
+                                {/*</View>*/}
 
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectFilter(1, 'ذكر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.filterId === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        ذكر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                {/*<Modal isVisible={this.state.selectFilter} onBackdropPress={() => this.toggleModalFilter()}>*/}
+                                    {/*<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>*/}
 
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectFilter(2, 'إنثي')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.filterId === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        إنثي
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
+                                        {/*<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>*/}
+                                            {/*<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>*/}
+                                                {/*{i18n.t('filtermon')}*/}
+                                            {/*</Text>*/}
+                                        {/*</View>*/}
 
-                                    </View>
-                                </Modal>
+                                        {/*<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>*/}
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={() => this.toggleModalKind()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.kindId !== null ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.kindId !== null ? styles.text_red :  styles.text_black )]}>
-                                            { this.state.kind }
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
-                                    </TouchableOpacity>
-                                </View>
+                                            {/*{*/}
+                                                {/*this.props.categories.map((cat, i) => (*/}
+                                                    {/*<TouchableOpacity*/}
+                                                        {/*key={i}*/}
+                                                        {/*style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
+                                                        {/*onPress             = {() => this.selectFilter(cat.id, cat.name , cat)}*/}
+                                                    {/*>*/}
+                                                        {/*<View style={[styles.overHidden, styles.rowRight]}>*/}
+                                                            {/*<CheckBox*/}
+                                                                {/*style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
+                                                                {/*color               = {styles.text_red}*/}
+                                                                {/*selectedColor       = {styles.text_red}*/}
+                                                                {/*checked             = {this.state.filterId === 1}*/}
+                                                            {/*/>*/}
+                                                            {/*<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
+                                                                {/*{cat.name}*/}
+                                                            {/*</Text>*/}
+                                                        {/*</View>*/}
+                                                    {/*</TouchableOpacity>*/}
+                                                {/*))*/}
+                                            {/*}*/}
+                                        {/*</View>*/}
 
-                                <Modal isVisible={this.state.selectKind} onBackdropPress={() => this.toggleModalKind()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
+                                    {/*</View>*/}
+                                {/*</Modal>*/}
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('producer')}
-                                            </Text>
-                                        </View>
+                                {/*{*/}
+                                    {/*this.state.mainCat !== null &&  this.state.mainCat.childes.length > 0 ?*/}
+                                         {/*<View>*/}
+                                             {/*<View style={[styles.overHidden, styles.rowGroup]}>*/}
+                                                 {/*<TouchableOpacity onPress={() => this.toggleModalSubKind()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.subKindId !== null ? styles.border_red :  styles.border_gray )]}>*/}
+                                                     {/*<Text style={[styles.textRegular, styles.textSize_14, (this.state.subKindId !== null ? styles.text_red :  styles.text_black )]}>*/}
+                                                         {/*{ this.state.subKind }*/}
+                                                     {/*</Text>*/}
+                                                     {/*<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />*/}
+                                                 {/*</TouchableOpacity>*/}
+                                             {/*</View>*/}
 
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectKindId(1, 'ذكر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.kindId === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        ذكر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                             {/*<Modal isVisible={this.state.selectSubKind} onBackdropPress={() => this.toggleModalSubKind()}>*/}
+                                                 {/*<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>*/}
 
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectKindId(2, 'إنثي')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.kindId === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        إنثي
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
+                                                     {/*<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>*/}
+                                                         {/*<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>*/}
+                                                             {/*{i18n.t('filtersub')}*/}
+                                                         {/*</Text>*/}
+                                                     {/*</View>*/}
 
-                                    </View>
-                                </Modal>
+                                                     {/*<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>*/}
+                                                         {/*{*/}
+                                                             {/*this.state.mainCat.childes.map((child, i) => (*/}
+                                                                 {/*<TouchableOpacity*/}
+                                                                     {/*key={i}*/}
+                                                                     {/*style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
+                                                                     {/*onPress             = {() => this.selectSubKind(child.id, child.name , child)}*/}
+                                                                 {/*>*/}
+                                                                     {/*<View style={[styles.overHidden, styles.rowRight]}>*/}
+                                                                         {/*<CheckBox*/}
+                                                                             {/*style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
+                                                                             {/*color               = {styles.text_red}*/}
+                                                                             {/*selectedColor       = {styles.text_red}*/}
+                                                                             {/*checked             = {this.state.subKindId === 1}*/}
+                                                                         {/*/>*/}
+                                                                         {/*<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
+                                                                             {/*{child.name}*/}
+                                                                         {/*</Text>*/}
+                                                                     {/*</View>*/}
+                                                                 {/*</TouchableOpacity>*/}
+                                                             {/*))*/}
+                                                         {/*}*/}
+                                                     {/*</View>*/}
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={() => this.toggleModalSubKind()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.subKindId !== null ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.subKindId !== null ? styles.text_red :  styles.text_black )]}>
-                                            { this.state.subKind }
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
-                                    </TouchableOpacity>
-                                </View>
+                                                 {/*</View>*/}
+                                             {/*</Modal>*/}
+                                         {/*</View>*/}
+                                        {/*:*/}
+                                         {/*null*/}
+                                 {/*}*/}
 
-                                <Modal isVisible={this.state.selectSubKind} onBackdropPress={() => this.toggleModalSubKind()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
-
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('filtersub')}
-                                            </Text>
-                                        </View>
-
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectSubKind(1, 'ذكر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.subKindId === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        ذكر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectSubKind(2, 'إنثي')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.subKindId === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        إنثي
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-
-                                    </View>
-                                </Modal>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
                                     <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
@@ -550,62 +424,20 @@ class AddProduct extends Component {
                                     </Item>
                                 </View>
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={() => this.toggleModalTimeOut()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.timeOutId !== null ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.timeOutId !== null ? styles.text_red :  styles.text_black )]}>
-                                            { this.state.timeOut }
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
-                                    </TouchableOpacity>
+                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                                        <Input
+                                            placeholder={i18n.translate('timeeat')}
+                                            style={[styles.input, styles.height_50, (this.state.timeOutStatus === 1 ? styles.Active : styles.noActive)]}
+                                            onChangeText={(timeOut) => this.setState({timeOut})}
+                                            onBlur={() => this.unActiveInput('timeOut')}
+                                            onFocus= {() => this.activeInput('timeOut')}
+                                            value= {this.state.timeOut}
+                                        />
+                                    </Item>
                                 </View>
 
-                                <Modal isVisible={this.state.selectTimeOut} onBackdropPress={() => this.toggleModalTimeOut()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('timeeat')}
-                                            </Text>
-                                        </View>
-
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectTimeOut(1, 'ذكر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.timeOutId === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        ذكر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectTimeOut(2, 'إنثي')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.timeOutId === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        إنثي
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-
-                                    </View>
-                                </Modal>
 
                                 <View>
                                     {this.state.arrayInputs}
@@ -632,27 +464,20 @@ class AddProduct extends Component {
                                 <View style={[ styles.height_40 ]}>
                                     <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(1)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 1  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 1 ? styles.text_White : styles.text_black_gray )]} >
-                                                إستلام من الشيف
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(2)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 2  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 2 ? styles.text_White : styles.text_black_gray )]} >
-                                                علي حسب المسافه
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(3)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 3  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12  , ( this.state.active === 3 ? styles.text_White : styles.text_black_gray )]} >
-                                                مجانيه
-                                            </Text>
-                                        </TouchableOpacity>
+                                        {
+                                            this.props.deliveryTypes.map((type, i ) => {
+                                                return(
+                                                    <TouchableOpacity
+                                                        onPress         = {() => this.onSubCategories(this.state.deliveryTypesArr ,type.id , type.name)}
+                                                        style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === type.id  ? styles.bg_black : styles.bg_gray ) ]}>
+                                                        <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === type.id ? styles.text_White : styles.text_black_gray )]} >
+                                                            {type.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            })
+                                        }
+
 
                                     </ScrollView>
                                 </View>
@@ -685,13 +510,14 @@ class AddProduct extends Component {
     }
 }
 
-export default AddProduct;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , deliveryTypes , categories}) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        deliveryTypes   : deliveryTypes.deliveryTypes,
+        categories: categories.categories,
+    };
+};
+export default connect(mapStateToProps, {getDeliveryTypes , getCategories})(AddProduct);

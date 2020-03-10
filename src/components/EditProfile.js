@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator} from "react-native";
 import {
     Container,
     Content,
@@ -12,38 +12,50 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getDeliveryTypes , getCountries , updateProfile , getGenders} from "../actions";
 import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import DateTimePicker from "react-native-modal-datetime-picker";
+import COLORS from "../consts/colors";
 
 class EditProfile extends Component {
     constructor(props){
         super(props);
         this.state = {
-            name                        : 'شعوذه الندم',
-            phone                       : '01001846667',
-            qualification               : '',
-            country                     : 'السنبلاوين',
-            countryId                   : 1,
-            nationality                 : 'ذكر',
-            nationalityId               : 1,
+            name                        : this.props.user.name,
+            phone                       : this.props.user.phone,
+            qualification               : this.props.user.qualification,
+            country                     : this.props.user.country,
+            countryId                   : this.props.user.country_id,
+            nationality                 : this.props.user.gender,
+            nationalityId               : this.props.user.gender_id,
+            date                        : this.props.user.birthday,
             userId                      : null,
             type                        : 0,
             nameStatus                  : 1,
             phoneStatus                 : 1,
+            qualificationStatus         : 1,
             spinner                     : false,
             isModalCountry              : false,
             isModalNationality          : false,
-            cityName                    : 'المنصوره - السنبلاوين - شارع المعيـز',
-            userImage                   : '../../assets/img/girl.png',
-            latitude                    : 11.11,
-            longitude                   : 11.11,
+            cityName                    : this.props.user.address,
+            userImage                   : this.props.user.avatar,
+            latitude                    : this.props.user.latitude,
+            longitude                   : this.props.user.longitude,
             base64                      : '',
-            active                      : 1,
+            active                      : null,
+            deliveryTypesArr            : this.props.user.delivery_types,
+            isSubmitted: false,
         }
+    }
+    componentWillMount() {
+        console.log('this.state.deliveryTypesArr' , this.state.deliveryTypesArr)
+        this.setState({ isSubmitted: false });
+        this.props.getDeliveryTypes(this.props.lang);
+        this.props.getCountries(this.props.lang);
+        this.props.getGenders(this.props.lang);
     }
 
     activeInput(type) {
@@ -54,6 +66,10 @@ class EditProfile extends Component {
 
         if (type === 'phone' || this.state.phone !== '') {
             this.setState({phoneStatus: 1})
+        }
+
+        if (type === 'qualification' || this.state.qualification !== '') {
+            this.setState({qualificationStatus: 1})
         }
 
     }
@@ -68,52 +84,67 @@ class EditProfile extends Component {
             this.setState({phoneStatus: 0})
         }
 
+        if (type === 'qualification' || this.state.qualification !== '') {
+            this.setState({qualificationStatus: 0})
+        }
     }
 
-    validate = () => {
-        let isError     = false;
-        let msg         = '';
-
-        if (this.state.name.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('Full');
-        } else if (this.state.phone.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('namereq');
-        } else if (this.state.nationalityId === null) {
-            isError     = true;
-            msg         = i18n.t('enternationality');
-        } else if (this.state.countryId === null){
-            isError     = true;
-            msg         = i18n.translate('choosecity');
-        }
-        if (msg !== '') {
-            Toast.show({
-                text        : msg,
-                type        : "danger",
-                duration    : 3000,
-                textStyle       : {
-                    color       : "white",
-                    fontFamily  : 'cairo',
-                    textAlign   : 'center',
-                }
-            });
-        }
-        return isError;
-    };
 
     onEditPressed() {
+        this.setState({ isSubmitted: true });
+        const data = {
+            name                : this.state.name,
+            email               : null,
+            phone               : this.state.phone,
+            country_id          : this.state.countryId,
+            gender              : this.state.nationality,
+            latitude            : this.state.latitude,
+            longitude           : this.state.longitude,
+            avatar              : this.state.base64,
+            provider_details    : null,
+            available           : null,
+            delivery_types      : ['1'],
+            qualification       : this.state.qualification,
+            address             : this.state.cityName,
+            lang                : this.props.lang,
+            token               : this.props.user.token,
+            props               : this.props,
+        };
 
-        this.setState({spinner: true});
-
-        const err = this.validate();
-
-        if (!err){
-            this.props.navigation.navigate('Profile');
-        }
-
+        this.setState({ isSubmitted: true });
+        this.props.updateProfile(data);
     }
 
+    renderEdit(){
+        if (this.state.name == '' || this.state.phone == ''){
+            return (
+                <View
+                    style={[styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red , {backgroundColor:"#999"}]}>
+                    <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                        {i18n.translate('confirm')}
+                    </Text>
+                </View>
+            );
+        }
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
+        }
+
+        return (
+            <TouchableOpacity
+                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                onPress     = {() => this.onEditPressed()}
+            >
+                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                    { i18n.t('confirm') }
+                </Text>
+            </TouchableOpacity>
+        );
+    }
     toggleDatePicker = () => {
         this.setState({ isDatePickerVisible: !this.state.isDatePickerVisible });
     };
@@ -178,27 +209,30 @@ class EditProfile extends Component {
         }
     };
 
-    onSubCategories ( id ){
-        this.setState({spinner: true, active : id });
+    onSubCategories ( deliveryTypesArr , id , name){
+        const found = deliveryTypesArr.some(item => item.id === id );
+        if (!found){
+            deliveryTypesArr.push({id , name});
+            this.setState({ active : id });
+            console.log('deliveryTypesArr +' , deliveryTypesArr) ;
+        } else {
+            const filteredTypes = deliveryTypesArr.filter((item) => item.id !== id);
+            this.setState({deliveryTypesArr : filteredTypes})
+            // console.log('deliveryTypesArr -filteredTypes ' , filteredTypes , "dddd" , this.state.deliveryTypesArr) ;
+        }
     }
-
+    checker = (arr, target) => target.every(v => arr.includes(v));
     componentWillReceiveProps(nextProps) {
-
+        this.setState({ isSubmitted: false});
         if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
             this.state.cityName             = nextProps.navigation.state.params.city_name;
             this.setState({latitude   : nextProps.navigation.state.params.latitude});
             this.setState({longitude  : nextProps.navigation.state.params.longitude});
         }else{
-            this.setState({cityName  : i18n.translate('mapname')});
+            this.setState({cityName  : this.props.user.address});
         }
 
         this.setState({ isModalFilter   : !this.state.isModalFilter});
-
-    }
-
-    componentWillMount() {
-
-        this.setState({spinner: true});
 
     }
 
@@ -302,39 +336,30 @@ class EditProfile extends Component {
                                         </View>
 
                                         <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectNationalityId(1, 'ذكر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.checked === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        ذكر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
 
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectNationalityId(2, 'إنثي')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.checked === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        إنثي
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                            {
+                                                this.props.genders.map((gender, i ) => {
+                                                    return(
+                                                        <TouchableOpacity
+                                                            style               = {[styles.rowGroup, styles.marginVertical_10]}
+                                                            onPress             = {() => this.selectNationalityId(gender.id, gender.name)}
+                                                        >
+                                                            <View style={[styles.overHidden, styles.rowRight]}>
+                                                                <CheckBox
+                                                                    style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+                                                                    color               = {styles.text_red}
+                                                                    selectedColor       = {styles.text_red}
+                                                                    checked             = {this.state.checked === 1}
+                                                                />
+                                                                <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+                                                                    {gender.name}
+                                                                </Text>
+                                                            </View>
+                                                        </TouchableOpacity>
+
+                                                    )
+                                                })
+                                            }
                                         </View>
 
                                     </View>
@@ -357,6 +382,21 @@ class EditProfile extends Component {
                                     minimumDate     = {new Date()}
                                 />
 
+
+
+                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                                        <Input
+                                            placeholder={i18n.translate('qualification')}
+                                            style={[styles.input, styles.height_50, (this.state.qualificationStatus === 1 ? styles.Active : styles.noActive)]}
+                                            onChangeText={(qualification) => this.setState({qualification})}
+                                            onBlur={() => this.unActiveInput('qualification')}
+                                            onFocus= {() => this.activeInput('qualification')}
+                                            value= {this.state.qualification}
+                                        />
+                                    </Item>
+                                </View>
+
                                 <View style={[styles.overHidden, styles.rowGroup]}>
                                     <TouchableOpacity onPress={() => this.toggleModalCountry()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border,  (this.state.countryId !== null ? styles.border_red :  styles.border_gray )]}>
                                         <Text style={[styles.textRegular, styles.textSize_14, (this.state.countryId !== null ? styles.text_red :  styles.text_black )]}>
@@ -376,56 +416,30 @@ class EditProfile extends Component {
                                         </View>
 
                                         <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectCountryId(1, 'الرياض')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.checked2 === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        الرياض
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
 
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectCountryId(2, 'السعوديه')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.checked2 === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        السعوديه
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                            {
+                                                this.props.countries.map((country, i ) => {
+                                                    return(
+                                                        <TouchableOpacity
+                                                            style               = {[styles.rowGroup, styles.marginVertical_10]}
+                                                            onPress             = {() => this.selectCountryId(country.id, country.name)}
+                                                        >
+                                                            <View style={[styles.overHidden, styles.rowRight]}>
+                                                                <CheckBox
+                                                                    style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+                                                                    color               = {styles.text_red}
+                                                                    selectedColor       = {styles.text_red}
+                                                                    checked             = {this.state.checked2 === country.id}
+                                                                />
+                                                                <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+                                                                    {country.name}
+                                                                </Text>
+                                                            </View>
+                                                        </TouchableOpacity>
 
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectCountryId(3, 'مصر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.checked === 3}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        مصر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                                    )
+                                                })
+                                            }
                                         </View>
 
                                     </View>
@@ -443,43 +457,31 @@ class EditProfile extends Component {
                                     </TouchableOpacity>
                                 </View>
 
+                                <Text style={[styles.textRegular, styles.textSize_13, styles.text_black , styles.marginVertical_15, styles.Width_100]}>
+                                    { i18n.t('delver') }
+                                </Text>
 
                                 <View style={[ styles.height_40 ]}>
                                     <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(1)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 1  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 1 ? styles.text_White : styles.text_black_gray )]} >
-                                                إستلام من الشيف
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(2)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 2  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 2 ? styles.text_White : styles.text_black_gray )]} >
-                                                علي حسب المسافه
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress         = {() => this.onSubCategories(3)}
-                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 3  ? styles.bg_black : styles.bg_gray ) ]}>
-                                            <Text style     = {[ styles.textRegular, styles.textSize_12  , ( this.state.active === 3 ? styles.text_White : styles.text_black_gray )]} >
-                                                مجانيه
-                                            </Text>
-                                        </TouchableOpacity>
+                                        {
+                                            this.props.deliveryTypes.map((type, i ) => {
+                                                return(
+                                                    <TouchableOpacity
+                                                        onPress         = {() => this.onSubCategories(this.state.deliveryTypesArr ,type.id , type.name)}
+                                                        style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === type.id  ? styles.bg_black : styles.bg_gray ) ]}>
+                                                        <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === type.id ? styles.text_White : styles.text_black_gray )]} >
+                                                            {type.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            })
+                                        }
 
                                     </ScrollView>
                                 </View>
 
-                            <TouchableOpacity
-                                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                                onPress     = {() => this.onEditPressed()}
-                            >
-                                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                    { i18n.t('confirm') }
-                                </Text>
-                            </TouchableOpacity>
+                                { this.renderEdit() }
 
                         </Form>
 
@@ -494,13 +496,13 @@ class EditProfile extends Component {
     }
 }
 
-export default EditProfile;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ lang , profile , deliveryTypes , countries , genders}) => {
+    return {
+        lang            : lang.lang,
+        user            : profile.user,
+        deliveryTypes   : deliveryTypes.deliveryTypes,
+        countries       : countries.countries,
+        genders       : genders.genders,
+    };
+};
+export default connect(mapStateToProps, {getDeliveryTypes , getCountries , updateProfile , getGenders})(EditProfile);

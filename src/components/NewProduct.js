@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity,} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator,} from "react-native";
 import {
     Container,
     Content,
@@ -12,21 +12,25 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getCategories , addCategory} from "../actions";
 import Modal from "react-native-modal";
 import { NavigationEvents } from "react-navigation";
+import CategoryPicker from "./CategoryPicker"
+import COLORS from "../consts/colors";
 
 class NewProduct extends Component {
     constructor(props){
         super(props);
         this.state = {
-            selectFilter                : false,
-            filter                      : i18n.t('mainCategory'),
-            filterId                    : null,
+            selectFilter                  : false,
+            filter                        : i18n.t('mainCategory'),
+            filterId                      : null,
+            category_id                   : null,
             nameAr                        : '',
             nameEn                        : '',
             nameArStatus                  : 0,
             nameEnStatus                  : 0,
+            isSubmitted                   : false,
 
         }
     }
@@ -56,31 +60,54 @@ class NewProduct extends Component {
     }
 
 
-    onEditPressed() {
+    onConfirm() {
+        this.setState({ isSubmitted: true });
+        this.props.addCategory( this.props.lang , this.state.nameAr , this.state.nameEn , this.state.category_id, this.props.user.token , this.props );
 
-        this.setState({spinner: true});
-
-        this.props.navigation.navigate('Home');
-    }
-
-    toggleModalFilter = () => {
-        this.setState({ selectFilter: !this.state.selectFilter});
-    };
-
-    selectfilterId(id, name) {
-        this.setState({
-            filterId         : id,
-            filter           : name
-        });
-        this.setState({ selectFilter: !this.state.selectFilter});
     }
 
     componentWillMount() {
+        this.setState({ isSubmitted: false });
+        this.props.getCategories(this.props.lang ,null);
+    }
+    selectedId = (id) => {
+        // alert(id)
+        this.setState({category_id:id})
+    }
+    renderConfirm(){
+        if (this.state.category_id === null || this.state.name_ar == '' || this.state.name_en == ''){
+            return (
+                <View
+                    style={[styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red , {backgroundColor:"#999"}]}>
+                    <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                        {i18n.translate('confirm')}
+                    </Text>
+                </View>
+            );
+        }
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
+        }
 
-        this.setState({spinner: true});
+        return (
+            <TouchableOpacity
+                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                onPress     = {() => this.onConfirm()}
+            >
+                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                    { i18n.t('confirm') }
+                </Text>
+            </TouchableOpacity>
+        );
+    }
+    componentWillReceiveProps(nextProps) {
+        this.setState({ isSubmitted: false});
 
     }
-
     onFocus(){
         this.componentWillMount();
     }
@@ -141,71 +168,12 @@ class NewProduct extends Component {
                                     </Item>
                                 </View>
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={() => this.toggleModalFilter()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.filterId !== null ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.filterId !== null ? styles.text_red :  styles.text_black )]}>
-                                            { this.state.filter }
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
-                                    </TouchableOpacity>
-                                </View>
 
-                                <Modal isVisible={this.state.selectFilter} onBackdropPress={() => this.toggleModalFilter()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
+                                <CategoryPicker categories={this.props.categories} selectedId={this.selectedId}/>
+                                {
+                                    this.renderConfirm()
+                                }
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
-                                                {i18n.t('mainCategory')}
-                                            </Text>
-                                        </View>
-
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectfilterId(1, 'لحم')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.filterId === 1}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        لحم
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress             = {() => this.selectfilterId(2, 'برجر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.filterId === 2}
-                                                    />
-                                                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        برجر
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-
-                                    </View>
-                                </Modal>
-
-                                <TouchableOpacity
-                                    style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                                    onPress     = {() => this.onEditPressed()}
-                                >
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                        { i18n.t('confirm') }
-                                    </Text>
-                                </TouchableOpacity>
 
                             </Form>
 
@@ -220,13 +188,13 @@ class NewProduct extends Component {
     }
 }
 
-export default NewProduct;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang, categories}) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        categories: categories.categories,
+    };
+};
+export default connect(mapStateToProps, {getCategories , addCategory})(NewProduct);

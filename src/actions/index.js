@@ -14,3 +14,8 @@ export * from './deliveryTypesAction';
 export * from './countriesAction';
 export * from './ChangePasswordAction';
 export * from './gendersAction';
+export * from './addCategoryAction';
+export * from './addMealAction';
+export * from './BillAction';
+export * from './cartAction';
+export * from './cartInfoAction';

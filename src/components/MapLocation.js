@@ -183,8 +183,7 @@ class MapLocation extends Component {
                                         latitudeDelta   : 0.0922,
                                         longitudeDelta  : 0.0421,
                                     }}>
-                                    <MapView.Marker draggable
-                                                    coordinate={this.state.mapRegion}
+                                    <MapView.Marker draggable coordinate={this.state.mapRegion}
                                                     onDragEnd={(e) =>  this._handleMapRegionChange(e.nativeEvent.coordinate)}>
                                         <Image source={require('../../assets/img/pin.png')} resizeMode={'contain'} style={{ width: 35, height: 35 }}/>
                                     </MapView.Marker>

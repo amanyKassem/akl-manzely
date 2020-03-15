@@ -468,6 +468,7 @@ class EditProfile extends Component {
                                             this.props.deliveryTypes.map((type, i ) => {
                                                 return(
                                                     <TouchableOpacity
+                                                        key={i}
                                                         onPress         = {() => this.onSubCategories(this.state.deliveryTypesArr ,type.id , type.name)}
                                                         style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === type.id  ? styles.bg_black : styles.bg_gray ) ]}>
                                                         <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === type.id ? styles.text_White : styles.text_black_gray )]} >
@@ -481,11 +482,7 @@ class EditProfile extends Component {
                                     </ScrollView>
                                 </View>
 
-                                {
-                                    this.renderEdit()
-                                }
-
-
+                                { this.renderEdit() }
 
                         </Form>
 

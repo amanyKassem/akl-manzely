@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    ActivityIndicator
+} from "react-native";
 import {
     Container,
     Content,
@@ -17,8 +26,12 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getBill , payTax} from "../actions";
+import Spinner from "react-native-loading-spinner-overlay";
 import * as Animatable from 'react-native-animatable';
+import {NavigationEvents} from "react-navigation";
+import BillCheckItem from './BillCheckItem'
+import COLORS from "../consts/colors";
 
 class Credit extends Component {
     constructor(props){
@@ -26,38 +39,71 @@ class Credit extends Component {
         this.state = {
             spinner                 : false,
             active                  : 1,
-            selectId                : 0
+            selectId                : 0,
+            checkedItems            : [],
+            isSubmitted             : false,
         }
     }
 
     componentWillMount() {
-
-        this.setState({spinner: true});
-
+        alert(this.state.checkedItems.length)
+        this.setState({ isSubmitted: false });
+        this.props.getBill(this.props.lang , this.props.user.token);
     }
 
-    onActive ( id ){
-        this.setState({spinner: true, active : id });
-    }
+    renderConfirm(){
+        if (this.state.checkedItems.length === 0){
+            return (
+                <View
+                    style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40, {backgroundColor:"#999"}]}>
+                    <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                        {i18n.translate('confirm')}
+                    </Text>
+                </View>
+            );
+        }
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
+        }
 
-    selectId(id) {
-        this.setState({selectId : id,});
-    }
-
-    _keyExtractor = (item, index) => item.id;
-
-    renderItems = (item) => {
-        return(
+        return (
             <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
+                style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
+                onPress={() => this.onConfirm()}>
+                <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                    {i18n.translate('confirm')}
+                </Text>
             </TouchableOpacity>
         );
-    };
+    }
+    componentWillReceiveProps(nextProps) {
+        this.setState({ isSubmitted: false});
+
+    }
+    onActive ( id ){
+        this.setState({active : id });
+    }
+
+    addToCheckList(id){
+        let itemsList = this.state.checkedItems;
+        const found = itemsList.some(itemId => itemId === id);
+        if (!found){
+            itemsList.push(id);
+        }else{
+            itemsList = itemsList.filter(itemId => itemId !== id);
+        }
+
+        this.setState({ checkedItems: itemsList });
+    }
+
+    onConfirm(){
+        this.setState({ isSubmitted: true });
+        this.props.payTax(this.props.lang , this.state.checkedItems , this.props.user.token)
+    }
 
     static navigationOptions = () => ({
         header          : null,
@@ -65,11 +111,16 @@ class Credit extends Component {
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/credit.png')} resizeMode={'contain'}/>)
     });
 
+    onFocus(){
+        this.componentWillMount();
+    }
+
     render() {
 
         return (
             <Container>
-
+                <Spinner visible = { this.state.spinner } />
+                <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -116,35 +167,39 @@ class Credit extends Component {
                                             { i18n.t('deservedAmount') }
                                         </Text>
                                         <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , {marginBottom:25}]}>
-                                            500 { i18n.t('RS') }
+                                            {this.props.bill.total_income} { i18n.t('RS') }
                                         </Text>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                            <TouchableOpacity>
-                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
-                                                    <View style={[ styles.flex_100 ]}>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('numorders') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                13
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('deservedAmount') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                30 ر.س
-                                                            </Text>
+
+                                        {
+                                            this.props.bill.income.map((bill, i) => (
+                                                <Animatable.View key={i} animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
+                                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                                    <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
+                                                        <View style={[ styles.flex_100 ]}>
+                                                            <View style={[ styles.rowRight]}>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
+                                                                    { i18n.t('numorders') }
+                                                                </Text>
+                                                                <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                    {bill.id}
+                                                                </Text>
+                                                            </View>
+                                                            <View style={[ styles.rowRight]}>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
+                                                                    { i18n.t('deservedAmount') }
+                                                                </Text>
+                                                                <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                    {bill.price} { i18n.t('RS') }
+                                                                </Text>
+                                                            </View>
                                                         </View>
                                                     </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
+                                                </Animatable.View>
+                                            ))
+                                        }
+
                                     </View>
                                 </View>
                                 :
@@ -154,99 +209,20 @@ class Credit extends Component {
                                             { i18n.t('bepaid') }
                                         </Text>
                                         <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , {marginBottom:25}]}>
-                                            500 { i18n.t('RS') }
+                                            {this.props.bill.total_outcome} { i18n.t('RS') }
                                         </Text>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100, styles.marginVertical_10 ]}>
-                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                            <TouchableOpacity onPress = {() => this.selectId(2)}>
-                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10, styles.position_R ]}>
-                                                    <View style={[ styles.flex_100 ]}>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('numorders') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                13
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('orderType') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                دفع عموله
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('bepaid') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                20 ر.س
-                                                            </Text>
-                                                        </View>
-                                                    </View>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red, styles.position_A , styles.top_10, { left : '95%' }]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.selectId === 2}
-                                                    />
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100, styles.marginVertical_10 ]}>
-                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                            <TouchableOpacity onPress = {() => this.selectId(3)}>
-                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10, styles.position_R ]}>
-                                                    <View style={[ styles.flex_100 ]}>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('numorders') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                13
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('orderType') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                دفع عموله
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                { i18n.t('bepaid') }
-                                                            </Text>
-                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                20 ر.س
-                                                            </Text>
-                                                        </View>
-                                                    </View>
-                                                    <CheckBox
-                                                        style               = {[styles.checkBox, styles.bg_red, styles.border_red, styles.position_A , styles.top_10, { left : '95%' }]}
-                                                        color               = {styles.text_red}
-                                                        selectedColor       = {styles.text_red}
-                                                        checked             = {this.state.selectId === 3}
-                                                    />
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                        <TouchableOpacity
-                                            style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
-                                            onPress={() => this.onLoginPressed()}>
-                                            <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
-                                                {i18n.translate('confirm')}
-                                            </Text>
-                                        </TouchableOpacity>
+
+                                        {
+                                            this.props.bill.outcome.map((bill, i) => (
+                                                <BillCheckItem addItem={(id) => this.addToCheckList(id)} key={bill.id} data={bill}/>
+                                            ))
+
+                                        }
+
+                                        {
+                                            this.renderConfirm()
+                                        }
+
                                     </View>
                                 </View>
                         }
@@ -261,13 +237,13 @@ class Credit extends Component {
     }
 }
 
-export default Credit;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , bill }) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        bill: bill.bill,
+    };
+};
+export default connect(mapStateToProps, {getBill , payTax})(Credit);

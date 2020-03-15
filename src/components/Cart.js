@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    ActivityIndicator
+} from "react-native";
 import {
     Container,
     Content,
@@ -18,7 +27,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getCarts} from "../actions";
 import COLORS from "../consts/colors";
 import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
@@ -31,21 +40,34 @@ class Cart extends Component {
     constructor(props){
         super(props);
         this.state = {
-            spinner                 : false,
+            loader: true
         }
     }
 
     componentWillMount() {
+        this.setState({loader: true});
+        this.props.getCarts(this.props.lang , this.props.user.token)
+    }
 
-        this.setState({spinner: true});
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({loader: false});
+    }
 
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
     }
 
     render() {
 
         return (
             <Container>
-
+                { this.renderLoader() }
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -66,90 +88,39 @@ class Cart extends Component {
                     <View style={[ styles.position_R, styles.zIndex, { top : -30 } ]}>
 
                         <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart')}>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                <Image style = {[styles.Width_100 , styles.height_70]} source={require('../../assets/img/1.png')}/>
-                                            </View>
-                                            <View style={[ styles.flex_75 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                        شعوذه الندم
-                                                    </Text>
+
+                            {
+                                this.props.carts.map((cart, i) => (
+                                    <View key={i} style={[ styles.marginVertical_10 ]}>
+                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
+                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                            <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart' , {provider_id:cart.provider_id})}>
+                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                    <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                        <Image style = {[styles.Width_100 , styles.height_70]} source={require('../../assets/img/1.png')}/>
+                                                    </View>
+                                                    <View style={[ styles.flex_75 ]}>
+                                                        <View style={[ styles.rowGroup]}>
+                                                            <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                                {cart.name_en}
+                                                            </Text>
+                                                        </View>
+                                                        <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                            {cart.category}
+                                                        </Text>
+                                                        <View style={[ styles.rowRight]}>
+                                                            <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
+                                                                {(cart.address).substr(0,30)}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
                                                 </View>
-                                                <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                    تصنيف القسم
-                                                </Text>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart')}>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                <Image style = {[styles.Width_100 , styles.height_70]} source={require('../../assets/img/2.png')}/>
-                                            </View>
-                                            <View style={[ styles.flex_75 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                        شعوذه الندم
-                                                    </Text>
-                                                </View>
-                                                <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                    تصنيف القسم
-                                                </Text>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart')}>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                <Image style = {[styles.Width_100 , styles.height_70]} source={require('../../assets/img/3.png')}/>
-                                            </View>
-                                            <View style={[ styles.flex_75 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                        شعوذه الندم
-                                                    </Text>
-                                                </View>
-                                                <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                    تصنيف القسم
-                                                </Text>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                                        شارع الندم التخصصي
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
+                                            </TouchableOpacity>
+                                        </Animatable.View>
+                                    </View>
+                                ))
+                            }
                         </View>
 
                     </View>
@@ -162,13 +133,12 @@ class Cart extends Component {
     }
 }
 
-export default Cart;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , carts }) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        carts: carts.carts,
+    };
+};
+export default connect(mapStateToProps, {getCarts})(Cart);

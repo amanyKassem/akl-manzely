@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView} from "react-native";
+import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView, ScrollView} from "react-native";
 import {Container, Content, Form, Input, Item, Toast, Icon, CheckBox} from 'native-base'
 import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
@@ -165,7 +165,6 @@ class Register extends Component {
         if (!err){
             this.props.navigation.navigate('ActivtionAccount');
         }
-
     }
 
     toggleDatePicker = () => {
@@ -473,6 +472,37 @@ class Register extends Component {
                                         />
                                     </Item>
                                 </View>
+
+                                {
+                                    this.state.userType === 'chef' ?
+										<View style={[ styles.height_40 ]}>
+											<ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
+
+												<TouchableOpacity
+													onPress         = {() => this.onSubCategories(1)}
+													style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 1  ? styles.bg_black : styles.bg_gray ) ]}>
+													<Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 1 ? styles.text_White : styles.text_black_gray )]} >
+														إستلام من الشيف
+													</Text>
+												</TouchableOpacity>
+												<TouchableOpacity
+													onPress         = {() => this.onSubCategories(2)}
+													style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 2  ? styles.bg_black : styles.bg_gray ) ]}>
+													<Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === 2 ? styles.text_White : styles.text_black_gray )]} >
+														علي حسب المسافه
+													</Text>
+												</TouchableOpacity>
+												<TouchableOpacity
+													onPress         = {() => this.onSubCategories(3)}
+													style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === 3  ? styles.bg_black : styles.bg_gray ) ]}>
+													<Text style     = {[ styles.textRegular, styles.textSize_12  , ( this.state.active === 3 ? styles.text_White : styles.text_black_gray )]} >
+														مجانيه
+													</Text>
+												</TouchableOpacity>
+
+											</ScrollView>
+										</View> : null
+                                }
 
                                 <View style={[styles.rowRight, styles.marginVertical_20]}>
                                     <TouchableOpacity style={[styles.rowRight, styles.marginVertical_10]}>

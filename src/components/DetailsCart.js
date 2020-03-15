@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, FlatList,} from "react-native";
+import {View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, ScrollView,} from "react-native";
 import {
     Container,
     Content,
@@ -13,15 +13,16 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getCartInfo , getDeliveryTypes} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import Modal from "react-native-modal";
+import COLORS from "../consts/colors";
 
 class DetailsCart extends Component {
     constructor(props){
         super(props);
         this.state = {
-            spinner                     : false,
+            loader                      : true,
             count                       : 0,
             delivery                    : i18n.t('delver'),
             deliveryId                  : null,
@@ -31,11 +32,24 @@ class DetailsCart extends Component {
     }
 
     componentWillMount() {
-
-        this.setState({spinner: true});
-
+        this.setState({loader: true});
+        const provider_id = this.props.navigation.state.params.provider_id;
+        this.props.getCartInfo(this.props.lang , provider_id , this.props.user.token);
+        this.props.getDeliveryTypes(this.props.lang);
+    }
+    componentWillReceiveProps(nextProps, nextContext) {
+        this.setState({loader: false});
     }
 
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
+    }
     incrementCount(){
         this.setState({count: this.state.count + 1});
     }
@@ -82,7 +96,7 @@ class DetailsCart extends Component {
 
         return (
             <Container>
-
+                { this.renderLoader() }
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -227,38 +241,29 @@ class DetailsCart extends Component {
                             <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
 
                                 <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                    <TouchableOpacity
-                                        style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                        onPress             = {() => this.selectDeliveryId(1, 'نفس المكان ال اتقابلنا فيه')}
-                                    >
-                                        <View style={[styles.overHidden, styles.rowRight]}>
-                                            <CheckBox
-                                                style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                color               = {styles.text_red}
-                                                selectedColor       = {styles.text_red}
-                                                checked             = {this.state.deliveryId === 1}
-                                            />
-                                            <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                نفس المكان ال اتقابلنا فيه
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                        onPress             = {() => this.selectDeliveryId(2, 'الساعه 2 عند الدمرداش')}
-                                    >
-                                        <View style={[styles.overHidden, styles.rowRight]}>
-                                            <CheckBox
-                                                style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                color               = {styles.text_red}
-                                                selectedColor       = {styles.text_red}
-                                                checked             = {this.state.deliveryId === 2}
-                                            />
-                                            <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الساعه 2 عند الدمرداش
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
+
+                                    {
+                                        this.props.deliveryTypes.map((type, i ) => {
+                                            return(
+                                                <TouchableOpacity
+                                                    style               = {[styles.rowGroup, styles.marginVertical_10]}
+                                                    onPress             = {() => this.selectDeliveryId(type.id, type.name)}
+                                                >
+                                                    <View style={[styles.overHidden, styles.rowRight]}>
+                                                        <CheckBox
+                                                            style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+                                                            color               = {styles.text_red}
+                                                            selectedColor       = {styles.text_red}
+                                                            checked             = {this.state.deliveryId === 1}
+                                                        />
+                                                        <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+                                                            {type.name}
+                                                        </Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            )
+                                        })
+                                    }
                                 </View>
 
                             </View>
@@ -269,7 +274,7 @@ class DetailsCart extends Component {
                                 { i18n.t('priceprod') }
                             </Text>
                             <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                20 ر.س
+                                {this.props.cartInfo.price} { i18n.t('RS') }
                             </Text>
                         </View>
 
@@ -278,7 +283,7 @@ class DetailsCart extends Component {
                                 { i18n.t('deliveryprice') }
                             </Text>
                             <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                60 ر.س
+                                {this.props.cartInfo.delivery_price} { i18n.t('RS') }
                             </Text>
                         </View>
 
@@ -287,7 +292,7 @@ class DetailsCart extends Component {
                                 { i18n.t('totalprice') }
                             </Text>
                             <Text style={[styles.textBold, styles.textSize_13, styles.text_White]}>
-                                80 ر.س
+                                {this.props.cartInfo.total_price} { i18n.t('RS') }
                             </Text>
                         </View>
 
@@ -310,13 +315,13 @@ class DetailsCart extends Component {
     }
 }
 
-export default DetailsCart;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , cartInfo , deliveryTypes}) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        cartInfo: cartInfo.cartInfo,
+        deliveryTypes   : deliveryTypes.deliveryTypes,
+    };
+};
+export default connect(mapStateToProps, {getCartInfo , getDeliveryTypes})(DetailsCart);

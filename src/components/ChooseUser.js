@@ -13,11 +13,6 @@ class ChooseUser extends Component {
         }
     }
 
-    async componentWillMount() {
-
-
-    }
-
     render() {
 
         return (

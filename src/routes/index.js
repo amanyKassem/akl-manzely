@@ -42,8 +42,8 @@ import AddProduct               from "../components/AddProduct";
 import NewProduct               from "../components/NewProduct";
 import InitScreen               from "../components/InitScreen";
 import ShareApp                 from "../components/ShareApp";
-import Credit                 from "../components/Credit";
-import EditBankAcc                 from "../components/EditBankAcc";
+import Credit                   from "../components/Credit";
+import EditBankAcc              from "../components/EditBankAcc";
 import DrawerCustomization      from "./DrawerCustomization";
 
 const width = Dimensions.get('window').width;

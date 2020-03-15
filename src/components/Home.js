@@ -907,7 +907,7 @@ class Home extends Component {
                                                         style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
                                                         <View style={[styles.Width_100, styles.position_R]}>
                                                             <Image style={[styles.Width_100, styles.height_100]}
-                                                                   source={require('../../assets/img/1.png')}/>
+                                                                   source={{uri : meal.image}}/>
                                                         </View>
                                                         <View style={[styles.Width_100, styles.marginVertical_5]}>
                                                             <View style={[styles.rowGroup, styles.marginVertical_5]}>

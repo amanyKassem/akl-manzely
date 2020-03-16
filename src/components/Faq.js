@@ -12,7 +12,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getContactInfo, getQuestions} from "../actions";
+import {getQuestions} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import COLORS from "../consts/colors";
 

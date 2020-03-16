@@ -17,6 +17,8 @@ import genders from './gendersReducer';
 import bill from './BillReducer';
 import carts from './CartsReducer';
 import cartInfo from './CartInfoReducer';
+import banners from './BannersReducer';
+import meals from './MealsReducer';
 
 export default combineReducers({
     lang,
@@ -37,4 +39,6 @@ export default combineReducers({
     bill,
     carts,
     cartInfo,
+    banners,
+    meals,
 });

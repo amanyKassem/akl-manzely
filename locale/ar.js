@@ -235,7 +235,10 @@ const ar = {
     'nameAr'                    : 'الاسم بالعربية',
     'nameEn'                    : 'الاسم بالانجليزية',
     'mainCategory'              : 'القسم الرئيسي',
-    'chooseType'              : 'اختر طريقة التوصيل',
+    'chooseType'                : 'اختر طريقة التوصيل',
+    'all'                       : 'الكل',
+    'available'                 : 'متواجد حاليا',
+    'notAvailable'              : 'غير متواجد حاليا',
 };
 
 export default ar;

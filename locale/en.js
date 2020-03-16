@@ -227,6 +227,9 @@ const en = {
     'nameEn'                            : 'name in english',
     'mainCategory'                      : 'main category',
     'chooseType'                        : 'choose delivery type',
+    'all'                               : 'All',
+    'available'                         : 'available now',
+    'notAvailable'                      : 'not available now',
 };
 
 export default en;

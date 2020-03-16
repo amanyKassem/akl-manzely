@@ -1,5 +1,16 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView, Share, Switch} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    Share,
+    Switch,
+    ActivityIndicator, Linking
+} from "react-native";
 import {
     Container,
     Content,
@@ -18,7 +29,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {productDetails , changeMealStatus , setFav} from "../actions";
 import COLORS from "../consts/colors";
 import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
@@ -57,9 +68,19 @@ class Details extends Component {
             select                  : 'وجبات سريعه',
             switchValue             : true,
             latitude                : null,
-            longitude               : null
+            longitude               : null,
+            loader: true,
+            isFav: false
         }
     }
+
+    toggleFavorite (id){
+        this.setState({ isFav: ! this.state.isFav });
+        const token =  this.props.user ?  this.props.user.token : null;
+        this.props.setFav( this.props.lang, id  , token );
+    }
+
+
 
     activeInput(type) {
 
@@ -74,20 +95,6 @@ class Details extends Component {
         if (type === 'phone' && this.state.phone === '') {
             this.setState({phoneStatus: 0})
         }
-
-    }
-
-    componentWillReceiveProps(nextProps) {
-
-        if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
-            this.state.cityName             = nextProps.navigation.state.params.city_name;
-            this.setState({latitude   : nextProps.navigation.state.params.latitude});
-            this.setState({longitude  : nextProps.navigation.state.params.longitude});
-        }else{
-            this.setState({cityName  : i18n.translate('mapname')});
-        }
-
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
 
     }
 
@@ -137,17 +144,6 @@ class Details extends Component {
         this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
-    toggleModalSelect = () => {
-        this.setState({ isModalSelect   : !this.state.isModalSelect});
-    };
-
-    selectSelectId(id, name) {
-        this.setState({
-            selectId        : id,
-            select          : name
-        });
-        this.setState({ isModalSelect   : !this.state.isModalSelect});
-    }
 
     incrementCount(){
         this.setState({count: this.state.count + 1});
@@ -222,25 +218,32 @@ class Details extends Component {
     };
 
     componentWillMount() {
-
-        this.setState({spinner: true});
-
+        this.setState({loader: true});
+        this.props.productDetails(this.props.lang, this.props.navigation.state.params.meal_id, this.props.auth.data.latitude , this.props.auth.data.longitude);
     }
 
-    _keyExtractor = (item, index) => item.id;
+    componentWillReceiveProps(nextProps) {
+        this.setState({loader: false  , isFav: nextProps.mealInfo.is_favourite});
+        if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
+            this.state.cityName             = nextProps.navigation.state.params.city_name;
+            this.setState({latitude   : nextProps.navigation.state.params.latitude});
+            this.setState({longitude  : nextProps.navigation.state.params.longitude});
+        }else{
+            this.setState({cityName  : i18n.translate('mapname')});
+        }
 
-    renderItems = (item) => {
-        return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
-        );
-    };
+        this.setState({ isModalFilter   : !this.state.isModalFilter});
+    }
+
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
+    }
 
     static navigationOptions = () => ({
         header          : null,
@@ -252,7 +255,7 @@ class Details extends Component {
 
         return (
             <Container>
-
+                { this.renderLoader() }
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -463,10 +466,12 @@ class Details extends Component {
 
                         <View style={[ styles.position_R, styles.overHidden ]}>
                             <Animatable.View animation="fadeIn" easing="ease-out" delay={500} style = {[styles.width_40 , styles.height_40, styles.position_A, styles.top_15, styles.right_35, styles.zIndex, styles.overlay_black]}>
-                                <TouchableOpacity style = {[ styles.width_40 , styles.height_40, styles.flexCenter ]}>
-                                    <Icon style = {[styles.text_red, styles.textSize_18]} type="AntDesign" name='heart' />
+                                <TouchableOpacity onPress = {() => this.toggleFavorite(this.props.mealInfo.id)}
+                                style = {[ styles.width_40 , styles.height_40, styles.flexCenter ]}>
+                                    <Icon style = {[this.state.isFav ? styles.text_red : styles.text_gray, styles.textSize_18]} type="AntDesign"  name={this.state.isFav ? 'heart' : 'hearto'} />
                                 </TouchableOpacity>
                             </Animatable.View>
+
                             <Swiper
                                 containerStyle      = {[styles.Width_95, styles.marginVertical_15, styles.height_120, styles.viewBlock]}
                                 autoplay            = {true}
@@ -477,110 +482,26 @@ class Details extends Component {
                                 loop                = {true}
                                 autoplayTimeout     = { 2 }>
 
-                                <View style={[styles.viewBlock]}>
-                                    <Image style={[styles.Width_95, styles.height_120]} source={require('../../assets/img/4.png')}/>
-                                    <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.position_A , styles.left_0, styles.bottom_0 , styles.Width_95, styles.overlay_black]}>
-                                        <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                            <Text style={[styles.textRegular, styles.text_White, styles.Width_100 ,styles.textSize_12, styles.textLeft]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                برجر لحم مشوي علي الفحم
-                                            </Text>
-                                        </View>
-                                    </Animatable.View>
-                                </View>
 
-                                <View style={[styles.viewBlock]}>
-                                    <Image style={[styles.Width_95, styles.height_120]} source={require('../../assets/img/2.png')}/>
-                                    <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.position_A , styles.left_0, styles.bottom_0 , styles.Width_95, styles.overlay_black]}>
-                                        <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                            <Text style={[styles.textRegular, styles.text_White, styles.Width_100 ,styles.textSize_12, styles.textLeft]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                                برجر لحم مشوي علي الفحم
-                                            </Text>
+                                {
+                                    this.props.mealInfo.images.map((img , i) => (
+                                        <View key={i} style={[styles.viewBlock]}>
+                                            <Image style={[styles.Width_95, styles.height_120]} source={{uri:img}}/>
+                                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.position_A , styles.left_0, styles.bottom_0 , styles.Width_95, styles.overlay_black]}>
+                                                <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
+                                                    <Text style={[styles.textRegular, styles.text_White, styles.Width_100 ,styles.textSize_12, styles.textLeft]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
+                                                        {this.props.mealInfo.title}
+                                                    </Text>
+                                                </View>
+                                            </Animatable.View>
                                         </View>
-                                    </Animatable.View>
-                                </View>
+                                    ))
+                                }
 
                             </Swiper>
 
                         </View>
 
-                        {/*<View style={[styles.overHidden, styles.rowGroup]}>*/}
-                        {/*    <TouchableOpacity onPress={() => this.toggleModalSelect()} style={[ styles.marginVertical_5 , styles.marginHorizontal_15 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_red]}>*/}
-                        {/*        <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>*/}
-                        {/*            { this.state.select }*/}
-                        {/*        </Text>*/}
-                        {/*        <Icon style={[styles.textSize_14, styles.text_White]} type="AntDesign" name='down' />*/}
-                        {/*    </TouchableOpacity>*/}
-                        {/*</View>*/}
-
-                        {/*<Modal isVisible={this.state.isModalSelect} onBackdropPress={() => this.toggleModalSelect()} style={[ styles.bottomCenter, styles.Width_100 ]}>*/}
-                        {/*    <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>*/}
-
-                        {/*        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>*/}
-                        {/*            <TouchableOpacity*/}
-                        {/*                style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
-                        {/*                onPress             = {() => this.selectSelectId(1, 'وجبات بطيئه')}*/}
-                        {/*            >*/}
-                        {/*                <View style={[styles.overHidden, styles.rowRight]}>*/}
-                        {/*                    <CheckBox*/}
-                        {/*                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
-                        {/*                        color               = {styles.text_red}*/}
-                        {/*                        selectedColor       = {styles.text_red}*/}
-                        {/*                        checked             = {this.state.checked === 1}*/}
-                        {/*                    />*/}
-                        {/*                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
-                        {/*                        وجبات بطيئه*/}
-                        {/*                    </Text>*/}
-                        {/*                </View>*/}
-                        {/*            </TouchableOpacity>*/}
-
-                        {/*            <TouchableOpacity*/}
-                        {/*                style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
-                        {/*                onPress             = {() => this.selectSelectId(2, 'وجبات حاره')}*/}
-                        {/*            >*/}
-                        {/*                <View style={[styles.overHidden, styles.rowRight]}>*/}
-                        {/*                    <CheckBox*/}
-                        {/*                        style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
-                        {/*                        color               = {styles.text_red}*/}
-                        {/*                        selectedColor       = {styles.text_red}*/}
-                        {/*                        checked             = {this.state.checked === 2}*/}
-                        {/*                    />*/}
-                        {/*                    <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
-                        {/*                        وجبات حاره*/}
-                        {/*                    </Text>*/}
-                        {/*                </View>*/}
-                        {/*            </TouchableOpacity>*/}
-                        {/*        </View>*/}
-
-                        {/*    </View>*/}
-                        {/*</Modal>*/}
-
-                        <View style={[ styles.height_40, styles.paddingHorizontal_10 ]}>
-                            <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
-
-                                <TouchableOpacity
-                                    onPress         = {() => this.onSubCategories(1)}
-                                    style           = {[ styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, { backgroundColor : this.state.active === 1  ? '#d3292a' : '#f8dede' } ]}>
-                                    <Text style     = {[ styles.textRegular, styles.textSize_12 , { color : this.state.active === 1 ? '#FFF' : '#a09f9f' }]} >
-                                        الكل
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress         = {() => this.onSubCategories(2)}
-                                    style           = {[ styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, { backgroundColor : this.state.active === 2  ? '#d3292a' : '#f8dede' } ]}>
-                                    <Text style     = {[ styles.textRegular, styles.textSize_12 , { color : this.state.active === 2 ? '#FFF' : '#a09f9f' }]} >
-                                        وجبات سريعه
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress         = {() => this.onSubCategories(3)}
-                                    style           = {[ styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, { backgroundColor : this.state.active === 3  ? '#d3292a' : '#f8dede' } ]}>
-                                    <Text style     = {[ styles.textRegular, styles.textSize_12 , { color : this.state.active === 3 ? '#FFF' : '#a09f9f' }]} >
-                                        وجبات محليه
-                                    </Text>
-                                </TouchableOpacity>
-
-                            </ScrollView>
-                        </View>
 
                         <View style={[ styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_10, styles.marginVertical_10, styles.overHidden, styles.marginHorizontal_15 ]}>
 
@@ -590,7 +511,7 @@ class Details extends Component {
                                         {i18n.t('editchef')} :
                                     </Text>
                                     <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.marginHorizontal_5]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                        شعوذه الندم
+                                        {this.props.mealInfo.provider.name}
                                     </Text>
                                 </View>
                                 <View style={[ styles.rowGroup ]}>
@@ -598,159 +519,87 @@ class Details extends Component {
                                         {i18n.t('monyproducer')}
                                     </Text>
                                     <Text style = {[styles.textRegular, styles.text_black, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
-                                        10 ر.س
+                                        {this.props.mealInfo.price} {i18n.t('RS')}
                                     </Text>
                                 </View>
                                 <View style={[ styles.rowGroup ]}>
                                     <Icon
-                                        style   = {[styles.text_green, styles.textSize_5, styles.marginHorizontal_5]}
+                                        style   = {[this.props.mealInfo.available ? styles.text_green : styles.text_red, styles.textSize_5, styles.marginHorizontal_5]}
                                         type    = "FontAwesome"
                                         name    = 'circle'
                                     />
-                                    <Text style={[styles.textRegular, styles.text_green, styles.textSize_12]}>
-                                        متواجد حاليا
+                                    <Text style={[styles.textRegular, this.props.mealInfo.provider.available ? styles.text_green : styles.text_red, styles.textSize_12]}>
+                                        {this.props.mealInfo.provider.available ? i18n.t('available') : i18n.t('notAvailable')}
                                     </Text>
                                 </View>
                             </View>
 
                             <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
                                 <View style={[ styles.width_50, styles.height_50, styles.flex_15 ]}>
-                                    <Image style = {[styles.Width_100 , styles.height_full]} source={require('../../assets/img/girl.png')}/>
+                                    <Image style = {[styles.Width_100 , styles.height_full]} source={{uri:this.props.mealInfo.provider.avatar}}/>
                                 </View>
                                 <View style={[ styles.paddingHorizontal_5, styles.flex_85 ]}>
                                     <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('editchef')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>استلام من الشيف / علي حسب المسافه</Text>
+                                        <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('delver')}</Text>
+                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.provider.delivery_type}</Text>
                                     </View>
                                     <View style={[ styles.rowGroup ]}>
                                         <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('eat')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>طماطم - بطاطس - خس - جبنة</Text>
+                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.additions}</Text>
                                     </View>
                                     <View style={[ styles.rowGroup ]}>
                                         <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('timeeat')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>علي حسب التواجد / قبلها بـ 2 ساعة</Text>
+                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.preparation_time}</Text>
                                     </View>
                                 </View>
                             </View>
 
                             <View>
                                 <Text style={[styles.textRegular, styles.text_black, styles.textSize_12, styles.rowLeft]}>
-                                    يبعد 200.2 KM
+                                    {this.props.mealInfo.distance}
                                 </Text>
                             </View>
+                            {
+                                this.props.mealInfo.available ?
+                                    <View style={[ styles.rowGroup ]}>
 
-                            <View style={[ styles.rowGroup ]}>
+                                        <TouchableOpacity style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_5, styles.height_40]}>
+                                            <Text style={[styles.textRegular, styles.text_White, styles.textSize_13]}>{i18n.t('addToCart')}</Text>
+                                        </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_5, styles.height_40]}>
-                                    <Text style={[styles.textRegular, styles.text_White, styles.textSize_13]}>{i18n.t('addToCart')}</Text>
-                                </TouchableOpacity>
+                                        <View style={[ styles.rowGroup ]}>
+                                            <TouchableOpacity
+                                                style       = {[styles.bg_light_red,styles.flexCenter, styles.paddingVertical_5, styles.paddingHorizontal_5]}
+                                                onPress     = {() => this.incrementCount()}
+                                            >
+                                                <Icon
+                                                    style   = {[styles.text_red, styles.textSize_14]}
+                                                    type    = "AntDesign"
+                                                    name    = 'plus'
+                                                />
+                                            </TouchableOpacity>
+                                            <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.Border, styles.border_light_red, styles.width_40, styles.textCenter, styles.marginHorizontal_5]}>
+                                                { this.state.count }
+                                            </Text>
+                                            <TouchableOpacity
+                                                style       = {[styles.bg_light_gray, styles.flexCenter, styles.paddingVertical_5, styles.paddingHorizontal_5]}
+                                                onPress     = {() => this.decrementCount()}
+                                            >
+                                                <Icon
+                                                    style   = {[styles.text_White, styles.textSize_14]}
+                                                    type    = "AntDesign"
+                                                    name    = 'minus'
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
 
-                                <View style={[ styles.rowGroup ]}>
-                                    <TouchableOpacity
-                                        style       = {[styles.bg_light_red,styles.flexCenter, styles.paddingVertical_5, styles.paddingHorizontal_5]}
-                                        onPress     = {() => this.incrementCount()}
-                                    >
-                                        <Icon
-                                            style   = {[styles.text_red, styles.textSize_14]}
-                                            type    = "AntDesign"
-                                            name    = 'plus'
-                                        />
-                                    </TouchableOpacity>
-                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.Border, styles.border_light_red, styles.width_40, styles.textCenter, styles.marginHorizontal_5]}>
-                                        { this.state.count }
-                                    </Text>
-                                    <TouchableOpacity
-                                        style       = {[styles.bg_light_gray, styles.flexCenter, styles.paddingVertical_5, styles.paddingHorizontal_5]}
-                                        onPress     = {() => this.decrementCount()}
-                                    >
-                                        <Icon
-                                            style   = {[styles.text_White, styles.textSize_14]}
-                                            type    = "AntDesign"
-                                            name    = 'minus'
-                                        />
-                                    </TouchableOpacity>
-                                </View>
+                                    </View>
+                                    :
+                                    null
+                            }
 
-                            </View>
 
                         </View>
-
-                        <View style={[ styles.Border, styles.border_gray, styles.paddingHorizontal_15, styles.paddingVertical_10, styles.marginVertical_10, styles.overHidden, styles.marginHorizontal_15 ]}>
-
-                            <View style={[ styles.rowGroup  ]}>
-                                <View style={[ styles.rowGroup ]}>
-                                    <Text style={[styles.textRegular, styles.text_black, styles.textSize_13]}>
-                                        برجر الندم
-                                    </Text>
-                                </View>
-                                <View style={[ styles.rowGroup ]}>
-                                    <Icon
-                                        style   = {[styles.text_black_gray, styles.textSize_10, styles.marginHorizontal_5]}
-                                        type    = "FontAwesome"
-                                        name    = 'eye'
-                                    />
-                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]}>
-                                        145 مشاهده
-                                    </Text>
-                                </View>
-                            </View>
-
-                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                <Text style = {[styles.textRegular, styles.text_black_gray, styles.textSize_12]}>
-                                    برجر - لحم - سلطه
-                                </Text>
-                            </View>
-
-                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                <Text style = {[styles.textRegular, styles.text_black, styles.textSize_12]}>
-                                    {i18n.translate('timeeat')}
-                                </Text>
-                            </View>
-
-                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                <Text style = {[styles.textRegular, styles.text_black_gray, styles.textSize_12]}>
-                                    1 ساعه
-                                </Text>
-                            </View>
-
-                            <View style={[ styles.rowRight]}>
-                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                    {i18n.t('monyproducer')}
-                                </Text>
-                                <Text style = {[styles.textRegular, styles.text_black, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
-                                    10 ر.س
-                                </Text>
-                            </View>
-
-                            <View style={[ styles.rowRight]}>
-                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                    {i18n.t('monyproducer')}
-                                </Text>
-                                <Switch
-                                    style           = {[ styles.switch, styles.marginHorizontal_25, styles.marginVertical_10 ]}
-                                    onValueChange   = {this.toggleSwitch}
-                                    value           = {this.state.switchValue}
-                                    onTintColor     = {'#F00'}
-                                    thumbTintColor  = {'#fff'}
-                                    tintColor       = {'#DDD'}
-                                    disabled
-                                />
-                            </View>
-
-                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-
-                            </View>
-
-                        </View>
-
-                        {/*<FlatList*/}
-                        {/*    data                    = {this.renderItems}*/}
-                        {/*    renderItem              = {(item) => this.renderItems(item)}*/}
-                        {/*    numColumns              = {2}*/}
-                        {/*    keyExtractor            = {this._keyExtractor}*/}
-                        {/*    extraData               = {this.renderItems}*/}
-                        {/*    onEndReachedThreshold   = {isIOS ? .01 : 1}*/}
-                        {/*/>*/}
 
                         <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
 
@@ -1133,13 +982,13 @@ class Details extends Component {
     }
 }
 
-export default Details;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , mealInfo}) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        mealInfo: mealInfo.mealInfo,
+    };
+};
+export default connect(mapStateToProps, {productDetails , changeMealStatus , setFav})(Details);

@@ -20,3 +20,6 @@ export * from './BillAction';
 export * from './cartAction';
 export * from './cartInfoAction';
 export * from './OrderStoreAction';
+export * from './bannersAction';
+export * from './mealsAction';
+export * from './favouriteAction';

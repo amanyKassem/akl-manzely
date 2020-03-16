@@ -8,7 +8,7 @@ import {
     Left,
     Icon,
     Body,
-    Title, CheckBox,
+    Title, CheckBox, Toast,
 } from 'native-base'
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
@@ -17,30 +17,32 @@ import {getCartInfo , getDeliveryTypes} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import Modal from "react-native-modal";
 import COLORS from "../consts/colors";
+import {NavigationEvents} from "react-navigation";
+import CartItem from './CartItem'
+
+let cartItems = [];
 
 class DetailsCart extends Component {
     constructor(props){
         super(props);
         this.state = {
             loader                      : true,
-            count                       : 0,
+            count                       : 1,
             delivery                    : i18n.t('delver'),
             deliveryId                  : null,
             isModalDelivery             : false,
+            totalPrice: 0,
 
         }
     }
 
     componentWillMount() {
-        this.setState({loader: true});
+        cartItems   = [];
+        this.setState({ totalPrice: 0 , loader: true});
         const provider_id = this.props.navigation.state.params.provider_id;
         this.props.getCartInfo(this.props.lang , provider_id , this.props.user.token);
         this.props.getDeliveryTypes(this.props.lang);
     }
-    componentWillReceiveProps(nextProps, nextContext) {
-        this.setState({loader: false});
-    }
-
     renderLoader(){
         if (this.state.loader){
             return(
@@ -50,11 +52,26 @@ class DetailsCart extends Component {
             );
         }
     }
-    incrementCount(){
-        this.setState({count: this.state.count + 1});
+    pushCartItems(cart_id , price){
+        if (cartItems.includes(cart_id) === false) {
+            cartItems.push(cart_id);
+            const totalPrice = Number(this.state.totalPrice) + Number(price);
+            setTimeout(() => this.setState({ totalPrice }), 0)
+        }
+
+        console.log('selected items_', cartItems , 'current total price ' , this.state.totalPrice);
     }
-    decrementCount(){
-        this.setState({count: this.state.count - 1});
+
+    pullCartItems(cart_id , price){
+        for( var i = 0; i < cartItems.length; i++){
+            if ( cartItems[i] === cart_id) {
+                cartItems.splice(i, 1);
+                const totalPrice = Number(this.state.totalPrice) - Number(price);
+                setTimeout(() => this.setState({ totalPrice }), 0)
+            }
+        }
+
+        console.log('selected items_', cartItems , 'current total price ' ,this.state.totalPrice );
     }
 
     toggleModalDelivery = () => {
@@ -70,33 +87,49 @@ class DetailsCart extends Component {
     }
 
     getLocation(){
-
+    this.state.deliveryId?
         this.props.navigation.navigate('MapLocation', {
-            pageName : this.props.navigation.state.routeName
+            pageName : this.props.navigation.state.routeName,
+            provider_id: this.props.navigation.state.params.provider_id,
+            delivery_type: this.state.deliveryId,
+        })
+    :
+        Toast.show({
+            text: i18n.t('chooseType'),
+            type: "danger",
+            duration: 3000,
+            textStyle: {
+                color: "white",
+                fontFamily: 'cairo',
+                textAlign: 'center',
+            }
         });
 
     }
 
+    componentWillReceiveProps(nextProps) {
+        this.setState({loader: false});
+        if (nextProps.cartInfo)
+            this.setState({ totalPrice: nextProps.cartInfo.price });
+    }
+
     _keyExtractor = (item, index) => item.id;
 
-    renderItems = (item) => {
+    renderItems = (item, key) => {
+        const providerId = this.props.navigation.state.params.provider_id;
         return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
+            <CartItem item={item} pushItem={(cart_id, price) => this.pushCartItems(cart_id, price)} pullItem={(cart_id, price) => this.pullCartItems(cart_id, price)} key={key} providerId={providerId} navigation={this.props.navigation} />
         );
     };
-
+    onFocus() {
+        this.componentWillMount();
+    }
     render() {
 
         return (
             <Container>
                 { this.renderLoader() }
+                <NavigationEvents onWillFocus={() => this.onFocus()}/>
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -113,199 +146,111 @@ class DetailsCart extends Component {
                 <Content contentContainerStyle={styles.bgFullWidth} style={styles.contentView}>
 
                     <View style={[ styles.position_A, styles.bg_gray, styles.Width_100, styles.height_80, styles.right_0, styles.top_0 ]}/>
+                    {
+                        this.props.cartInfo ?
+                            <View>
+                                <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
 
-                    <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
+                                    <FlatList
+                                        data={this.props.cartInfo.meals}
+                                        renderItem={({item}) => this.renderItems(item)}
+                                        numColumns={2}
+                                        keyExtractor={this._keyExtractor}
+                                        columnWrapperStyle={{ justifyContent:'space-between'}}
+                                    />
 
-                        <View style={[ styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10 ]}>
-                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.Width_100, styles.position_R ]}>
-                                <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                <View style = {[styles.position_R, styles.bg_White , styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5]}>
-                                    <View style = {[ styles.Width_100, styles.rowGroup ]}>
-                                        <View style = {[styles.flex_1 , styles.height_100, styles.marginHorizontal_5]}>
-                                            <Image style = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/1.png')}/>
-                                        </View>
-                                        <View style = {[ styles.marginHorizontal_5]}>
-                                            <TouchableOpacity onPress={() => this.incrementCount()} style={[ styles.bg_light_red, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'plus'} style={[ styles.text_red, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
-                                            <View style={[styles.Border, styles.border_red, styles.paddingHorizontal_5, styles.paddingVertical_5]}>
-                                                <Text style={[styles.text_red, styles.textRegular, styles.textSize_14, styles.textCenter]}>{this.state.count}</Text>
+                                </View>
+
+                                <View style={[ styles.marginVertical_10, styles.paddingHorizontal_5, styles.marginHorizontal_15]}>
+
+                                    <View style={[styles.overHidden]}>
+                                        <TouchableOpacity onPress={() => this.toggleModalDelivery()} style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, (this.state.deliveryId !== null ? styles.border_red : styles.border_gray)]}>
+                                            <Text style={[styles.textBold, styles.textSize_13, (this.state.deliveryId !== null ? styles.text_red : styles.text_light_gray)]}>
+                                                { this.state.delivery }
+                                            </Text>
+                                            <Icon style={[styles.textSize_14, styles.text_light_gray]} type="AntDesign" name='down' />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <Modal isVisible={this.state.isModalDelivery} onBackdropPress={() => this.toggleModalDelivery()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                                        <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
+
+                                            <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
+
+                                                {
+                                                    this.props.deliveryTypes ?
+                                                        this.props.deliveryTypes.map((type, i ) => {
+                                                            return(
+                                                                <TouchableOpacity
+                                                                    key={i}
+                                                                    style               = {[styles.rowGroup, styles.marginVertical_10]}
+                                                                    onPress             = {() => this.selectDeliveryId(type.id, type.name)}
+                                                                >
+                                                                    <View style={[styles.overHidden, styles.rowRight]}>
+                                                                        <CheckBox
+                                                                            style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+                                                                            color               = {styles.text_red}
+                                                                            selectedColor       = {styles.text_red}
+                                                                            checked             = {this.state.deliveryId === 1}
+                                                                            onPress             = {() => this.selectDeliveryId(type.id, type.name)}
+                                                                        />
+                                                                        <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+                                                                            {type.name}
+                                                                        </Text>
+                                                                    </View>
+                                                                </TouchableOpacity>
+                                                            )
+                                                        })
+                                                        :
+                                                        null
+                                                }
                                             </View>
-                                            <TouchableOpacity onPress={() => this.decrementCount()} style={[ styles.bg_light_gray, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'minus'} style={[ styles.text_White, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
+
                                         </View>
+                                    </Modal>
+
+                                    <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray]}>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
+                                            { i18n.t('priceprod') }
+                                        </Text>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
+                                            {this.state.totalPrice} { i18n.t('RS') }
+                                        </Text>
                                     </View>
-                                    <View style = {[ styles.Width_100, styles.marginVertical_5, styles.paddingHorizontal_10 ]}>
-                                        <View style={[ styles.rowGroup ]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر لحم</Text>
-                                        </View>
-                                        <View style={[ ]}>
-                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر - لحم - سلطه</Text>
-                                            <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10 ر.س</Text>
-                                        </View>
+
+                                    <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray]}>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
+                                            { i18n.t('deliveryprice') }
+                                        </Text>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
+                                            {this.props.cartInfo.delivery_price} { i18n.t('RS') }
+                                        </Text>
                                     </View>
-                                    <TouchableOpacity style={[ styles.bg_red, styles.width_40, styles.height_40, styles.flexCenter, styles.position_A, styles.bottom_10, styles.right_0 ]}>
-                                        <Icon type={'AntDesign'} name={'close'} style={[ styles.text_White, styles.textSize_22 ]}/>
+
+                                    <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_black, styles.Border, styles.border_gray]}>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_White]}>
+                                            { i18n.t('totalprice') }
+                                        </Text>
+                                        <Text style={[styles.textBold, styles.textSize_13, styles.text_White]}>
+                                            {Number(this.state.totalPrice) + Number(this.props.cartInfo.delivery_price)} { i18n.t('RS') }
+                                        </Text>
+                                    </View>
+
+                                    <TouchableOpacity
+                                        style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                                        onPress     = {() => this.getLocation()}
+                                    >
+                                        <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                                            { i18n.t('sent') }
+                                        </Text>
                                     </TouchableOpacity>
+
                                 </View>
-                            </Animatable.View>
-                        </View>
-
-                        <View style={[ styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10 ]}>
-                            <Animatable.View animation="fadeInLeft" easing="ease-out" delay={500} style={[ styles.Width_100, styles.position_R ]}>
-                                <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                <View style = {[styles.position_R, styles.bg_White , styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5]}>
-                                    <View style = {[ styles.Width_100, styles.rowGroup ]}>
-                                        <View style = {[styles.flex_1 , styles.height_100, styles.marginHorizontal_5]}>
-                                            <Image style = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/1.png')}/>
-                                        </View>
-                                        <View style = {[ styles.marginHorizontal_5]}>
-                                            <TouchableOpacity onPress={() => this.incrementCount()} style={[ styles.bg_light_red, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'plus'} style={[ styles.text_red, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
-                                            <View style={[styles.Border, styles.border_red, styles.paddingHorizontal_5, styles.paddingVertical_5]}>
-                                                <Text style={[styles.text_red, styles.textRegular, styles.textSize_14, styles.textCenter]}>{this.state.count}</Text>
-                                            </View>
-                                            <TouchableOpacity onPress={() => this.decrementCount()} style={[ styles.bg_light_gray, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'minus'} style={[ styles.text_White, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                    <View style = {[ styles.Width_100, styles.marginVertical_5, styles.paddingHorizontal_10 ]}>
-                                        <View style={[ styles.rowGroup ]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر لحم</Text>
-                                        </View>
-                                        <View style={[ ]}>
-                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر - لحم - سلطه</Text>
-                                            <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10 ر.س</Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity style={[ styles.bg_red, styles.width_40, styles.height_40, styles.flexCenter, styles.position_A, styles.bottom_10, styles.right_0 ]}>
-                                        <Icon type={'AntDesign'} name={'close'} style={[ styles.text_White, styles.textSize_22 ]}/>
-                                    </TouchableOpacity>
-                                </View>
-                            </Animatable.View>
-                        </View>
-
-                        <View style={[ styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10 ]}>
-                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.Width_100, styles.position_R ]}>
-                                <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                <View style = {[styles.position_R, styles.bg_White , styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5]}>
-                                    <View style = {[ styles.Width_100, styles.rowGroup ]}>
-                                        <View style = {[styles.flex_1 , styles.height_100, styles.marginHorizontal_5]}>
-                                            <Image style = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/1.png')}/>
-                                        </View>
-                                        <View style = {[ styles.marginHorizontal_5]}>
-                                            <TouchableOpacity onPress={() => this.incrementCount()} style={[ styles.bg_light_red, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'plus'} style={[ styles.text_red, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
-                                            <View style={[styles.Border, styles.border_red, styles.paddingHorizontal_5, styles.paddingVertical_5]}>
-                                                <Text style={[styles.text_red, styles.textRegular, styles.textSize_14, styles.textCenter]}>{this.state.count}</Text>
-                                            </View>
-                                            <TouchableOpacity onPress={() => this.decrementCount()} style={[ styles.bg_light_gray, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5 ]}>
-                                                <Icon type={'Entypo'} name={'minus'} style={[ styles.text_White, styles.textSize_14 ]}/>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                    <View style = {[ styles.Width_100, styles.marginVertical_5, styles.paddingHorizontal_10 ]}>
-                                        <View style={[ styles.rowGroup ]}>
-                                            <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>برجر لحم</Text>
-                                        </View>
-                                        <View style={[ ]}>
-                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>برجر - لحم - سلطه</Text>
-                                            <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>10 ر.س</Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity style={[ styles.bg_red, styles.width_40, styles.height_40, styles.flexCenter, styles.position_A, styles.bottom_10, styles.right_0 ]}>
-                                        <Icon type={'AntDesign'} name={'close'} style={[ styles.text_White, styles.textSize_22 ]}/>
-                                    </TouchableOpacity>
-                                </View>
-                            </Animatable.View>
-                        </View>
-
-                    </View>
-
-                    <View style={[ styles.marginVertical_10, styles.paddingHorizontal_5, styles.marginHorizontal_15]}>
-
-                        <View style={[styles.overHidden]}>
-                            <TouchableOpacity onPress={() => this.toggleModalDelivery()} style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, (this.state.deliveryId !== null ? styles.border_red : styles.border_gray)]}>
-                                <Text style={[styles.textBold, styles.textSize_13, (this.state.deliveryId !== null ? styles.text_red : styles.text_light_gray)]}>
-                                    { this.state.delivery }
-                                </Text>
-                                <Icon style={[styles.textSize_14, styles.text_light_gray]} type="AntDesign" name='down' />
-                            </TouchableOpacity>
-                        </View>
-
-                        <Modal isVisible={this.state.isModalDelivery} onBackdropPress={() => this.toggleModalDelivery()} style={[ styles.bottomCenter, styles.Width_100 ]}>
-                            <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
-
-                                <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
-                                    {
-                                        this.props.deliveryTypes.map((type, i ) => {
-                                            return(
-                                                <TouchableOpacity
-                                                    style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                    onPress             = {() => this.selectDeliveryId(type.id, type.name)}
-                                                >
-                                                    <View style={[styles.overHidden, styles.rowRight]}>
-                                                        <CheckBox
-                                                            style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                            color               = {styles.text_red}
-                                                            selectedColor       = {styles.text_red}
-                                                            checked             = {this.state.deliveryId === 1}
-                                                        />
-                                                        <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                            {type.name}
-                                                        </Text>
-                                                    </View>
-                                                </TouchableOpacity>
-                                            )
-                                        })
-                                    }
-                                </View>
-
                             </View>
-                        </Modal>
+                            :
+                            null
+                    }
 
-                        <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray]}>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                { i18n.t('priceprod') }
-                            </Text>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                {this.props.cartInfo.price} { i18n.t('RS') }
-                            </Text>
-                        </View>
-
-                        <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray]}>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                { i18n.t('deliveryprice') }
-                            </Text>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                {this.props.cartInfo.delivery_price} { i18n.t('RS') }
-                            </Text>
-                        </View>
-
-                        <View style={[ styles.marginVertical_5 , styles.Width_100, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.rowGroup, styles.bg_black, styles.Border, styles.border_gray]}>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_White]}>
-                                { i18n.t('totalprice') }
-                            </Text>
-                            <Text style={[styles.textBold, styles.textSize_13, styles.text_White]}>
-                                {this.props.cartInfo.total_price} { i18n.t('RS') }
-                            </Text>
-                        </View>
-
-                        <TouchableOpacity
-                            style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                            onPress     = {() => this.getLocation()}
-                        >
-                            <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                { i18n.t('sent') }
-                            </Text>
-                        </TouchableOpacity>
-
-                    </View>
 
                 </Content>
 

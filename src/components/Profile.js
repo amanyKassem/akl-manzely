@@ -243,26 +243,32 @@ class Profile extends Component {
                                 </Text>
                                 <Icon style={[styles.textSize_14, styles.text_light_gray]} type="Feather" name='map-pin' />
                             </View>
-                            <Text style={[styles.textRegular, styles.textSize_13, styles.text_black , styles.marginVertical_15, styles.Width_100]}>
-                                { i18n.t('delver') }
-                            </Text>
-                            <View style={[ styles.height_40 ]}>
-                                <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
+                            {
+                                this.props.user != null && this.props.user.type === 'provider' ?
+                                    <View style={styles.Width_100}>
+                                        <Text style={[styles.textRegular, styles.textSize_13, styles.text_black , styles.marginVertical_15, styles.Width_100 , {alignSelf:'flex-start'}]}>
+                                            { i18n.t('delver') }
+                                        </Text>
+                                        <View style={[ styles.height_40 ]}>
+                                            <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
-                                    {
-                                        this.props.user.delivery_types.map((type, i) => (
-                                            <View
-                                                key={i}
-                                                style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, styles.bg_black ]}>
-                                                <Text style     = {[ styles.textRegular, styles.textSize_12 , styles.text_White ]} >
-                                                    {type.name}
-                                                </Text>
-                                            </View>
-                                        ))
-                                    }
+                                                {
+                                                    this.props.user.delivery_types.map((type, i) => (
+                                                        <View
+                                                            key={i}
+                                                            style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, styles.bg_black ]}>
+                                                            <Text style     = {[ styles.textRegular, styles.textSize_12 , styles.text_White ]} >
+                                                                {type.name}
+                                                            </Text>
+                                                        </View>
+                                                    ))
+                                                }
 
-                                </ScrollView>
-                            </View>
+                                            </ScrollView>
+                                        </View>
+                                    </View>
+                                    :null
+                            }
 
                             <TouchableOpacity
                                 style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter,]}

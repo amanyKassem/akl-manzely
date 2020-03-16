@@ -19,3 +19,4 @@ export * from './addMealAction';
 export * from './BillAction';
 export * from './cartAction';
 export * from './cartInfoAction';
+export * from './OrderStoreAction';

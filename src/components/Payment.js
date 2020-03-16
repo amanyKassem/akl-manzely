@@ -26,7 +26,7 @@ class Payment extends Component {
             delivery                    : i18n.t('delver'),
             deliveryId                  : null,
             isModalDelivery             : false,
-            active                      : 0,
+            active                      : 1,
 
         }
     }
@@ -40,7 +40,11 @@ class Payment extends Component {
     getPayment(id){
 
         this.props.navigation.navigate('FormPayment', {
-            paymentId : id
+            paymentId : id,
+            latitude                : this.props.navigation.state.params.latitude,
+            longitude               : this.props.navigation.state.params.longitude,
+            provider_id             : this.props.navigation.state.params.provider_id,
+            delivery_type           : this.props.navigation.state.params.delivery_type,
         });
 
     }

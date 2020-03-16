@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView,} from "react-native";
+import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView, ActivityIndicator,} from "react-native";
 import {
     Container,
     Content,
@@ -13,9 +13,10 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getOrderStore} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import DateTimePicker from "react-native-modal-datetime-picker";
+import COLORS from "../consts/colors";
 
 class FormPayment extends Component {
     constructor(props){
@@ -32,6 +33,7 @@ class FormPayment extends Component {
             codeStatus                  : 0,
             isDatePickerVisible         : false,
             spinner                     : false,
+            isSubmitted: false,
 
         }
     }
@@ -76,37 +78,7 @@ class FormPayment extends Component {
 
     }
 
-    validate = () => {
-        let isError     = false;
-        let msg         = '';
 
-        if (this.state.name === '') {
-            isError     = true;
-            msg         = i18n.t('Full');
-        } else if (this.state.number.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('acNum');
-        } else if (this.state.timeDate === '') {
-            isError     = true;
-            msg         = i18n.t('chDate');
-        } else if (this.state.code === '') {
-            isError     = true;
-            msg         = i18n.t('chCode');
-        }
-        if (msg !== '') {
-            Toast.show({
-                text        : msg,
-                type        : "danger",
-                duration    : 3000,
-                textStyle       : {
-                    color       : "white",
-                    fontFamily  : 'cairo',
-                    textAlign   : 'center',
-                }
-            });
-        }
-        return isError;
-    };
 
     toggleDatePicker = () => {
         this.setState({ isDatePickerVisible: !this.state.isDatePickerVisible });
@@ -119,28 +91,46 @@ class FormPayment extends Component {
 
     componentWillMount() {
 
-        this.setState({spinner: true});
+        this.setState({ isSubmitted: false });
 
     }
 
-    getPayment(){
+    renderStoreOrder(){
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
+        }
 
-        this.props.navigation.navigate('FormPayment', {
-
-        });
-
+        return (
+            <TouchableOpacity
+                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                onPress     = {() => this.onPayPressed()}
+            >
+                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                    { i18n.t('confirm') }
+                </Text>
+            </TouchableOpacity>
+        );
     }
-
     onPayPressed() {
 
-        const err = this.validate();
+        this.setState({ isSubmitted: true });
+        const latitude                = this.props.navigation.state.params.latitude;
+        const longitude               = this.props.navigation.state.params.longitude;
+        const provider_id             = this.props.navigation.state.params.provider_id;
+        const delivery_type           = this.props.navigation.state.params.delivery_type;
 
-        this.props.navigation.navigate('ConfirmPayment', {
 
-        });
+        this.props.getOrderStore(this.props.lang, provider_id , delivery_type , latitude , longitude , this.props.user.token  , this.props )
 
     }
+    componentWillReceiveProps(nextProps) {
+        this.setState({ isSubmitted: false});
 
+    }
     render() {
 
         return (
@@ -228,14 +218,10 @@ class FormPayment extends Component {
                                     </Item>
                                 </View>
 
-                                <TouchableOpacity
-                                    style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                                    onPress     = {() => this.onPayPressed()}
-                                >
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                        { i18n.t('confirm') }
-                                    </Text>
-                                </TouchableOpacity>
+                                {
+                                    this.renderStoreOrder()
+                                }
+
 
                             </Form>
 
@@ -249,13 +235,10 @@ class FormPayment extends Component {
     }
 }
 
-export default FormPayment;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({lang , profile}) => {
+    return {
+        lang: lang.lang,
+        user: profile.user,
+    };
+};
+export default connect(mapStateToProps, {getOrderStore })(FormPayment);

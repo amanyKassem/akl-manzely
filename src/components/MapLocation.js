@@ -130,9 +130,11 @@ class MapLocation extends Component {
                 })
             }else if (pageName === 'DetailsCart'){
                 this.props.navigation.navigate('Payment', {
-                    city_name       : this.state.city,
-                    latitude        : this.state.mapRegion.latitude,
-                    longitude       : this.state.mapRegion.longitude,
+                    city_name               : this.state.city,
+                    latitude                : this.state.mapRegion.latitude,
+                    longitude               : this.state.mapRegion.longitude,
+                    provider_id             : this.props.navigation.state.params.provider_id,
+                    delivery_type           : this.props.navigation.state.params.delivery_type,
                 })
             }else if (pageName === 'EditProfile'){
                 this.props.navigation.navigate('EditProfile', {

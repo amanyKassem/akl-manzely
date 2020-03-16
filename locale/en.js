@@ -226,7 +226,7 @@ const en = {
     'nameAr'                            : 'name in arabic',
     'nameEn'                            : 'name in english',
     'mainCategory'                      : 'main category',
-
+    'chooseType'                        : 'choose delivery type',
 };
 
 export default en;

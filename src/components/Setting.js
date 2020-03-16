@@ -91,22 +91,22 @@ class Setting extends Component {
                                         </Animatable.View>
                                     </View>
 
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeIn" easing="ease-out" delay={600} style={[ styles.marginVertical_5]}>
-                                            <TouchableOpacity
-                                                style       = {[ styles.rowGroup, styles.Border, styles.border_gray, styles.paddingVertical_10, styles.paddingHorizontal_10 ]}>
-                                                <Text style={[ styles.textRegular, styles.text_light_gray, styles.textSize_14 ]}>{ i18n.t('Available') }</Text>
-                                                <Switch
-                                                    style           = {[ styles.switch ]}
-                                                    onValueChange   = {this.toggleSwitch}
-                                                    value           = {this.state.switchValue}
-                                                    onTintColor     = {'#F00'}
-                                                    thumbTintColor  = {'#fff'}
-                                                    tintColor       = {'#DDD'}
-                                                />
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
+                                    {/*<View style={[styles.overHidden]}>*/}
+                                    {/*    <Animatable.View animation="fadeIn" easing="ease-out" delay={600} style={[ styles.marginVertical_5]}>*/}
+                                    {/*        <TouchableOpacity*/}
+                                    {/*            style       = {[ styles.rowGroup, styles.Border, styles.border_gray, styles.paddingVertical_10, styles.paddingHorizontal_10 ]}>*/}
+                                    {/*            <Text style={[ styles.textRegular, styles.text_light_gray, styles.textSize_14 ]}>{ i18n.t('Available') }</Text>*/}
+                                    {/*            <Switch*/}
+                                    {/*                style           = {[ styles.switch ]}*/}
+                                    {/*                onValueChange   = {this.toggleSwitch}*/}
+                                    {/*                value           = {this.state.switchValue}*/}
+                                    {/*                onTintColor     = {'#F00'}*/}
+                                    {/*                thumbTintColor  = {'#fff'}*/}
+                                    {/*                tintColor       = {'#DDD'}*/}
+                                    {/*            />*/}
+                                    {/*        </TouchableOpacity>*/}
+                                    {/*    </Animatable.View>*/}
+                                    {/*</View>*/}
 
                                 </View>
                             </View>

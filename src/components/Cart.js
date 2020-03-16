@@ -33,6 +33,7 @@ import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
 import StarRating from "react-native-star-rating";
 import Modal from "react-native-modal";
+import {NavigationEvents} from "react-navigation";
 
 const isIOS = Platform.OS === 'ios';
 
@@ -63,11 +64,15 @@ class Cart extends Component {
         }
     }
 
+    onFocus() {
+        this.componentWillMount();
+    }
     render() {
 
         return (
             <Container>
                 { this.renderLoader() }
+                <NavigationEvents onWillFocus={() => this.onFocus()}/>
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -97,12 +102,12 @@ class Cart extends Component {
                                             <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart' , {provider_id:cart.provider_id})}>
                                                 <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
                                                     <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                        <Image style = {[styles.Width_100 , styles.height_70]} source={require('../../assets/img/1.png')}/>
+                                                        <Image style = {[styles.Width_100 , styles.height_70]} source={{uri:cart.avatar}}/>
                                                     </View>
                                                     <View style={[ styles.flex_75 ]}>
                                                         <View style={[ styles.rowGroup]}>
                                                             <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                                {cart.name_en}
+                                                                {cart.name}
                                                             </Text>
                                                         </View>
                                                         <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>

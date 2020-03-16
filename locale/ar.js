@@ -235,6 +235,7 @@ const ar = {
     'nameAr'                    : 'الاسم بالعربية',
     'nameEn'                    : 'الاسم بالانجليزية',
     'mainCategory'              : 'القسم الرئيسي',
+    'chooseType'              : 'اختر طريقة التوصيل',
 };
 
 export default ar;

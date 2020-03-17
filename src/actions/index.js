@@ -23,3 +23,6 @@ export * from './OrderStoreAction';
 export * from './bannersAction';
 export * from './mealsAction';
 export * from './favouriteAction';
+export * from './addToCartAction';
+export * from './offersAction';
+export * from './favouritesAction';

@@ -29,6 +29,15 @@ class Product extends Component{
         this.setState({ isFav: nextProps.data.is_favourite  });
     }
 
+    onPressMeal(){
+        if( this.props.type){
+            this.props.rerunAction(this.props.data.id)
+        }
+        else {
+            this.props.navigation.navigate(this.props.user?'Details':'Login' , {meal_id:this.props.data.id})
+        }
+    }
+
     render(){
         return(
             <View
@@ -36,7 +45,7 @@ class Product extends Component{
                 <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
                                  style={[styles.Width_100]}>
                     <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate(this.props.user?'Details':'Login' , {meal_id:this.props.data.id})}
+                        onPress={() => this.onPressMeal()}
                         style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
                         <View style={[styles.Width_100, styles.position_R]}>
                             <Image style={[styles.Width_100, styles.height_100]}

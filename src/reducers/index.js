@@ -19,6 +19,8 @@ import carts from './CartsReducer';
 import cartInfo from './CartInfoReducer';
 import banners from './BannersReducer';
 import meals from './MealsReducer';
+import offers from './OffersReducer';
+import favorites from './FavoritesReducer';
 
 export default combineReducers({
     lang,
@@ -41,4 +43,6 @@ export default combineReducers({
     cartInfo,
     banners,
     meals,
+    offers,
+    favorites,
 });

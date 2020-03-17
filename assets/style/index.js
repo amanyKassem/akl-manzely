@@ -526,6 +526,9 @@ const styles = ({
     Width_100 : {
         width                       : '100%'
     },
+    width_30 : {
+        width                       : 30
+    },
     width_40 : {
         width                       : 40
     },

@@ -27,7 +27,6 @@ import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import Spinner from "react-native-loading-spinner-overlay";
 import Product from './Product'
-import BillCheckItem from "./Credit";
 
 const isIOS = Platform.OS === 'ios';
 

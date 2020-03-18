@@ -19,6 +19,7 @@ import * as Animatable from 'react-native-animatable';
 import StarRating from "react-native-star-rating";
 import COLORS from "../consts/colors";
 import Modal from "react-native-modal";
+import {NavigationEvents} from "react-navigation";
 import Product from './Product'
 
 class Offers extends Component {
@@ -62,6 +63,7 @@ class Offers extends Component {
         return (
             <Container>
                 { this.renderLoader() }
+                <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>

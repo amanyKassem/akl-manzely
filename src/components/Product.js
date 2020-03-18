@@ -14,7 +14,7 @@ class Product extends Component{
     constructor(props){
         super(props);
         this.state = {
-            isFav: false
+            isFav: this.props.data.is_favourite
         }
     }
 

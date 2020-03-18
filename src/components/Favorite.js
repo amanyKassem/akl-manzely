@@ -20,6 +20,7 @@ import StarRating from "react-native-star-rating";
 import COLORS from "../consts/colors";
 import Modal from "react-native-modal";
 import Product from './Product'
+import {NavigationEvents} from "react-navigation";
 
 class Favorite extends Component {
     constructor(props){
@@ -48,20 +49,6 @@ class Favorite extends Component {
             );
         }
     }
-    _keyExtractor = (item, index) => item.id;
-
-    renderItems = (item) => {
-        return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
-        );
-    };
 
     static navigationOptions = () => ({
         header          : null,
@@ -77,6 +64,7 @@ class Favorite extends Component {
         return (
             <Container>
                 { this.renderLoader() }
+                <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>

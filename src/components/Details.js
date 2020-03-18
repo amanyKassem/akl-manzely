@@ -243,7 +243,7 @@ class Details extends Component {
             this.setState({cityName  : i18n.translate('mapname')});
         }
 
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     renderLoader(){

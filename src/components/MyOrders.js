@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    ActivityIndicator
+} from "react-native";
 import {
     Container,
     Content,
@@ -17,54 +26,60 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {getOrders} from "../actions";
 import * as Animatable from 'react-native-animatable';
+import COLORS from "../consts/colors";
+import {NavigationEvents} from "react-navigation";
 
 class MyOrders extends Component {
     constructor(props){
         super(props);
         this.state = {
-            spinner                 : false,
+            loader: true,
             active                  : 1,
         }
     }
 
     componentWillMount() {
+        this.setState({loader: true});
+        this.onActive(this.state.active);
+    }
 
-        this.setState({spinner: true});
+    componentWillReceiveProps(nextProps) {
+        this.setState({loader: false });
+    }
 
+    renderLoader(){
+        if (this.state.loader){
+            return(
+                <View style={[styles.loading, styles.flexCenter]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            );
+        }
     }
 
     onActive ( id ){
-        this.setState({spinner: true, active : id });
+        this.setState({active: id, loader: true});
+        const token = this.props.user ? this.props.user.token : null;
+        this.props.getOrders(this.props.lang, id, token)
     }
 
-    _keyExtractor = (item, index) => item.id;
-
-    renderItems = (item) => {
-        return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
-        );
-    };
 
     static navigationOptions = () => ({
         header          : null,
         drawerLabel     : (<Text style={[styles.textRegular, styles.textSize_16]}>{i18n.translate('myorder')}</Text>) ,
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/file.png')} resizeMode={'contain'}/>)
     });
-
+    onFocus(){
+        this.componentWillMount();
+    }
     render() {
 
         return (
             <Container>
-
+                { this.renderLoader() }
+                <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
                         <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
@@ -79,6 +94,7 @@ class MyOrders extends Component {
                 </Header>
 
                 <Content contentContainerStyle={styles.bgFullWidth} style={styles.contentView}>
+
 
                     <View style={[ styles.position_A, styles.bg_gray, styles.Width_100, styles.height_70, styles.right_0, styles.top_0, styles.zIndexDown ]}/>
 
@@ -98,7 +114,7 @@ class MyOrders extends Component {
                                 onPress         = {() => this.onActive(2)}
                             >
                                 <Text style={[ styles.textRegular, styles.textSize_14, ( this.state.active === 2 ? styles.text_red : styles.text_black )]}>
-                                    { i18n.t('underProssess') }
+                                    { i18n.t('accepted') }
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -106,7 +122,7 @@ class MyOrders extends Component {
                                 onPress         = {() => this.onActive(3)}
                             >
                                 <Text style={[ styles.textRegular, styles.textSize_14, ( this.state.active === 3 ? styles.text_red : styles.text_black )]}>
-                                    { i18n.t('accepted') }
+                                    { i18n.t('done') }
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -120,61 +136,66 @@ class MyOrders extends Component {
                         </View>
 
                         <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
-                            <View style={[ styles.marginVertical_10 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                    <TouchableOpacity onPress = {() => this.props.navigation.navigate('DetailsOrder', {status : this.state.active})}>
-                                        <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                            <View style={[ styles.flex_100 ]}>
-                                                <View style={[ styles.rowGroup]}>
-                                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                        شعوذه الندم
-                                                    </Text>
+                        {
+                            this.props.orders.map((order , i) => (
+                                    <View key={i} style={[ styles.marginVertical_10 ]}>
+                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
+                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                            <TouchableOpacity onPress = {() => this.props.navigation.navigate('DetailsOrder', {status : this.state.active , order_id : order.id})}>
+                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                    <View style={[ styles.flex_100 ]}>
+                                                        <View style={[ styles.rowGroup]}>
+                                                            <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                                {order.provider_name}
+                                                            </Text>
+                                                        </View>
+                                                        <View style={[ styles.rowRight]}>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
+                                                                { i18n.t('numorders') }
+                                                            </Text>
+                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                {order.id}
+                                                            </Text>
+                                                        </View>
+                                                        <View style={[ styles.rowRight]}>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
+                                                                { i18n.t('numpage') }
+                                                            </Text>
+                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                {order.items_count}
+                                                            </Text>
+                                                        </View>
+                                                        <View style={[ styles.rowRight]}>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
+                                                                { i18n.t('total') }
+                                                            </Text>
+                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                {order.price} { i18n.t('RS') }
+                                                            </Text>
+                                                        </View>
+                                                        <View style={[ styles.rowRight]}>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
+                                                                { i18n.t('orderStatus') }
+                                                            </Text>
+                                                            <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                {order.status_name}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
                                                 </View>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
-                                                        { i18n.t('numorders') }
-                                                    </Text>
-                                                    <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                        13
-                                                    </Text>
-                                                </View>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
-                                                        { i18n.t('numpage') }
-                                                    </Text>
-                                                    <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                        123
-                                                    </Text>
-                                                </View>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
-                                                        { i18n.t('total') }
-                                                    </Text>
-                                                    <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                        123 ر.س
-                                                    </Text>
-                                                </View>
-                                                <View style={[ styles.rowRight]}>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
-                                                        { i18n.t('orderStatus') }
-                                                    </Text>
-                                                    <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                        ف إنتظار الموافقه
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-                        </View>
+                                            </TouchableOpacity>
+                                        </Animatable.View>
+                                    </View>
+                            ))
+                        }
 
+                        </View>
                     </View>
+
 
                 </Content>
 
@@ -183,14 +204,12 @@ class MyOrders extends Component {
         );
     }
 }
-
-export default MyOrders;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang , orders}) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+        orders: orders.orders,
+    };
+};
+export default connect(mapStateToProps, {getOrders})(MyOrders);

@@ -383,7 +383,7 @@ class Details extends Component {
                                 </View>
 
                                 <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                    <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                     <Form style={[styles.Width_90, styles.marginVertical_10, styles.flexCenter]}>
 
                                         <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
@@ -436,7 +436,7 @@ class Details extends Component {
                                         </TouchableOpacity>
 
                                     </Form>
-
+                                    </KeyboardAvoidingView>
                                 </View>
 
                             </View>
@@ -755,7 +755,7 @@ class Details extends Component {
                                 </View>
 
                                 <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                    <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                     <Form style={[styles.Width_100, styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
                                         <View style={[styles.rowGroup, styles.Width_100]}>
@@ -794,7 +794,7 @@ class Details extends Component {
                                         </TouchableOpacity>
 
                                     </Form>
-
+                                    </KeyboardAvoidingView>
                                 </View>
 
                             </View>

@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, ActivityIndicator} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    ActivityIndicator,
+    KeyboardAvoidingView
+} from "react-native";
 import {
     Container,
     Content,
@@ -321,8 +330,8 @@ class AddProduct extends Component {
                         </View>
 
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
-
-                            <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
+                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
+                                <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
                                 <CategoryPicker categories={this.props.categories} selectedId={this.selectedId}/>
 
@@ -390,6 +399,7 @@ class AddProduct extends Component {
                                 </TouchableOpacity>
 
                             </Form>
+                            </KeyboardAvoidingView>
 
                         </View>
                     </View>

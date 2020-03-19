@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ActivityIndicator , Linking} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator, Linking, KeyboardAvoidingView} from "react-native";
 import {
     Container,
     Content,
@@ -108,80 +108,85 @@ class CallUs extends Component {
 
                     <View style={[ styles.position_A, styles.bg_gray, styles.Width_100, styles.height_70, styles.right_0, styles.top_0, styles.zIndexDown ]}/>
 
-                    <View style={[ styles.position_R, styles.zIndex, styles.bgFullWidth , styles.paddingVertical_10]}>
-                        <View style={[ styles.position_R, styles.marginHorizontal_20, styles.bgFullWidth ]}>
-                            <View style={[ styles.bg_White, styles.paddingHorizontal_10, styles.paddingVertical_10, styles.Border, styles.border_gray, styles.bgFullWidth ]}>
-                                <View style={[styles.marginVertical_20]}>
+                    {
+                        this.props.contactInfo ?
+                            <View style={[ styles.position_R, styles.zIndex, styles.bgFullWidth , styles.paddingVertical_10]}>
+                                <View style={[ styles.position_R, styles.marginHorizontal_20, styles.bgFullWidth ]}>
+                                    <View style={[ styles.bg_White, styles.paddingHorizontal_10, styles.paddingVertical_10, styles.Border, styles.border_gray, styles.bgFullWidth ]}>
+                                        <View style={[styles.marginVertical_20]}>
 
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
-                                            <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/user_icon.png')} resizeMode={'contain'}/>
-                                            <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft, styles.text_black ]}>{this.props.contactInfo.name}</Text>
-                                        </Animatable.View>
-                                    </View>
-                                    <TouchableOpacity style={[styles.overHidden]}  onPress={() => Communications.phonecall(this.props.contactInfo.phone, true)}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
-                                            <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/smartphone.png')} resizeMode={'contain'}/>
-                                            <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft , styles.text_black]}>{this.props.contactInfo.phone}</Text>
-                                        </Animatable.View>
-                                    </TouchableOpacity>
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
-                                            <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/map-location.png')} resizeMode={'contain'}/>
-                                            <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft , styles.text_black]}>{this.props.contactInfo.address}</Text>
-                                        </Animatable.View>
-                                    </View>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
+                                                    <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/user_icon.png')} resizeMode={'contain'}/>
+                                                    <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft, styles.text_black ]}>{this.props.contactInfo.name}</Text>
+                                                </Animatable.View>
+                                            </View>
+                                            <TouchableOpacity style={[styles.overHidden]}  onPress={() => Communications.phonecall(this.props.contactInfo.phone, true)}>
+                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
+                                                    <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/smartphone.png')} resizeMode={'contain'}/>
+                                                    <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft , styles.text_black]}>{this.props.contactInfo.phone}</Text>
+                                                </Animatable.View>
+                                            </TouchableOpacity>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.SelfLeft, styles.bg_White, styles.Border, styles.border_red , styles.Width_100 ]}>
+                                                    <Image style={[styles.favImage, styles.marginHorizontal_5]} source={require('../../assets/img/map-location.png')} resizeMode={'contain'}/>
+                                                    <Text style={[ styles.textRegular, styles.textSize_14, styles.flexLeft , styles.text_black]}>{this.props.contactInfo.address}</Text>
+                                                </Animatable.View>
+                                            </View>
 
+                                        </View>
+
+                                        {
+                                            this.props.user.type !== 'user' && this.props.user.type !== 'provider' ?
+                                                null :
+                                                <TouchableOpacity
+                                                    style       = {[ styles.marginVertical_30 , styles.width_250, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter,styles.marginHorizontal_5]}
+                                                    onPress     = {() => this.toggleModalComment()}
+                                                >
+                                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_red, styles.textDecoration]}>
+                                                        { i18n.t('FAsww') }
+                                                    </Text>
+                                                </TouchableOpacity>
+                                        }
+
+
+                                        <View style={[styles.rowCenter]}>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
+                                                    <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.facebook)}>
+                                                        <Image style={[styles.iconBank]} source={require('../../assets/img/face.png')} resizeMode={'contain'}/>
+                                                    </TouchableOpacity>
+                                                </Animatable.View>
+                                            </View>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10  ]}>
+                                                    <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.twitter)}>
+                                                        <Image style={[styles.iconBank]} source={require('../../assets/img/twitter.png')} resizeMode={'contain'}/>
+                                                    </TouchableOpacity>
+                                                </Animatable.View>
+                                            </View>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10]}>
+                                                    <TouchableOpacity onPress={() => Linking.openURL('https://api.whatsapp.com/send?phone='+this.props.contactInfo.phone)}>
+                                                        <Image style={[styles.iconBank]} source={require('../../assets/img/wahts.png')} resizeMode={'contain'}/>
+                                                    </TouchableOpacity>
+                                                </Animatable.View>
+                                            </View>
+                                            <View style={[styles.overHidden]}>
+                                                <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10  ]}>
+                                                    <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.instagram)}>
+                                                        <Image style={[styles.iconBank]} source={require('../../assets/img/ins.png')} resizeMode={'contain'}/>
+                                                    </TouchableOpacity>
+                                                </Animatable.View>
+                                            </View>
+                                        </View>
+
+                                    </View>
                                 </View>
-
-                                {
-                                    this.props.user.type !== 'user' && this.props.user.type !== 'provider' ?
-                                        null :
-                                        <TouchableOpacity
-                                            style       = {[ styles.marginVertical_30 , styles.width_250, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter,styles.marginHorizontal_5]}
-                                            onPress     = {() => this.toggleModalComment()}
-                                        >
-                                            <Text style={[styles.textRegular, styles.textSize_13, styles.text_red, styles.textDecoration]}>
-                                                { i18n.t('FAsww') }
-                                            </Text>
-                                        </TouchableOpacity>
-                                }
-
-
-                                <View style={[styles.rowCenter]}>
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
-                                            <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.facebook)}>
-                                                <Image style={[styles.iconBank]} source={require('../../assets/img/face.png')} resizeMode={'contain'}/>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10  ]}>
-                                            <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.twitter)}>
-                                                <Image style={[styles.iconBank]} source={require('../../assets/img/twitter.png')} resizeMode={'contain'}/>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10]}>
-                                            <TouchableOpacity onPress={() => Linking.openURL('https://api.whatsapp.com/send?phone='+this.props.contactInfo.phone)}>
-                                                <Image style={[styles.iconBank]} source={require('../../assets/img/wahts.png')} resizeMode={'contain'}/>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-                                    <View style={[styles.overHidden]}>
-                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.marginVertical_5, styles.paddingHorizontal_10, styles.paddingVertical_10  ]}>
-                                            <TouchableOpacity onPress={() => Linking.openURL(this.props.contactInfo.instagram)}>
-                                                <Image style={[styles.iconBank]} source={require('../../assets/img/ins.png')} resizeMode={'contain'}/>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-                                </View>
-
                             </View>
-                        </View>
-                    </View>
+                            :
+                            null
+                    }
 
                     <Modal isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                         <View style={[styles.overHidden, styles.bg_White , styles.Width_100, styles.position_R, styles.top_20]}>
@@ -193,7 +198,7 @@ class CallUs extends Component {
                             </View>
 
                             <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                 <Form style={[styles.Width_100, styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
                                     <View style={[styles.rowGroup, styles.Width_100]}>
@@ -218,7 +223,7 @@ class CallUs extends Component {
                                     </TouchableOpacity>
 
                                 </Form>
-
+                                </KeyboardAvoidingView>
                             </View>
 
                         </View>

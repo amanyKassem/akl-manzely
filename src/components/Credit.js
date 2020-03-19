@@ -46,7 +46,7 @@ class Credit extends Component {
     }
 
     componentWillMount() {
-        alert(this.state.checkedItems.length)
+        // alert(this.state.checkedItems.length)
         this.setState({ isSubmitted: false });
         this.props.getBill(this.props.lang , this.props.user.token);
     }
@@ -160,50 +160,54 @@ class Credit extends Component {
                         </View>
 
                         {
-                            (this.state.active === 1) ?
-                                <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
-                                    <View style={[ styles.marginVertical_10 ]}>
-                                        <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , styles.marginVertical_5]}>
-                                            { i18n.t('deservedAmount') }
-                                        </Text>
-                                        <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , {marginBottom:25}]}>
-                                            {this.props.bill.total_income} { i18n.t('RS') }
-                                        </Text>
+                            this.props.bill?
+                                (this.state.active === 1) ?
+                                    <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
+                                        <View style={[ styles.marginVertical_10 ]}>
+                                            <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , styles.marginVertical_5]}>
+                                                { i18n.t('deservedAmount') }
+                                            </Text>
+                                            <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , {marginBottom:25}]}>
+                                                {this.props.bill.total_income} { i18n.t('RS') }
+                                            </Text>
 
-                                        {
-                                            this.props.bill.income.map((bill, i) => (
-                                                <Animatable.View key={i} animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                                    <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                                    <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
-                                                        <View style={[ styles.flex_100 ]}>
-                                                            <View style={[ styles.rowRight]}>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                    { i18n.t('numorders') }
-                                                                </Text>
-                                                                <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                    {bill.id}
-                                                                </Text>
+                                            {
+                                                this.props.bill.income ?
+                                                    this.props.bill.income.map((bill, i) => (
+                                                        <Animatable.View key={i} animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 , styles.marginVertical_10 ]}>
+                                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                                            <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
+                                                                <View style={[ styles.flex_100 ]}>
+                                                                    <View style={[ styles.rowRight]}>
+                                                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
+                                                                            { i18n.t('numorders') }
+                                                                        </Text>
+                                                                        <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                            {bill.id}
+                                                                        </Text>
+                                                                    </View>
+                                                                    <View style={[ styles.rowRight]}>
+                                                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
+                                                                            { i18n.t('deservedAmount') }
+                                                                        </Text>
+                                                                        <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
+                                                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                            {bill.price} { i18n.t('RS') }
+                                                                        </Text>
+                                                                    </View>
+                                                                </View>
                                                             </View>
-                                                            <View style={[ styles.rowRight]}>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_120]}>
-                                                                    { i18n.t('deservedAmount') }
-                                                                </Text>
-                                                                <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
-                                                                    {bill.price} { i18n.t('RS') }
-                                                                </Text>
-                                                            </View>
-                                                        </View>
-                                                    </View>
-                                                </Animatable.View>
-                                            ))
-                                        }
+                                                        </Animatable.View>
+                                                    ))
+                                                    :
+                                                    null
+                                            }
 
+                                        </View>
                                     </View>
-                                </View>
-                                :
-                                <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
+                                    :
+                                    <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
                                     <View style={[ styles.marginVertical_10 ]}>
                                         <Text style={[ styles.textRegular, styles.textSize_14, styles.textCenter ,styles.text_red , styles.marginVertical_5]}>
                                             { i18n.t('bepaid') }
@@ -213,9 +217,12 @@ class Credit extends Component {
                                         </Text>
 
                                         {
-                                            this.props.bill.outcome.map((bill, i) => (
-                                                <BillCheckItem addItem={(id) => this.addToCheckList(id)} key={bill.id} data={bill}/>
-                                            ))
+                                            this.props.bill.outcome ?
+                                                this.props.bill.outcome.map((bill, i) => (
+                                                    <BillCheckItem addItem={(id) => this.addToCheckList(id)} key={bill.id} data={bill}/>
+                                                ))
+                                                :
+                                                null
 
                                         }
 
@@ -225,6 +232,8 @@ class Credit extends Component {
 
                                     </View>
                                 </View>
+                                :
+                                null
                         }
 
                     </View>

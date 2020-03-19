@@ -105,6 +105,32 @@ class Home extends Component {
 
     }
 
+    renderNoData() {
+        if (this.props.providerHome.meals && (this.props.providerHome.meals).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
+    renderMealsNoData() {
+        if (this.props.meals && (this.props.meals).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
     onSubCategories ( id ){
         this.setState({spinner: true, active : id });
         this.props.auth.data.type === 'provider'?
@@ -249,7 +275,7 @@ class Home extends Component {
                                         </View>
 
                                         <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                             <Form
                                                 style={[styles.Width_90, styles.marginVertical_10, styles.flexCenter]}>
 
@@ -314,7 +340,7 @@ class Home extends Component {
                                                 </TouchableOpacity>
 
                                             </Form>
-
+                                            </KeyboardAvoidingView>
                                         </View>
 
                                     </View>
@@ -442,34 +468,37 @@ class Home extends Component {
                                         autoplayTimeout={2}>
 
                                         {
-                                            this.props.banners.map((banner, i) => (
-                                                <View key={i} style={[styles.viewBlock]}>
-                                                    <Image style={[styles.Width_95, styles.swiper]}
-                                                           source={{uri:banner.image}}/>
-                                                    <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
-                                                                     style={[styles.blockContent, styles.Width_50]}>
-                                                        <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                {banner.title}
-                                                            </Text>
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                {banner.description}
-                                                            </Text>
-                                                            <TouchableOpacity onPress={() => Linking.openURL(banner.url)}>
+                                            this.props.banners?
+                                                this.props.banners.map((banner, i) => (
+                                                    <View key={i} style={[styles.viewBlock]}>
+                                                        <Image style={[styles.Width_95, styles.swiper]}
+                                                               source={{uri:banner.image}}/>
+                                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
+                                                                         style={[styles.blockContent, styles.Width_50]}>
+                                                            <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
                                                                 <Text
-                                                                    style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
+                                                                    style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
                                                                     numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                    {i18n.t('here')}
+                                                                    {banner.title}
                                                                 </Text>
-                                                            </TouchableOpacity>
-                                                        </View>
-                                                    </Animatable.View>
-                                                </View>
-                                            ))
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
+                                                                    numberOfLines={1} prop with ellipsizeMode="tail">
+                                                                    {banner.description}
+                                                                </Text>
+                                                                <TouchableOpacity onPress={() => Linking.openURL(banner.url)}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
+                                                                        numberOfLines={1} prop with ellipsizeMode="tail">
+                                                                        {i18n.t('here')}
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            </View>
+                                                        </Animatable.View>
+                                                    </View>
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </Swiper>
@@ -490,17 +519,20 @@ class Home extends Component {
                                         </TouchableOpacity>
 
                                         {
-                                            this.props.categories.map((cat, i) => (
-                                                <TouchableOpacity
-                                                    key={i}
-                                                    onPress={() => this.onSubCategories(cat.id)}
-                                                    style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
-                                                        {cat.name}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))
+                                            this.props.categories?
+                                                this.props.categories.map((cat, i) => (
+                                                    <TouchableOpacity
+                                                        key={i}
+                                                        onPress={() => this.onSubCategories(cat.id)}
+                                                        style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
+                                                        <Text
+                                                            style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
+                                                            {cat.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </ScrollView>
@@ -508,11 +540,14 @@ class Home extends Component {
 
                                 <View
                                     style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100]}>
-
+                                    {this.renderMealsNoData()}
                                     {
-                                        this.props.meals.map((meal, i) => (
-                                            <Product key={meal.id} data={meal} navigation={this.props.navigation} />
-                                        ))
+                                        this.props.meals?
+                                            this.props.meals.map((meal, i) => (
+                                                <Product key={meal.id} data={meal} navigation={this.props.navigation} />
+                                            ))
+                                            :
+                                            null
                                     }
 
 
@@ -597,17 +632,20 @@ class Home extends Component {
                                         </TouchableOpacity>
 
                                         {
-                                            this.props.categories.map((cat, i) => (
-                                                <TouchableOpacity
-                                                    key={i}
-                                                    onPress={() => this.onSubCategories(cat.id)}
-                                                    style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
-                                                        {cat.name}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))
+                                            this.props.categories ?
+                                                this.props.categories.map((cat, i) => (
+                                                    <TouchableOpacity
+                                                        key={i}
+                                                        onPress={() => this.onSubCategories(cat.id)}
+                                                        style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
+                                                        <Text
+                                                            style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
+                                                            {cat.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </ScrollView>
@@ -615,40 +653,44 @@ class Home extends Component {
 
                                 <View
                                     style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100]}>
+                                    {this.renderNoData()}
                                     {
-                                        this.props.providerHome.meals.map((meal, i) => (
-                                            <View
-                                                key={i}
-                                                style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                                 style={[styles.Width_100]}>
-                                                    <View
-                                                        style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                                    <TouchableOpacity
-                                                        onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
-                                                        style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                        <View style={[styles.Width_100, styles.position_R]}>
-                                                            <Image style={[styles.Width_100, styles.height_100]}
-                                                                   source={{uri : meal.image}}/>
-                                                        </View>
-                                                        <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_black, styles.textSize_12]}>{meal.title}</Text>
+                                        this.props.providerHome && this.props.providerHome.meals ?
+                                            this.props.providerHome.meals.map((meal, i) => (
+                                                <View
+                                                    key={i}
+                                                    style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
+                                                    <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
+                                                                     style={[styles.Width_100]}>
+                                                        <View
+                                                            style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
+                                                        <TouchableOpacity
+                                                            onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
+                                                            style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
+                                                            <View style={[styles.Width_100, styles.position_R]}>
+                                                                <Image style={[styles.Width_100, styles.height_100]}
+                                                                       source={{uri : meal.image}}/>
                                                             </View>
-                                                            <View style={[styles.rowGroup]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>{meal.description}</Text>
+                                                            <View style={[styles.Width_100, styles.marginVertical_5]}>
+                                                                <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_black, styles.textSize_12]}>{meal.title}</Text>
+                                                                </View>
+                                                                <View style={[styles.rowGroup]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>{meal.description}</Text>
+                                                                </View>
+                                                                <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
+                                                                </View>
                                                             </View>
-                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
-                                                            </View>
-                                                        </View>
-                                                    </TouchableOpacity>
-                                                </Animatable.View>
-                                            </View>
-                                        ))
+                                                        </TouchableOpacity>
+                                                    </Animatable.View>
+                                                </View>
+                                            ))
+                                            :
+                                            null
                                     }
 
                                 </View>

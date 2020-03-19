@@ -33,6 +33,7 @@ export const updateProfile = (data) => {
                 latitude            : data.latitude,
                 longitude           : data.longitude,
                 avatar              : data.avatar,
+                cover               : data.cover,
                 provider_details    : data.provider_details,
                 available           : data.available,
                 delivery_types      : data.delivery_types,

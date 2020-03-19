@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView} from "react-native";
 import {
     Container,
     Content,
@@ -97,12 +97,13 @@ class EditProfile extends Component {
             email               : null,
             phone               : this.state.phone,
             country_id          : this.state.countryId,
-            gender              : this.state.nationality,
+            gender              : this.state.nationalityId,
             latitude            : this.state.latitude,
             longitude           : this.state.longitude,
             avatar              : this.state.base64,
+            cover               : null,
             provider_details    : null,
-            available           : null,
+            available           : this.props.user.available,
             delivery_types      : ['1'],
             qualification       : this.state.qualification,
             address             : this.state.cityName,
@@ -111,7 +112,7 @@ class EditProfile extends Component {
             props               : this.props,
         };
 
-        this.setState({ isSubmitted: true });
+
         this.props.updateProfile(data);
     }
 
@@ -174,9 +175,10 @@ class EditProfile extends Component {
     selectNationalityId(id, name) {
         this.setState({
             checked        : id,
-            nationality     : name
+            nationality     : name,
+            nationalityId     : id,
         });
-        this.state.nationalityId = id;
+        // this.state.nationalityId = id;
         this.setState({ isModalNationality: !this.state.isModalNationality});
     }
 
@@ -287,7 +289,7 @@ class EditProfile extends Component {
                         </View>
 
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
-
+                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
@@ -508,7 +510,7 @@ class EditProfile extends Component {
                                 { this.renderEdit() }
 
                         </Form>
-
+                            </KeyboardAvoidingView>
                         </View>
                     </View>
 

@@ -5,7 +5,11 @@ const width     = Dimensions.get('window').width;
 const height    = Dimensions.get('window').height;
 
 const styles = ({
-
+    keyboardAvoid: {
+        width:'100%',
+        height: null,
+        flex: 1,
+    },
     // Style Color ConText
 
     text_gray : {

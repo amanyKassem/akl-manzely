@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ActivityIndicator,} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView,} from "react-native";
 import {
     Container,
     Content,
@@ -139,7 +139,7 @@ class NewProduct extends Component {
                     <View style={[ styles.position_R, styles.zIndex, styles.Width_100 , styles.paddingVertical_10]}>
 
                         <View style={[ styles.marginVertical_10, styles.Width_90, styles.flexCenter, styles.bg_White, styles.paddingHorizontal_10 ]}>
-
+                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
@@ -176,7 +176,7 @@ class NewProduct extends Component {
 
 
                             </Form>
-
+                            </KeyboardAvoidingView>
                         </View>
                     </View>
 

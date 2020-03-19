@@ -246,7 +246,7 @@ class Register extends Component {
                                 <Image style={[styles.icoImage]} source={require('../../assets/img/icon.png')}/>
                             </Animatable.View>
                         </View>
-                        <KeyboardAvoidingView behavior={'padding'}>
+                        <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>

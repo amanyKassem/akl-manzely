@@ -82,9 +82,14 @@ class About extends Component {
                                 </View>
                                 <View style={[styles.overHidden]}>
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}>
-                                        <Text style={[styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15]}>
-                                            {this.props.contactInfo.about}
-                                        </Text>
+                                        {
+                                            this.props.contactInfo && this.props.contactInfo.about?
+                                                <Text style={[styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15 , {alignSelf: 'flex-start'}]}>
+                                                    {this.props.contactInfo.about}
+                                                </Text>
+                                                :
+                                                null
+                                        }
                                     </Animatable.View>
                                 </View>
                             </View>

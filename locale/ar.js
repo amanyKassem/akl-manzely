@@ -239,6 +239,8 @@ const ar = {
     'all'                       : 'الكل',
     'available'                 : 'متواجد حاليا',
     'notAvailable'              : 'غير متواجد حاليا',
+    'orderProcessing'           : 'تجهيز الطلب',
+    'orderDelivery'             : 'توصيل الطلب',
 };
 
 export default ar;

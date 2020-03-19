@@ -242,12 +242,15 @@ class ViewProduct extends Component {
                                         loop={true}
                                         autoplayTimeout={2}>
                                         {
-                                            this.props.mealInfo.images.map((img , i) => (
-                                                <View key={i} style={[styles.viewBlock]}>
-                                                    <Image style={[styles.Width_95, styles.height_200]}
-                                                           source={{uri:img}}/>
-                                                </View>
-                                            ))
+                                            this.props.mealInfo.images ?
+                                                this.props.mealInfo.images.map((img , i) => (
+                                                    <View key={i} style={[styles.viewBlock]}>
+                                                        <Image style={[styles.Width_95, styles.height_200]}
+                                                               source={{uri:img}}/>
+                                                    </View>
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </Swiper>
@@ -369,9 +372,12 @@ class ViewProduct extends Component {
 
                                         </View>
                                         {
-                                            this.props.mealInfo.reviews.map((review, i) => (
-                                                this.renderComments(review, i)
-                                            ))
+                                            this.props.mealInfo.reviews ?
+                                                this.props.mealInfo.reviews.map((review, i) => (
+                                                    this.renderComments(review, i)
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </View>
@@ -391,7 +397,7 @@ class ViewProduct extends Component {
                                         </View>
 
                                         <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                             <Form
                                                 style={[styles.Width_100, styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
@@ -440,7 +446,7 @@ class ViewProduct extends Component {
                                                 </TouchableOpacity>
 
                                             </Form>
-
+                                            </KeyboardAvoidingView>
                                         </View>
 
                                     </View>
@@ -492,9 +498,12 @@ class ViewProduct extends Component {
                                                     }
                                                 </View>
                                                 {
-                                                    this.props.mealInfo.reviews.map((review, i) => (
-                                                        this.renderComments(review, i)
-                                                    ))
+                                                    this.props.mealInfo.reviews ?
+                                                        this.props.mealInfo.reviews.map((review, i) => (
+                                                            this.renderComments(review, i)
+                                                        ))
+                                                        :
+                                                        null
                                                 }
                                             </View>
                                         </View>

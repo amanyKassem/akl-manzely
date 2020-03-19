@@ -160,7 +160,7 @@ class FormPayment extends Component {
                                 <Image style={[styles.shape_logo]} source={require('../../assets/img/layout.png')}/>
                             </Animatable.View>
                         </View>
-
+                        <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
@@ -224,7 +224,7 @@ class FormPayment extends Component {
 
 
                             </Form>
-
+                        </KeyboardAvoidingView>
                     </View>
 
                 </Content>

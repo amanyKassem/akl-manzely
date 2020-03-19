@@ -230,6 +230,8 @@ const en = {
     'all'                               : 'All',
     'available'                         : 'available now',
     'notAvailable'                      : 'not available now',
+    'orderProcessing'                   : 'order processing',
+    'orderDelivery'                     : 'order delivery',
 };
 
 export default en;

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity} from "react-native";
+import {View, Text, Image, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView} from "react-native";
 import {
     Container,
     Content,
@@ -12,25 +12,27 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {updateProfile} from "../actions";
 import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
+import COLORS from "../consts/colors";
 
 class EditShop extends Component {
     constructor(props){
         super(props);
         this.state = {
-            name                        : 'شعوذه الندم',
-            info                        : 'هذا النص هو مثال لنص آخر يصعب الندم عليه',
+            name                        : this.props.user.provider_name,
+            info                        : this.props.user.provider_details,
             nameStatus                  : 1,
             infoStatus                  : 1,
-            cityName                    : 'المنصوره - السنبلاوين - شارع المعيـز',
-            userImage                   : '../../assets/img/girl.png',
-            latitude                    : 11.11,
-            longitude                   : 11.11,
-            base64                      : ''
+            base64                      : '',
+            cityName                    : this.props.user.address,
+            userImage                   : this.props.user.cover,
+            latitude                    : this.props.user.latitude,
+            longitude                   : this.props.user.longitude,
+            isSubmitted: false,
         }
     }
 
@@ -58,42 +60,61 @@ class EditShop extends Component {
 
     }
 
-    validate = () => {
-        let isError     = false;
-        let msg         = '';
-
-        if (this.state.name.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('Full');
-        } else if (this.state.info.length <= 0) {
-            isError     = true;
-            msg         = i18n.t('info');
-        }
-        if (msg !== '') {
-            Toast.show({
-                text        : msg,
-                type        : "danger",
-                duration    : 3000,
-                textStyle       : {
-                    color       : "white",
-                    fontFamily  : 'cairo',
-                    textAlign   : 'center',
-                }
-            });
-        }
-        return isError;
-    };
 
     onEditPressed() {
+        this.setState({ isSubmitted: true });
+        const data = {
+            name                : this.state.name,
+            email               : null,
+            phone               : null,
+            country_id          : null,
+            gender              : null,
+            latitude            : this.state.latitude,
+            longitude           : this.state.longitude,
+            avatar              : null,
+            cover               : this.state.base64,
+            provider_details    : this.state.info,
+            available           : null,
+            delivery_types      : null,
+            qualification       : null,
+            address             : this.state.cityName,
+            lang                : this.props.lang,
+            token               : this.props.user.token,
+            props               : this.props,
+        };
 
-        this.setState({spinner: true});
 
-        const err = this.validate();
-
-        if (!err){
-            this.props.navigation.navigate('Profile');
+        this.props.updateProfile(data);
+    }
+    renderEdit(){
+        if (this.state.name == '' || this.state.info == ''){
+            return (
+                <View
+                    style={[styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red , {backgroundColor:"#999"}]}>
+                    <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                        {i18n.translate('confirm')}
+                    </Text>
+                </View>
+            );
+        }
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
         }
 
+        return (
+            <TouchableOpacity
+                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                onPress     = {() => this.onEditPressed()}
+            >
+                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                    { i18n.t('confirm') }
+                </Text>
+            </TouchableOpacity>
+        );
     }
 
     getLocation(){
@@ -135,13 +156,13 @@ class EditShop extends Component {
             this.setState({cityName  : i18n.translate('mapname')});
         }
 
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        this.setState({ isSubmitted   : false});
 
     }
 
     componentWillMount() {
 
-        this.setState({spinner: true});
+        this.setState({ isSubmitted: false });
 
     }
 
@@ -196,7 +217,7 @@ class EditShop extends Component {
                                 </View>
                             </View>
                         </View>
-
+                        <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
 
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
@@ -237,18 +258,11 @@ class EditShop extends Component {
                                     />
                                 </View>
 
-                                <TouchableOpacity
-                                    style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                                    onPress     = {() => this.onEditPressed()}
-                                >
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                        { i18n.t('confirm') }
-                                    </Text>
-                                </TouchableOpacity>
+                                {this.renderEdit()}
 
                             </Form>
-
                         </View>
+                        </KeyboardAvoidingView>
                     </View>
 
                 </Content>
@@ -259,13 +273,12 @@ class EditShop extends Component {
     }
 }
 
-export default EditShop;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang }) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang
+    };
+};
+export default connect(mapStateToProps, {updateProfile})(EditShop);

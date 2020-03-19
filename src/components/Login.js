@@ -191,7 +191,7 @@ class Login extends Component {
                                     <Image style={[styles.icoImage]} source={require('../../assets/img/icon.png')}/>
                             </Animatable.View>
                         </View>
-                        <KeyboardAvoidingView behavior={'padding'}>
+                        <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.Width_100, styles.flexCenter, styles.marginVertical_10, styles.Width_90]}>
 
                                 <View

@@ -76,6 +76,7 @@ class Login extends Component {
         }
         return isError;
     };
+
     renderSubmit() {
         if (this.state.password == '' || this.state.phone == '') {
             return (
@@ -101,6 +102,7 @@ class Login extends Component {
             </TouchableOpacity>
         );
     }
+
     onLoginPressed() {
 
         this.setState({spinner: true});

@@ -5,6 +5,10 @@ import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
 import * as Animatable from 'react-native-animatable';
 import {NavigationEvents} from "react-navigation";
+import {chooseLang, profile, userLogin} from '../actions'
+import {connect} from 'react-redux';
+import CONST from '../consts';
+import axios from 'axios';
 
 class ActivtionAccount extends Component {
     constructor(props){
@@ -18,6 +22,12 @@ class ActivtionAccount extends Component {
             spinner             : false,
         }
     }
+
+	componentWillMount() {
+		const code = this.props.navigation.state.params.code;
+		alert(code);
+		this.setState({ userId: null })
+	}
 
     activeInput(type) {
 
@@ -58,40 +68,84 @@ class ActivtionAccount extends Component {
         return isError;
     };
 
-    onLoginPressed() {
+	checkCode(){
+	    const { token, code, phone, password, deviceId, device_type } = this.props.navigation.state.params;
+		if (code == this.state.code){
+			this.setState({ isSubmitted: true });
+
+
+			axios({
+				url: CONST.url + 'active-user',
+				method   : 'POST',
+				headers  : {Authorization: token },
+				data     : {lang: this.props.lang}
+			}).then(response => {
+				AsyncStorage.getItem('deviceID').then(deviceID => {
+
+					this.props.userLogin({phone, password, deviceId , device_type}, this.props.lang)
+				})
+			})
+
+
+
+		}else{
+			Toast.show({
+				text: i18n.t('codeNotCorrect'),
+				type: "danger",
+				duration: 3000
+			});
+		}
+
+	}
+
+
+
+	onLoginPressed() {
 
         this.setState({spinner: true});
 
         const err = this.validate();
 
         if (!err){
-            const {phone, password, deviceId , type} = this.state;
-            this.props.userLogin({ phone, password, deviceId, type }, this.props.lang);
+            this.checkCode();
         }
 
     }
 
-    async componentWillMount() {
-
-
-    }
-
     componentWillReceiveProps(newProps){
+		this.setState({spinner: false});
 
+		if (newProps.auth !== null && newProps.auth.success) {
 
-    }
+			if (this.state.userId === null) {
+				this.setState({userId: newProps.auth.data.id});
+				this.props.profile(newProps.auth.data.token);
+			}
 
-    onFocus(){
-        this.componentWillMount();
-    }
+			this.props.navigation.navigate('drawerNavigator');
+
+		}
+
+		if (newProps.auth !== null) {
+			Toast.show({
+				text: newProps.auth.message,
+				type: newProps.auth.success ? "success" : "danger",
+				duration: 3000,
+				textStyle: {
+					color: "#fff",
+					fontFamily: 'cairo',
+					textAlign: 'center',
+				}
+			});
+		}
+
+	}
 
     render() {
 
         return (
 
             <Container>
-
-                <NavigationEvents onWillFocus={() => this.onFocus()} />
 
                 <Content contentContainerStyle={styles.bgFullWidth}>
                     <View style={[styles.position_R, styles.bgFullWidth, styles.marginVertical_15, styles.flexCenter, styles.Width_100]}>
@@ -108,7 +162,7 @@ class ActivtionAccount extends Component {
                                         <Input
                                             placeholder={i18n.translate('actcode')}
                                             style={[styles.input, styles.height_50, (this.state.codeStatus === 1 ? styles.Active : styles.noActive)]}
-                                            onChangeText={(phone) => this.setState({code})}
+                                            onChangeText={(code) => this.setState({code})}
                                             onBlur={() => this.unActiveInput('code')}
                                             onFocus={() => this.activeInput('code')}
                                             keyboardType={'number-pad'}
@@ -140,14 +194,13 @@ class ActivtionAccount extends Component {
     }
 }
 
-export default ActivtionAccount;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         loading     : auth.loading,
-//         auth        : auth.user,
-//         user        : profile.user,
-//         lang        : lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {  })(Login);
+const mapStateToProps = ({ auth, profile, lang }) => {
+    return {
+        loading     : auth.loading,
+        auth        : auth.user,
+        user        : profile.user,
+        lang        : lang.lang
+    };
+};
+export default connect(mapStateToProps, { userLogin, profile })(ActivtionAccount);

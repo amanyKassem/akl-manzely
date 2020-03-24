@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { AsyncStorage, Platform } from 'react-native';
+import { Toast } from 'native-base'
 import CONST from '../consts';
 
 export const userLogin = ({phone, password, deviceId , device_type }, lang) => {
@@ -19,7 +20,7 @@ export const userLogin = ({phone, password, deviceId , device_type }, lang) => {
     };
 };
 
-export const register = (data, props, lang) => {
+export const register = (data, props) => {
 	return (dispatch) => {
 		AsyncStorage.getItem('deviceID').then(device_id => {
 			axios({
@@ -27,38 +28,42 @@ export const register = (data, props, lang) => {
 				method: 'POST',
 				data: {
 					name			    : data.name,
-					email			    : data.email,
 					phone			    : data.phone,
-					gender		        : data.gender,
-					country_id		    : data.country_id,
-					category_id		    : data.category_id,
+					email			    : data.email,
+					gender		        : data.nationalityId,
+					country_id		    : data.countryId,
 					latitude			: data.latitude,
 					longitude			: data.longitude,
-					type			    : data.type,
-					address			    : data.address,
-					provider_name		: data.provider_name,
-					birthday			: data.birthday,
+					type			    : data.userType == 'chef' ? 'provider' : data.userType,
+					address			    : data.cityName,
+					provider_name		: data.providerName,
+					birthday			: data.date,
 					qualification	    : data.qualification,
 					device_type	        : Platform.OS,
+					delivery_types	    : data.deliveryArr,
 					password		    : data.password,
-					device_id,
-					lang
+					lang 			    : data.lang,
+					device_id
 				}
 			}).then(response => {
 				dispatch({type: 'register', payload: response.data});
-				if (response.data.key === 1){
-					props.navigation.navigate('ActivationCode', {
+				if (response.data.success){
+					console.log('message___', response.data.message);
+					props.navigation.navigate('ActivtionAccount', {
 						code			: response.data.data.code,
-						user_id			: response.data.data.id,
 						phone			: data.phone,
+						deviceId		: device_id,
+						device_type	    : Platform.OS,
 						password		: data.password,
-						deviceId		: device_id
+						token			: response.data.data.token,
 					});
 				}
 
+				console.log('message', response.data.message);
+
 				Toast.show({
-					text        	: response.data.msg,
-					type			: response.data.key === 1 ? "success" : "danger",
+					text        	: response.data.message,
+					type			: response.data.success ? "success" : "danger",
 					duration    	: 3000,
 					textStyle   	: {
 						color       	: "white",

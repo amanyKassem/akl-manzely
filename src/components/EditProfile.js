@@ -221,6 +221,7 @@ class EditProfile extends Component {
             // console.log('deliveryTypesArr -filteredTypes ' , filteredTypes , "dddd" , this.state.deliveryTypesArr) ;
         }
     }
+
     checker = (arr, target) => target.every(v => arr.includes(v));
     componentWillReceiveProps(nextProps) {
         this.setState({ isSubmitted: false});
@@ -502,7 +503,7 @@ const mapStateToProps = ({ lang , profile , deliveryTypes , countries , genders}
         user            : profile.user,
         deliveryTypes   : deliveryTypes.deliveryTypes,
         countries       : countries.countries,
-        genders       : genders.genders,
+        genders         : genders.genders,
     };
 };
 export default connect(mapStateToProps, {getDeliveryTypes , getCountries , updateProfile , getGenders})(EditProfile);

@@ -26,6 +26,7 @@ import StarRating from "react-native-star-rating";
 import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import Spinner from "react-native-loading-spinner-overlay";
+import SearchInput from './SearchInput'
 const isIOS = Platform.OS === 'ios';
 
 class Home extends Component {
@@ -80,7 +81,8 @@ class Home extends Component {
             this.setState({cityName  : i18n.translate('mapname')});
         }
 
-        this.setState({ isModalFilter   : !this.state.isModalFilter , spinner : false});
+        this.setState({ spinner : false});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter , spinner : false});
 
     }
 
@@ -95,7 +97,6 @@ class Home extends Component {
     }
 
     onSearch(){
-
         this.props.navigation.navigate('FilterSearch', {
             pageName : this.props.navigation.state.routeName
         });
@@ -112,13 +113,13 @@ class Home extends Component {
     };
 
     toggleModalRate = () => {
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter});
         this.setState({ isModalRate     : !this.state.isModalRate});
     };
 
     toggleModalSallery = () => {
         this.setState({ isModalSallery  : !this.state.isModalSallery});
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     };
 
     selectRateId(id, name) {
@@ -128,7 +129,7 @@ class Home extends Component {
         });
         this.state.reteId = id;
         this.setState({ isModalRate     : !this.state.isModalRate});
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     selectSellaryId(id, name) {
@@ -138,7 +139,7 @@ class Home extends Component {
         });
         this.state.SalleId = id;
         this.setState({ isModalSallery  : !this.state.isModalSallery});
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
+        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     componentWillMount() {
@@ -156,6 +157,7 @@ class Home extends Component {
     onFocus(){
         this.componentWillMount();
     }
+
     render() {
 
         return (
@@ -172,22 +174,7 @@ class Home extends Component {
                     <Body style={styles.bodyText}>
                         {
                             this.props.user == null || this.props.user.type === 'user'?
-                                <View style={[styles.position_R, styles.SelfRight]}>
-                                    <Item floatingLabel style={styles.item}>
-                                        <Input
-                                            placeholder={i18n.translate('searchCat')}
-                                            style={[styles.input, styles.height_40, styles.BorderNone, styles.paddingRight_5, styles.paddingLeft_5 ,styles.textSize_14,styles.text_red, {backgroundColor : "#dcd8d8"}]}
-                                            autoCapitalize='none'
-                                            placeholderTextColor="#d8999a"
-                                            onChangeText={(categorySearch) => this.setState({categorySearch})}
-                                        />
-                                    </Item>
-                                    <TouchableOpacity
-                                        style={[styles.position_A, styles.right_0, styles.width_50, styles.height_40, styles.flexCenter]}
-                                        onPress={() => this.onSearch()}>
-                                        <Image style={[styles.headImage]} source={require('../../assets/img/search.png')} resizeMode={'contain'}/>
-                                    </TouchableOpacity>
-                                </View>
+                                <SearchInput navigation={this.props.navigation} />
                                 :
                                 <Title style={[styles.textRegular , styles.text_red, styles.textSize_16, styles.textLeft, styles.Width_100, styles.paddingHorizontal_5, styles.paddingVertical_0]}>
                                     { i18n.t('home') }
@@ -520,33 +507,29 @@ class Home extends Component {
                                 </View>
 
                                 <View style={[styles.height_40]}>
-                                    <ScrollView style={[styles.scroll]} horizontal={true}
-                                                showsHorizontalScrollIndicator={false}>
+                                    <ScrollView style={[styles.scroll]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
                                         <TouchableOpacity
                                             onPress={() => this.onSubCategories(1)}
                                             style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === 1 ? '#d3292a' : '#f8dede'}]}>
                                             <Text
                                                 style={[styles.textRegular, styles.textSize_12, {color: this.state.active === 1 ? '#FFF' : '#a09f9f'}]}>
-                                                الكل
+                                                { i18n.t('all') }
                                             </Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={() => this.onSubCategories(2)}
-                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === 2 ? '#d3292a' : '#f8dede'}]}>
-                                            <Text
-                                                style={[styles.textRegular, styles.textSize_12, {color: this.state.active === 2 ? '#FFF' : '#a09f9f'}]}>
-                                                وجبات سريعه
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={() => this.onSubCategories(3)}
-                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === 3 ? '#d3292a' : '#f8dede'}]}>
-                                            <Text
-                                                style={[styles.textRegular, styles.textSize_12, {color: this.state.active === 3 ? '#FFF' : '#a09f9f'}]}>
-                                                وجبات محليه
-                                            </Text>
-                                        </TouchableOpacity>
+                                        {
+                                            this.props.categories.map(( category, i ) => (
+												<TouchableOpacity key={i}
+													onPress={() => this.onSubCategories(category.id)}
+													style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#f8dede'}]}>
+													<Text
+														style={[styles.textRegular, styles.textSize_12, {color: this.state.active === category.id ? '#FFF' : '#a09f9f'}]}>
+                                                        { category.name }
+													</Text>
+												</TouchableOpacity>
+                                            ))
+                                        }
+
 
                                     </ScrollView>
                                 </View>

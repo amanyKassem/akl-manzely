@@ -235,6 +235,10 @@ const ar = {
     'nameAr'                    : 'الاسم بالعربية',
     'nameEn'                    : 'الاسم بالانجليزية',
     'mainCategory'              : 'القسم الرئيسي',
+	'emailNotCorrect'           : 'الايميل غير صحيح',
+	'providerNameRequired'      : 'اسم المطعم مطلوب',
+	'providerName'              : 'اسم المطعم',
+	'all'                       : 'الكل',
 };
 
 export default ar;

@@ -226,6 +226,10 @@ const en = {
     'nameAr'                            : 'name in arabic',
     'nameEn'                            : 'name in english',
     'mainCategory'                      : 'main category',
+    'emailNotCorrect'                   : 'email not correct',
+	'providerNameRequired'              : 'provider name required',
+	'providerName'                      : 'provider name ',
+	'all'                               : 'All',
 
 };
 

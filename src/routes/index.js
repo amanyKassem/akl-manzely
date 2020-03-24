@@ -75,248 +75,273 @@ const drawerNavigator = createDrawerNavigator({
     contentComponent    : drawerCust
 });
 
-const AppNavigator = createStackNavigator({
-    InitScreen : {
-        screen : InitScreen,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Login: {
-        screen: Login,
-        navigationOptions: {
-            header: null
-        }
-    },
-    drawerNavigator: {
-        screen: drawerNavigator,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Credit : {
-        screen : Credit,
-        navigationOptions: {
-            header: null
-        }
-    },
-    AddProduct : {
-        screen : AddProduct,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ShareApp : {
-        screen : ShareApp,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ViewProduct : {
-        screen : ViewProduct,
-        navigationOptions: {
-            header: null
-        }
-    },
-    editBankAcc : {
-        screen : EditBankAcc,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Setting : {
-        screen : Setting,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Register : {
-        screen : Register,
-        navigationOptions: {
-            header: null
-        }
-    },
-    FormPayment : {
-        screen : FormPayment,
-        navigationOptions: {
-            header: null
-        }
-    },
-    FormBank : {
-        screen : FormBank,
-        navigationOptions: {
-            header: null
-        }
-    },
-    FilterSearch : {
-        screen : FilterSearch,
-        navigationOptions: {
-            header: null
-        }
-    },
-    EditProfile : {
-        screen : EditProfile,
-        navigationOptions: {
-            header: null
-        }
-    },
-    DetailsCart : {
-        screen : DetailsCart,
-        navigationOptions: {
-            header: null
-        }
-    },
-    DetailsOrder : {
-        screen : DetailsOrder,
-        navigationOptions: {
-            header: null
-        }
-    },
-    DetailsChef : {
-        screen : DetailsChef,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Details : {
-        screen : Details,
-        navigationOptions: {
-            header: null
-        }
-    },
-    NewProduct : {
-        screen : NewProduct,
-        navigationOptions: {
-            header: null
-        }
-    },
-    EditShop : {
-        screen : EditShop,
-        navigationOptions: {
-            header: null
-        }
-    },
-    TermsAddProduct : {
-        screen : TermsAddProduct,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Profile : {
-        screen : Profile,
-        navigationOptions: {
-            header: null
-        }
-    },
-    BankAccounts : {
-        screen : BankAccounts,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Language : {
-        screen : Language,
-        navigationOptions: {
-            header: null
-        }
-    },
-    CallUs : {
-        screen : CallUs,
-        navigationOptions: {
-            header: null
-        }
-    },
-    MyOrders : {
-        screen : MyOrders,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ConfirmPayment : {
-        screen : ConfirmPayment,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Payment : {
-        screen : Payment,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Favorite : {
-        screen : Favorite,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Offers : {
-        screen : Offers,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Faq : {
-        screen : Faq,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Terms : {
-        screen : Terms,
-        navigationOptions: {
-            header: null
-        }
-    },
-    About : {
-        screen : About,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Cart : {
-        screen : Cart,
-        navigationOptions: {
-            header: null
-        }
-    },
-    Notification : {
-        screen : Notification,
-        navigationOptions: {
-            header: null
-        }
-    },
-    MapLocation : {
-        screen : MapLocation,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ActivtionAccount : {
-        screen : ActivtionAccount,
-        navigationOptions: {
-            header: null
-        }
-    },
-    NewPassword : {
-        screen : NewPassword,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ForgetPassword : {
-        screen : ForgetPassword,
-        navigationOptions: {
-            header: null
-        }
-    },
-    ChooseUser : {
-        screen : ChooseUser,
-        navigationOptions: {
-            header: null
-        }
-    },
+
+
+
+
+
+
+
+
+const appStack =  createStackNavigator({
+	drawerNavigator: {
+		screen: drawerNavigator,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Credit : {
+		screen : Credit,
+		navigationOptions: {
+			header: null
+		}
+	},
+	AddProduct : {
+		screen : AddProduct,
+		navigationOptions: {
+			header: null
+		}
+	},
+	ShareApp : {
+		screen : ShareApp,
+		navigationOptions: {
+			header: null
+		}
+	},
+	ViewProduct : {
+		screen : ViewProduct,
+		navigationOptions: {
+			header: null
+		}
+	},
+	editBankAcc : {
+		screen : EditBankAcc,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Setting : {
+		screen : Setting,
+		navigationOptions: {
+			header: null
+		}
+	},
+	FormPayment : {
+		screen : FormPayment,
+		navigationOptions: {
+			header: null
+		}
+	},
+	FormBank : {
+		screen : FormBank,
+		navigationOptions: {
+			header: null
+		}
+	},
+	FilterSearch : {
+		screen : FilterSearch,
+		navigationOptions: {
+			header: null
+		}
+	},
+	EditProfile : {
+		screen : EditProfile,
+		navigationOptions: {
+			header: null
+		}
+	},
+	DetailsCart : {
+		screen : DetailsCart,
+		navigationOptions: {
+			header: null
+		}
+	},
+	DetailsOrder : {
+		screen : DetailsOrder,
+		navigationOptions: {
+			header: null
+		}
+	},
+	DetailsChef : {
+		screen : DetailsChef,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Details : {
+		screen : Details,
+		navigationOptions: {
+			header: null
+		}
+	},
+	NewProduct : {
+		screen : NewProduct,
+		navigationOptions: {
+			header: null
+		}
+	},
+	EditShop : {
+		screen : EditShop,
+		navigationOptions: {
+			header: null
+		}
+	},
+	TermsAddProduct : {
+		screen : TermsAddProduct,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Profile : {
+		screen : Profile,
+		navigationOptions: {
+			header: null
+		}
+	},
+	BankAccounts : {
+		screen : BankAccounts,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Language : {
+		screen : Language,
+		navigationOptions: {
+			header: null
+		}
+	},
+	CallUs : {
+		screen : CallUs,
+		navigationOptions: {
+			header: null
+		}
+	},
+	MyOrders : {
+		screen : MyOrders,
+		navigationOptions: {
+			header: null
+		}
+	},
+	ConfirmPayment : {
+		screen : ConfirmPayment,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Payment : {
+		screen : Payment,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Favorite : {
+		screen : Favorite,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Offers : {
+		screen : Offers,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Faq : {
+		screen : Faq,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Terms : {
+		screen : Terms,
+		navigationOptions: {
+			header: null
+		}
+	},
+	About : {
+		screen : About,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Cart : {
+		screen : Cart,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Notification : {
+		screen : Notification,
+		navigationOptions: {
+			header: null
+		}
+	},
+	MapLocation : {
+		screen : MapLocation,
+		navigationOptions: {
+			header: null
+		}
+	},
+});
+
+
+const authStack = createStackNavigator({
+	ChooseUser : {
+		screen : ChooseUser,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Login: {
+		screen: Login,
+		navigationOptions: {
+			header: null
+		}
+	},
+	Register : {
+		screen : Register,
+		navigationOptions: {
+			header: null
+		}
+	},
+	MapLocation : {
+		screen : MapLocation,
+		navigationOptions: {
+			header: null
+		}
+	},
+	ActivtionAccount : {
+		screen : ActivtionAccount,
+		navigationOptions: {
+			header: null
+		}
+	},
+	ForgetPassword : {
+		screen : ForgetPassword,
+		navigationOptions: {
+			header: null
+		}
+	},
+	NewPassword : {
+		screen : NewPassword,
+		navigationOptions: {
+			header: null
+		}
+	},
 
 });
 
+
+const AppNavigator = createSwitchNavigator({
+	InitScreen : {
+		screen : InitScreen,
+		navigationOptions: {
+			header: null
+		}
+	},
+	auth    : authStack,
+	app     : appStack,
+});
+
 export default createAppContainer(AppNavigator);
+

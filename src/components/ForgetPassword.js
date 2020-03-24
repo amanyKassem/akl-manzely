@@ -5,6 +5,9 @@ import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
 import * as Animatable from 'react-native-animatable';
 import {NavigationEvents} from "react-navigation";
+import axios from "axios";
+import CONST from "../consts";
+import Spinner from "react-native-loading-spinner-overlay";
 
 class ForgetPassword extends Component {
     constructor(props){
@@ -58,40 +61,30 @@ class ForgetPassword extends Component {
         return isError;
     };
 
-    onLoginPressed() {
+	onCheckPhone(){
+		this.setState({ spinner: true });
+		axios.post(CONST.url + 'forget-password' ,{
+			phone: this.state.phone,
+		}).then(response => {
+			Toast.show({
+				text: response.data.message,
+				type: response.data.success ? "success" :"danger",
+				duration: 3000
+			});
+			this.setState({ spinner: false , phone:'' });
 
-        this.setState({spinner: true});
+			if (response.data.success)
+			    this.props.navigation.navigate("NewPassword" , {token:response.data.data.token , code:response.data.data.code});
+		})
+	}
 
-        const err = this.validate();
-
-        // if (!err){
-        //     const {phone, password, deviceId , type} = this.state;
-        //     this.props.userLogin({ phone, password, deviceId, type }, this.props.lang);
-        // }
-
-    }
-
-    async componentWillMount() {
-
-
-    }
-
-    componentWillReceiveProps(newProps){
-
-
-    }
-
-    onFocus(){
-        this.componentWillMount();
-    }
 
     render() {
 
         return (
 
             <Container>
-
-                <NavigationEvents onWillFocus={() => this.onFocus()} />
+				<Spinner visible={this.state.spinner} />
 
                 <Content contentContainerStyle={styles.bgFullWidth}>
                     <View style={[styles.position_R, styles.bgFullWidth, styles.marginVertical_15, styles.flexCenter, styles.Width_100]}>
@@ -107,6 +100,7 @@ class ForgetPassword extends Component {
                                     style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
                                     <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
                                         <Input
+                                            value={this.state.phone}
                                             placeholder={i18n.translate('phone')}
                                             style={[styles.input, styles.height_50, (this.state.phoneStatus === 1 ? styles.Active : styles.noActive)]}
                                             onChangeText={(phone) => this.setState({phone})}
@@ -119,7 +113,7 @@ class ForgetPassword extends Component {
 
                                 <TouchableOpacity
                                     style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40, styles.zIndex]}
-                                    onPress={() => this.onLoginPressed()}>
+                                    onPress={() => this.onCheckPhone()}>
                                     <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
                                         {i18n.translate('login')}
                                     </Text>

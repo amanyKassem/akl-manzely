@@ -5,21 +5,25 @@ import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
 import * as Animatable from 'react-native-animatable';
 import {NavigationEvents} from "react-navigation";
+import Spinner from "react-native-loading-spinner-overlay";
+import axios from 'axios';
+import CONST from "../consts";
+
 
 class NewPassword extends Component {
     constructor(props){
         super(props);
         this.state = {
-            code               : '',
-            oldPassword         : '',
-            newPassword         : '',
-            deviceId            : '',
-            userId              : null,
-            type                : 0,
-            codeStatus         : 0,
+            code                   : '',
+            oldPassword            : '',
+            newPassword            : '',
+            deviceId               : '',
+            userId                 : null,
+            type                   : 0,
+            codeStatus             : 0,
             oldPasswordStatus      : 0,
             newPasswordStatus      : 0,
-            spinner             : false,
+            spinner                : false,
         }
     }
 
@@ -101,17 +105,45 @@ class NewPassword extends Component {
 
     }
 
-    async componentWillMount() {
+	componentWillMount() {
+		const {code} = this.props.navigation.state.params;
+		alert(code);
+	}
+
+	renewPassword() {
+		if(this.state.oldPassword !== this.state.newPassword){
+			Toast.show({
+				text: i18n.t('verifyPassword'),
+				type: "danger",
+				duration: 3000
+			});
+			return false
+		}
+
+		const { code, token } = this.props.navigation.state.params;
+		this.setState({spinner: true});
+
+		axios({
+			url: CONST.url + 'reset-password',
+			method   : 'POST',
+			headers  : {Authorization: token },
+			data     : {lang: this.props.lang, password: this.state.oldPassword, code}
+		}).then(response => {
+			this.setState({spinner: false});
+
+			if (response.data.success)
+				this.props.navigation.navigate("Login");
+
+			Toast.show({
+				text: response.data.message,
+				type: response.data.success ? "success" :"danger",
+				duration: 3000
+			});
+		});
+	}
 
 
-    }
-
-    componentWillReceiveProps(newProps){
-
-
-    }
-
-    onFocus(){
+	onFocus(){
         this.componentWillMount();
     }
 
@@ -120,6 +152,7 @@ class NewPassword extends Component {
         return (
 
             <Container>
+				<Spinner visible={this.state.spinner} />
 
                 <NavigationEvents onWillFocus={() => this.onFocus()} />
 
@@ -177,7 +210,7 @@ class NewPassword extends Component {
 
                                 <TouchableOpacity
                                     style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40, styles.zIndex]}
-                                    onPress={() => this.onLoginPressed()}>
+                                    onPress={() => this.renewPassword()}>
                                     <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
                                         {i18n.translate('confirm')}
                                     </Text>

@@ -9,7 +9,7 @@ import {
     KeyboardAvoidingView,
     Share,
     Switch,
-    ActivityIndicator
+    ActivityIndicator, I18nManager
 } from "react-native";
 import {
     Container,
@@ -274,7 +274,7 @@ class ViewProduct extends Component {
                                             />
                                             <Text
                                                 style={[styles.textRegular, styles.text_black_gray, styles.textSize_12]}>
-                                                {this.props.mealInfo.views} مشاهده
+                                                {this.props.mealInfo.views} {i18n.translate('view')}
                                             </Text>
                                         </View>
                                     </View>
@@ -302,7 +302,7 @@ class ViewProduct extends Component {
                                             {i18n.t('monyproducer')}
                                         </Text>
                                         <Text
-                                            style={[styles.textRegular, styles.text_black, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
+                                            style={[styles.textRegular, styles.text_black, styles.textSize_12, I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
                                             {this.props.mealInfo.price} {i18n.t('RS')}
                                         </Text>
                                     </View>

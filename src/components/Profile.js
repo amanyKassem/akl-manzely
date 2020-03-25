@@ -171,7 +171,7 @@ class Profile extends Component {
                             { i18n.t('myAcc') }
                         </Title>
                     </Body>
-                    <Right style={styles.leftIcon}>
+                    <Right>
                         <Button style={styles.Button} transparent onPress = {() => this.props.navigation.navigate('EditProfile')}>
                             <Image style={[styles.headImage]} source={require('../../assets/img/edit.png')} resizeMode={'contain'}/>
                         </Button>

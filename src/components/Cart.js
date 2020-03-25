@@ -63,6 +63,19 @@ class Cart extends Component {
             );
         }
     }
+    renderNoData() {
+        if (this.props.carts && (this.props.carts).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100 , {height:'95%'}]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
 
     onFocus() {
         this.componentWillMount();
@@ -93,38 +106,41 @@ class Cart extends Component {
                     <View style={[ styles.position_R, styles.zIndex, { top : -30 } ]}>
 
                         <View style={[ styles.Width_90, styles.flexCenter, styles.marginVertical_30 ]}>
-
+                            {this.renderNoData()}
                             {
-                                this.props.carts.map((cart, i) => (
-                                    <View key={i} style={[ styles.marginVertical_10 ]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                            <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                            <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart' , {provider_id:cart.provider_id})}>
-                                                <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                    <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                                        <Image style = {[styles.Width_100 , styles.height_70]} source={{uri:cart.avatar}}/>
-                                                    </View>
-                                                    <View style={[ styles.flex_75 ]}>
-                                                        <View style={[ styles.rowGroup]}>
-                                                            <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                                {cart.name}
-                                                            </Text>
+                                this.props.carts?
+                                    this.props.carts.map((cart, i) => (
+                                        <View key={i} style={[ styles.marginVertical_10 ]}>
+                                            <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
+                                                <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
+                                                <TouchableOpacity onPress     = {() => this.props.navigation.navigate('DetailsCart' , {provider_id:cart.provider_id})}>
+                                                    <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                        <View style={[ styles.height_70 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
+                                                            <Image style = {[styles.Width_100 , styles.height_70]} source={{uri:cart.avatar}}/>
                                                         </View>
-                                                        <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
-                                                            {cart.category}
-                                                        </Text>
-                                                        <View style={[ styles.rowRight]}>
-                                                            <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
-                                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                                                {(cart.address).substr(0,30)}
+                                                        <View style={[ styles.flex_75 ]}>
+                                                            <View style={[ styles.rowGroup]}>
+                                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                                    {cart.name}
+                                                                </Text>
+                                                            </View>
+                                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                                {cart.category}
                                                             </Text>
+                                                            <View style={[ styles.rowRight]}>
+                                                                <Icon style={[styles.textSize_12, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
+                                                                    {(cart.address).substr(0,30)}
+                                                                </Text>
+                                                            </View>
                                                         </View>
                                                     </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-                                ))
+                                                </TouchableOpacity>
+                                            </Animatable.View>
+                                        </View>
+                                    ))
+                                    :
+                                    null
                             }
                         </View>
 

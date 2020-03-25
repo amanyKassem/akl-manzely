@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator,} from "react-native";
+import {View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, I18nManager,} from "react-native";
 import {
     Container,
     Content,
@@ -280,7 +280,7 @@ class DetailsOrder extends Component {
                                                                 </View>
                                                                 <View style={[ ]}>
                                                                     <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10 , {alignSelf:"flex-start"}]}>{meal.additions}</Text>
-                                                                    <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginVertical_5]}>{meal.price} { i18n.t('RS') }</Text>
+                                                                    <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10, styles.marginVertical_5]}>{meal.price} { i18n.t('RS') }</Text>
                                                                 </View>
                                                             </View>
                                                             <View style={[ styles.Border, styles.border_red ,styles.flexCenter, styles.position_A, styles.bottom_10, styles.right_5, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>

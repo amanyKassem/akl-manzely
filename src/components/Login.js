@@ -111,7 +111,7 @@ class Login extends Component {
 
         if (!err){
             const {phone, password, deviceId , device_type} = this.state;
-            this.props.userLogin({ phone, password, deviceId , device_type}, this.props.lang);
+            this.props.userLogin({ phone, password, deviceId:'11' , device_type}, this.props.lang);
         }
 
     }
@@ -233,14 +233,14 @@ class Login extends Component {
                                 {this.renderSubmit()}
 
                             </Form>
+                            <TouchableOpacity
+                                onPress         = {() => this.props.navigation.navigate('ChooseUser')}
+                                style           = {[styles.marginVertical_10, styles.flexCenter]}>
+                                <Text style     = {[styles.textRegular, styles.textSize_14, styles.text_red]}>
+                                    {i18n.translate('doHaveAcc')}
+                                </Text>
+                            </TouchableOpacity>
                         </KeyboardAvoidingView>
-                        <TouchableOpacity
-                            onPress         = {() => this.props.navigation.navigate('ChooseUser')}
-                            style           = {[styles.marginVertical_10, styles.flexCenter, styles.zIndex]}>
-                            <Text style     = {[styles.textRegular, styles.textSize_14, styles.text_red]}>
-                                {i18n.translate('doHaveAcc')}
-                            </Text>
-                        </TouchableOpacity>
                     </View>
                     <View style={[styles.shape_logo, styles.position_A, styles.fixItem, styles.zIndexDown]}>
                         <Animatable.View animation="fadeIn" easing="ease-out" delay={500}>

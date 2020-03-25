@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, Switch} from "react-native";
+import {View, Text, Image, TouchableOpacity, I18nManager} from "react-native";
 import {
     Container,
     Content,
@@ -75,7 +75,7 @@ class Setting extends Component {
                                                 onPress     = {() => this.props.navigation.navigate('EditProfile')}
                                             >
                                                 <Text style={[ styles.textRegular, styles.text_light_gray, styles.textSize_14 ]}>{ i18n.t('editdata') }</Text>
-                                                <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='left' />
+                                                <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name={I18nManager.isRTL ?'left' : 'right'} />
                                             </TouchableOpacity>
                                         </Animatable.View>
                                     </View>
@@ -86,7 +86,7 @@ class Setting extends Component {
                                                 onPress     = {() => this.props.navigation.navigate('Language')}
                                             >
                                                 <Text style={[ styles.textRegular, styles.text_light_gray, styles.textSize_14 ]}>{ i18n.t('lang') }</Text>
-                                                <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='left' />
+                                                <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name={I18nManager.isRTL ?'left' : 'right'} />
                                             </TouchableOpacity>
                                         </Animatable.View>
                                     </View>

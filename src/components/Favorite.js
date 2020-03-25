@@ -55,6 +55,19 @@ class Favorite extends Component {
         drawerLabel     : (<Text style={[styles.textRegular, styles.textSize_16]}>{i18n.translate('fav')}</Text>) ,
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/heart.png')} resizeMode={'contain'}/>)
     });
+
+    renderNoData() {
+        if (this.props.favorites && (this.props.favorites).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100 , {height:'95%'}]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
     onFocus(){
         this.componentWillMount();
     }
@@ -83,13 +96,15 @@ class Favorite extends Component {
                     <View style={[ styles.position_A, styles.bg_gray, styles.Width_100, styles.height_80, styles.right_0, styles.top_0 ]}/>
 
                     <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
-
+                        {this.renderNoData()}
                         {
-                            this.props.favorites.map((meal, i) => (
-                                <Product key={meal.id} data={meal} navigation={this.props.navigation} />
-                            ))
+                            this.props.favorites ?
+                                this.props.favorites.map((meal, i) => (
+                                    <Product key={meal.id} data={meal} navigation={this.props.navigation} />
+                                ))
+                                :
+                                null
                         }
-
 
                     </View>
 

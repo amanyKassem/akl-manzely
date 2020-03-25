@@ -374,7 +374,7 @@ class Details extends Component {
                     <View style={[ styles.boxUser ]}>
 
                         <Modal isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
-                            <View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R, styles.top_20]}>
+                            <View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R,  styles.top_45 , {height:500 , paddingTop:40}]}>
 
                                 <View style={[styles.paddingVertical_15]}>
                                     <Text style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.textLeft , styles.SelfCenter]}>
@@ -464,7 +464,7 @@ class Details extends Component {
                                                 checked             = {this.state.reteId === 1}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآعلي تقييم
+                                                {i18n.t('topRated')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -481,7 +481,7 @@ class Details extends Component {
                                                 checked             = {this.state.reteId === 2}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآقل تقييم
+                                                {i18n.t('lowRated')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -512,7 +512,7 @@ class Details extends Component {
                                                 checked             = {this.state.SalleId === 1}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآعلي سعر
+                                                {i18n.t('topPrice')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -529,7 +529,7 @@ class Details extends Component {
                                                 checked             = {this.state.SalleId === 2}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآقل سعر
+                                                {i18n.t('lowPrice')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -580,54 +580,67 @@ class Details extends Component {
 
                         <View style={[ styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_10, styles.marginVertical_10, styles.overHidden, styles.marginHorizontal_15 ]}>
 
-                            <View style={[ styles.rowGroup,  ]}>
-                                <View style={[ styles.rowGroup ]}>
-                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                        {i18n.t('editchef')} :
-                                    </Text>
-                                    <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.marginHorizontal_5]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
-                                        {this.props.mealInfo.provider.name}
-                                    </Text>
-                                </View>
-                                <View style={[ styles.rowGroup ]}>
-                                    <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                        {i18n.t('monyproducer')}
-                                    </Text>
-                                    <Text style = {[styles.textRegular, styles.text_black, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
-                                        {this.props.mealInfo.price} {i18n.t('RS')}
-                                    </Text>
-                                </View>
-                                <View style={[ styles.rowGroup ]}>
-                                    <Icon
-                                        style   = {[this.props.mealInfo.available ? styles.text_green : styles.text_red, styles.textSize_5, styles.marginHorizontal_5]}
-                                        type    = "FontAwesome"
-                                        name    = 'circle'
-                                    />
-                                    <Text style={[styles.textRegular, this.props.mealInfo.provider.available ? styles.text_green : styles.text_red, styles.textSize_12]}>
-                                        {this.props.mealInfo.provider.available ? i18n.t('available') : i18n.t('notAvailable')}
-                                    </Text>
-                                </View>
-                            </View>
+                            {
+                                this.props.mealInfo.provider ?
+                                    <View style={[ styles.rowGroup,  ]}>
+                                        <View style={[ styles.rowGroup ]}>
+                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
+                                                {i18n.t('editchef')} :
+                                            </Text>
+                                            <Text style={[styles.textRegular, styles.text_red, styles.textSize_13, styles.marginHorizontal_5]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
+                                                {this.props.mealInfo.provider.name}
+                                            </Text>
+                                        </View>
+                                        <View style={[ styles.rowGroup ]}>
+                                            <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
+                                                {i18n.t('monyproducer')}
+                                            </Text>
+                                            <Text style = {[styles.textRegular, styles.text_black, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10, styles.marginHorizontal_5]}>
+                                                {this.props.mealInfo.price} {i18n.t('RS')}
+                                            </Text>
+                                        </View>
+                                        <View style={[ styles.rowGroup ]}>
+                                            <Icon
+                                                style   = {[this.props.mealInfo.available ? styles.text_green : styles.text_red, styles.textSize_5, styles.marginHorizontal_5]}
+                                                type    = "FontAwesome"
+                                                name    = 'circle'
+                                            />
+                                            <Text style={[styles.textRegular, this.props.mealInfo.provider.available ? styles.text_green : styles.text_red, styles.textSize_12]}>
+                                                {this.props.mealInfo.provider.available ? i18n.t('available') : i18n.t('notAvailable')}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    :
+                                    null
+                            }
 
-                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                <View style={[ styles.width_50, styles.height_50, styles.flex_15 ]}>
-                                    <Image style = {[styles.Width_100 , styles.height_full]} source={{uri:this.props.mealInfo.provider.avatar}}/>
-                                </View>
-                                <View style={[ styles.paddingHorizontal_5, styles.flex_85 ]}>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('delver')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.provider.delivery_type}</Text>
+                            {
+                                this.props.mealInfo.provider ?
+                                    <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
+                                        <View style={[ styles.width_50, styles.height_50, styles.flex_15 ]}>
+                                            <Image style = {[styles.Width_100 , styles.height_full]} source={{uri:this.props.mealInfo.provider.avatar}}/>
+                                        </View>
+                                        <View style={[ styles.paddingHorizontal_5, styles.flex_85 ]}>
+                                            <View style={[ styles.rowGroup ]}>
+                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('delver')}</Text>
+                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.provider.delivery_type}</Text>
+                                            </View>
+                                            <View style={[ styles.rowGroup ]}>
+                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('eat')}</Text>
+                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.additions}</Text>
+                                            </View>
+                                            <View style={[ styles.rowGroup ]}>
+                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('timeeat')}</Text>
+                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.preparation_time}</Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('eat')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.additions}</Text>
-                                    </View>
-                                    <View style={[ styles.rowGroup ]}>
-                                        <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>{i18n.t('timeeat')}</Text>
-                                        <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>{this.props.mealInfo.preparation_time}</Text>
-                                    </View>
-                                </View>
-                            </View>
+                                    :
+                                    null
+                            }
+
+
+
 
                             <View>
                                 <Text style={[styles.textRegular, styles.text_black, styles.textSize_12, styles.rowLeft]}>
@@ -680,9 +693,12 @@ class Details extends Component {
                         <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
 
                             {
-                                this.props.mealInfo.recommended.map((meal, i) => (
-                                    <Product key={meal.id} data={meal} navigation={this.props.navigation} rerunAction={(id) => this.rerunAction(id)} type={'mealDetails'}/>
-                                ))
+                                this.props.mealInfo.recommended ?
+                                    this.props.mealInfo.recommended.map((meal, i) => (
+                                        <Product key={meal.id} data={meal} navigation={this.props.navigation} rerunAction={(id) => this.rerunAction(id)} type={'mealDetails'}/>
+                                    ))
+                                    :
+                                    null
                             }
 
                         </View>
@@ -705,7 +721,7 @@ class Details extends Component {
                                         </Text>
                                     </View>
                                     {
-                                        this.props.mealInfo.reviews.length !== 0 ?
+                                        this.props.mealInfo.reviews && this.props.mealInfo.reviews.length !== 0 ?
                                             <TouchableOpacity onPress={() => this.toggleShowComments()} style={[styles.height_30, styles.width_30, styles.Radius_30, styles.bg_red,
                                                 {justifyContent:'center', alignItems:'center'}]}>
                                                 <Icon style={[styles.text_White, styles.textSize_18]}
@@ -738,9 +754,12 @@ class Details extends Component {
 
                                 </View>
                                 {
-                                    this.props.mealInfo.reviews.map((review, i) => (
-                                        this.renderComments(review, i)
-                                    ))
+                                    this.props.mealInfo.reviews ?
+                                        this.props.mealInfo.reviews.map((review, i) => (
+                                            this.renderComments(review, i)
+                                        ))
+                                        :
+                                        null
                                 }
 
                             </View>
@@ -846,9 +865,12 @@ class Details extends Component {
                                             }
                                         </View>
                                         {
-                                            this.props.mealInfo.reviews.map((review, i) => (
-                                                this.renderComments(review, i)
-                                            ))
+                                            this.props.mealInfo.reviews ?
+                                                this.props.mealInfo.reviews.map((review, i) => (
+                                                    this.renderComments(review, i)
+                                                ))
+                                                :
+                                                null
                                         }
                                     </View>
                                 </View>

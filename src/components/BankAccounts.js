@@ -47,6 +47,19 @@ class BankAccounts extends Component {
         }
     }
 
+    renderNoData() {
+        if (this.props.bankAcoounts && (this.props.bankAcoounts).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100 , {height:'70%'}]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
 
     static navigationOptions = () => ({
         header          : null,
@@ -82,47 +95,50 @@ class BankAccounts extends Component {
                     <View style={[ styles.position_R, styles.zIndex, styles.bgFullWidth , styles.paddingVertical_10]}>
 
                         <View style={[styles.paddingHorizontal_5, styles.marginHorizontal_15, styles.paddingVertical_25]}>
+                            {this.renderNoData()}
+                            {
+                                this.props.bankAcoounts?
+                                    this.props.bankAcoounts.map((bank, i) => (
+                                            <View key={i} style={[styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 , {marginBottom:20}]}>
+                                                <View style={[styles.overHidden]}>
+                                                    <Image style={[styles.icImg]}
+                                                           source={{uri : bank.bank_image}}
+                                                           resizeMode={'contain'}/>
+                                                </View>
+                                                <TouchableOpacity
+                                                    onPress         = {() => this.props.navigation.navigate('editBankAcc' ,
+                                                        {id:bank.id , national_id:bank.national_id , image:bank.image , account_number:bank.account_number ,
+                                                            iban_number : bank.iban_number , bank_id: bank.bank_id, bank: bank.bank_name})}
+                                                    style={{width: 18, height: 18, position: 'absolute', right: 5, top: 5}}>
+                                                    <Image style={{width: '100%', height: '100%'}}
+                                                           source={require('../../assets/img/edit.png')}
+                                                           resizeMode={'contain'}/>
+                                                </TouchableOpacity>
 
-                        {
-                            this.props.bankAcoounts.map((bank, i) => (
-                                    <View key={i} style={[styles.Border, styles.border_gray, styles.bg_White, styles.paddingHorizontal_15, styles.SelfLeft, styles.Width_100 , {marginBottom:20}]}>
-                                        <View style={[styles.overHidden]}>
-                                            <Image style={[styles.icImg]}
-                                                   source={{uri : bank.bank_image}}
-                                                   resizeMode={'contain'}/>
-                                        </View>
-                                        <TouchableOpacity
-                                            onPress         = {() => this.props.navigation.navigate('editBankAcc' ,
-                                                {id:bank.id , national_id:bank.national_id , image:bank.image , account_number:bank.account_number ,
-                                                    iban_number : bank.iban_number , bank_id: bank.bank_id, bank: bank.bank_name})}
-                                            style={{width: 18, height: 18, position: 'absolute', right: 5, top: 5}}>
-                                            <Image style={{width: '100%', height: '100%'}}
-                                                   source={require('../../assets/img/edit.png')}
-                                                   resizeMode={'contain'}/>
-                                        </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={() => this.deleteBank(bank.id)}
+                                                    style={{position: 'absolute', right: 5, bottom: 5}}>
+                                                    <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign"
+                                                          name='closecircle'/>
+                                                </TouchableOpacity>
 
-                                        <TouchableOpacity
-                                            onPress={() => this.deleteBank(bank.id)}
-                                            style={{position: 'absolute', right: 5, bottom: 5}}>
-                                            <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign"
-                                                  name='closecircle'/>
-                                        </TouchableOpacity>
-
-                                        <View style={[styles.overHidden, styles.marginHorizontal_10]}>
-                                            <View style={[styles.rowGroup]}>
-                                                <Text
-                                                    style={[styles.textRegular, styles.textSize_14, styles.text_black_gray , styles.width_150]}>{i18n.t('namebank')} :
-                                                    {bank.bank_name}</Text>
+                                                <View style={[styles.overHidden, styles.marginHorizontal_10]}>
+                                                    <View style={[styles.rowGroup]}>
+                                                        <Text
+                                                            style={[styles.textRegular, styles.textSize_14, styles.text_black_gray , styles.width_150]}>{i18n.t('namebank')} :
+                                                            {bank.bank_name}</Text>
+                                                    </View>
+                                                    <View style={[styles.rowGroup]}>
+                                                        <Text
+                                                            style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{i18n.t('accNum')} :
+                                                            {bank.account_number}</Text>
+                                                    </View>
+                                                </View>
                                             </View>
-                                            <View style={[styles.rowGroup]}>
-                                                <Text
-                                                    style={[styles.textRegular, styles.textSize_14, styles.text_black_gray]}>{i18n.t('accNum')} :
-                                                    {bank.account_number}</Text>
-                                            </View>
-                                        </View>
-                                    </View>
-                            ))
-                        }
+                                    ))
+                                    :
+                                    null
+                            }
 
                         </View>
 

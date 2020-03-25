@@ -229,8 +229,12 @@ const en = {
     'emailNotCorrect'                   : 'email not correct',
 	'providerNameRequired'              : 'provider name required',
 	'providerName'                      : 'provider name ',
-	'all'                               : 'All',
-
+    'chooseType'                        : 'choose delivery type',
+    'all'                               : 'All',
+    'available'                         : 'available now',
+    'notAvailable'                      : 'not available now',
+    'orderProcessing'                   : 'order processing',
+    'orderDelivery'                     : 'order delivery',
 };
 
 export default en;

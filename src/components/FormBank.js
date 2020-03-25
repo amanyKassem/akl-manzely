@@ -214,9 +214,7 @@ class FormBank extends Component {
 
                     <View style={[ styles.position_R, styles.zIndex, styles.bgFullWidth , {marginTop:50}]}>
 
-                        <Form style={styles.formControlLabel}>
-
-                            <KeyboardAvoidingView behavior={'padding'}>
+                        <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
 
                                 <Form style={[styles.flexCenter, styles.Width_90]}>
 
@@ -332,7 +330,6 @@ class FormBank extends Component {
 
                             </KeyboardAvoidingView>
 
-                        </Form>
 
                     </View>
 

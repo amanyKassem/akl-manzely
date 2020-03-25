@@ -239,6 +239,11 @@ const ar = {
 	'providerNameRequired'      : 'اسم المطعم مطلوب',
 	'providerName'              : 'اسم المطعم',
 	'all'                       : 'الكل',
+    'chooseType'                : 'اختر طريقة التوصيل',
+    'available'                 : 'متواجد حاليا',
+    'notAvailable'              : 'غير متواجد حاليا',
+    'orderProcessing'           : 'تجهيز الطلب',
+    'orderDelivery'             : 'توصيل الطلب',
 };
 
 export default ar;

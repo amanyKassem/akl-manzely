@@ -5,7 +5,11 @@ const width     = Dimensions.get('window').width;
 const height    = Dimensions.get('window').height;
 
 const styles = ({
-
+    keyboardAvoid: {
+        width:'100%',
+        height: null,
+        flex: 1,
+    },
     // Style Color ConText
 
     text_gray : {
@@ -526,6 +530,9 @@ const styles = ({
     Width_100 : {
         width                       : '100%'
     },
+    width_30 : {
+        width                       : 30
+    },
     width_40 : {
         width                       : 40
     },
@@ -572,7 +579,7 @@ const styles = ({
     top_0 : {
         top                         : 0
     },
-    top_5 : {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              top_5 : {
         top                         : 5
     },
     top_10 : {

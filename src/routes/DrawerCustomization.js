@@ -13,12 +13,7 @@ import MyOrders from "../components/MyOrders";
 import Offers from "../components/Offers";
 import Favorite from "../components/Favorite";
 import BankAccounts from "../components/BankAccounts";
-import About from "../components/About";
-import Faq from "../components/Faq";
 import ShareApp from "../components/ShareApp";
-import Terms from "../components/Terms";
-import CallUs from "../components/CallUs";
-import Setting from "../components/Setting";
 
 class DrawerCustomization extends Component {
     constructor(props){

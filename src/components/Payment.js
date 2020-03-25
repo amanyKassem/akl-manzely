@@ -13,7 +13,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
+import {changeOrderStatus} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import Modal from "react-native-modal";
 
@@ -26,23 +26,31 @@ class Payment extends Component {
             delivery                    : i18n.t('delver'),
             deliveryId                  : null,
             isModalDelivery             : false,
-            active                      : 0,
-
+            active                      : 1,
+            isSubmitted: false,
         }
     }
 
-    componentWillMount() {
-
-        this.setState({spinner: true});
+    componentWillMount(){
+        this.setState({isSubmitted: false});
 
     }
-
+    componentWillReceiveProps(nextProps) {
+        this.setState({isSubmitted: false});
+    }
     getPayment(id){
-
-        this.props.navigation.navigate('FormPayment', {
-            paymentId : id
-        });
-
+        if(this.props.navigation.state.params.fromNav){
+            this.setState({isSubmitted: true});
+            this.props.changeOrderStatus(this.props.lang, this.props.navigation.state.params.order_id ,3 ,null , 'online' , this.props.user.token , this.props )
+        }else {
+            this.props.navigation.navigate('FormPayment', {
+                paymentId : id,
+                latitude                : this.props.navigation.state.params.latitude,
+                longitude               : this.props.navigation.state.params.longitude,
+                provider_id             : this.props.navigation.state.params.provider_id,
+                delivery_type           : this.props.navigation.state.params.delivery_type,
+            });
+        }
     }
 
     choosePay ( id ){
@@ -122,13 +130,11 @@ class Payment extends Component {
     }
 }
 
-export default Payment;
-
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang }) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang,
+    };
+};
+export default connect(mapStateToProps, {changeOrderStatus})(Payment);

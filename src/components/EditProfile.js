@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView} from "react-native";
 import {
     Container,
     Content,
@@ -97,12 +97,13 @@ class EditProfile extends Component {
             email               : null,
             phone               : this.state.phone,
             country_id          : this.state.countryId,
-            gender              : this.state.nationality,
+            gender              : this.state.nationalityId,
             latitude            : this.state.latitude,
             longitude           : this.state.longitude,
             avatar              : this.state.base64,
+            cover               : null,
             provider_details    : null,
-            available           : null,
+            available           : this.props.user.available,
             delivery_types      : ['1'],
             qualification       : this.state.qualification,
             address             : this.state.cityName,
@@ -111,7 +112,7 @@ class EditProfile extends Component {
             props               : this.props,
         };
 
-        this.setState({ isSubmitted: true });
+
         this.props.updateProfile(data);
     }
 
@@ -174,9 +175,10 @@ class EditProfile extends Component {
     selectNationalityId(id, name) {
         this.setState({
             checked        : id,
-            nationality     : name
+            nationality     : name,
+            nationalityId     : id,
         });
-        this.state.nationalityId = id;
+        // this.state.nationalityId = id;
         this.setState({ isModalNationality: !this.state.isModalNationality});
     }
 
@@ -288,7 +290,7 @@ class EditProfile extends Component {
                         </View>
 
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
-
+                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                             <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
@@ -366,38 +368,52 @@ class EditProfile extends Component {
                                     </View>
                                 </Modal>
 
-                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                    <TouchableOpacity onPress={this.toggleDatePicker} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.date !== '' ? styles.border_red :  styles.border_gray )]}>
-                                        <Text style={[styles.textRegular, styles.textSize_14, (this.state.date !== '' ? styles.text_red :  styles.text_black )]}>
-                                            {i18n.translate('birthday')} : {this.state.date}
-                                        </Text>
-                                        <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='calendar' />
-                                    </TouchableOpacity>
-                                </View>
+                                {
+                                    this.props.user != null && this.props.user.type === 'provider' ?
 
-                                <DateTimePicker
-                                    isVisible       = {this.state.isDatePickerVisible}
-                                    onConfirm       = {this.doneDatePicker}
-                                    onCancel        = {this.toggleDatePicker}
-                                    mode            = {'date'}
-                                    minimumDate     = {new Date()}
+                                        <View style={[styles.overHidden, styles.rowGroup]}>
+                                            <TouchableOpacity onPress={this.toggleDatePicker}
+                                                              style={[styles.marginVertical_10, styles.Width_100, styles.height_50, styles.paddingHorizontal_20, styles.paddingVertical_10, styles.rowGroup, styles.Border, (this.state.date !== '' ? styles.border_red : styles.border_gray)]}>
+                                                <Text
+                                                    style={[styles.textRegular, styles.textSize_14, (this.state.date !== '' ? styles.text_red : styles.text_black)]}>
+                                                    {i18n.translate('birthday')} : {this.state.date}
+                                                </Text>
+                                                <Icon style={[styles.textSize_20, styles.text_light_gray]}
+                                                      type="AntDesign" name='calendar'/>
+                                            </TouchableOpacity>
+                                        </View>
+                                        :
+                                        null
+                                }
+
+                                < DateTimePicker
+                                isVisible = {this.state.isDatePickerVisible}
+                                onConfirm       = {this.doneDatePicker}
+                                onCancel        = {this.toggleDatePicker}
+                                mode            = {'date'}
+                                minimumDate     = {new Date()}
                                 />
 
 
+                                {
+                                    this.props.user != null && this.props.user.type === 'provider' ?
 
-                                <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
-                                    <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
-                                        <Input
-                                            placeholder={i18n.translate('qualification')}
-                                            style={[styles.input, styles.height_50, (this.state.qualificationStatus === 1 ? styles.Active : styles.noActive)]}
-                                            onChangeText={(qualification) => this.setState({qualification})}
-                                            onBlur={() => this.unActiveInput('qualification')}
-                                            onFocus= {() => this.activeInput('qualification')}
-                                            value= {this.state.qualification}
-                                        />
-                                    </Item>
-                                </View>
+                                        <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                                            <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                                                <Input
+                                                    placeholder={i18n.translate('qualification')}
+                                                    style={[styles.input, styles.height_50, (this.state.qualificationStatus === 1 ? styles.Active : styles.noActive)]}
+                                                    onChangeText={(qualification) => this.setState({qualification})}
+                                                    onBlur={() => this.unActiveInput('qualification')}
+                                                    onFocus= {() => this.activeInput('qualification')}
+                                                    value= {this.state.qualification}
+                                                />
+                                            </Item>
+                                        </View>
 
+                                        :
+                                        null
+                                }
                                 <View style={[styles.overHidden, styles.rowGroup]}>
                                     <TouchableOpacity onPress={() => this.toggleModalCountry()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border,  (this.state.countryId !== null ? styles.border_red :  styles.border_gray )]}>
                                         <Text style={[styles.textRegular, styles.textSize_14, (this.state.countryId !== null ? styles.text_red :  styles.text_black )]}>
@@ -457,35 +473,45 @@ class EditProfile extends Component {
                                         <Icon style={[styles.textSize_20, styles.text_light_gray]} type="Feather" name='map-pin' />
                                     </TouchableOpacity>
                                 </View>
+                                {
+                                    this.props.user != null && this.props.user.type === 'provider' ?
+                                        <View style={styles.Width_100}>
+                                            <Text
+                                                style={[styles.textRegular, styles.textSize_13, styles.text_black, styles.marginVertical_15, styles.Width_100]}>
+                                                {i18n.t('delver')}
+                                            </Text>
 
-                                <Text style={[styles.textRegular, styles.textSize_13, styles.text_black , styles.marginVertical_15, styles.Width_100]}>
-                                    { i18n.t('delver') }
-                                </Text>
+                                            <View style={[styles.height_40]}>
+                                                <ScrollView style={[styles.scroll]} horizontal={true}
+                                                            showsHorizontalScrollIndicator={false}>
 
-                                <View style={[ styles.height_40 ]}>
-                                    <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
+                                                    {
+                                                        this.props.deliveryTypes.map((type, i) => {
+                                                            return (
+                                                                <TouchableOpacity
+                                                                    key={i}
+                                                                    onPress={() => this.onSubCategories(this.state.deliveryTypesArr, type.id, type.name)}
+                                                                    style={[styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, (this.state.active === type.id ? styles.bg_black : styles.bg_gray)]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.textSize_12, (this.state.active === type.id ? styles.text_White : styles.text_black_gray)]}>
+                                                                        {type.name}
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            )
+                                                        })
+                                                    }
 
-                                        {
-                                            this.props.deliveryTypes.map((type, i ) => {
-                                                return(
-                                                    <TouchableOpacity
-                                                        onPress         = {() => this.onSubCategories(this.state.deliveryTypesArr ,type.id , type.name)}
-                                                        style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === type.id  ? styles.bg_black : styles.bg_gray ) ]}>
-                                                        <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === type.id ? styles.text_White : styles.text_black_gray )]} >
-                                                            {type.name}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )
-                                            })
-                                        }
-
-                                    </ScrollView>
-                                </View>
+                                                </ScrollView>
+                                            </View>
+                                        </View>
+                                        :
+                                        null
+                                }
 
                                 { this.renderEdit() }
 
                         </Form>
-
+                            </KeyboardAvoidingView>
                         </View>
                     </View>
 

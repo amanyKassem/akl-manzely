@@ -12,7 +12,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getContactInfo, getQuestions} from "../actions";
+import {getQuestions} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import COLORS from "../consts/colors";
 
@@ -83,17 +83,19 @@ class Faq extends Component {
                                 </View>
                                 <View style={[styles.overHidden]}>
                                     {
-
-                                        this.props.questions.map((q, i) => (
-                                            <Animatable.View key={i} animation="fadeInRight" easing="ease-out" delay={500}>
-                                                <Text style={[styles.textRegular , styles.text_black, styles.textLeft, styles.Width_100, styles.marginVertical_10, styles.paddingHorizontal_10]}>
-                                                    -- {q.question}
-                                                </Text>
-                                                <Text style={[styles.textRegular , styles.text_black, styles.textLeft, styles.Width_100, styles.marginVertical_10, styles.paddingHorizontal_10]}>
-                                                    {q.answer}
-                                                </Text>
-                                            </Animatable.View>
-                                        ))
+                                        this.props.questions ?
+                                            this.props.questions.map((q, i) => (
+                                                <Animatable.View key={i} animation="fadeInRight" easing="ease-out" delay={500}>
+                                                    <Text style={[styles.textRegular , styles.text_black, styles.textLeft, styles.Width_100, styles.marginVertical_10, styles.paddingHorizontal_10]}>
+                                                        -- {q.question}
+                                                    </Text>
+                                                    <Text style={[styles.textRegular , styles.text_black, styles.textLeft, styles.Width_100, styles.marginVertical_10, styles.paddingHorizontal_10]}>
+                                                        {q.answer}
+                                                    </Text>
+                                                </Animatable.View>
+                                            ))
+                                        :
+                                        null
                                     }
                                 </View>
                             </View>

@@ -1,5 +1,14 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    ActivityIndicator,
+    KeyboardAvoidingView
+} from "react-native";
 import {
     Container,
     Content,
@@ -12,13 +21,14 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getDeliveryTypes , getCategories} from "../actions";
-import Modal from "react-native-modal";
+import { getCategories , addMeal} from "../actions";
+import * as ImageManipulator from 'expo-image-manipulator';
 import { NavigationEvents } from "react-navigation";
 import {ImageBrowser,CameraBrowser} from 'expo-multiple-imagepicker';
 import * as Permissions from 'expo-permissions';
 import * as Animatable from "react-native-animatable";
 import CategoryPicker from "./CategoryPicker"
+import COLORS from "../consts/colors";
 
 let base64   = [];
 
@@ -39,13 +49,18 @@ class AddProduct extends Component {
             priceStatus                 : 0,
             discount                    : '',
             discountStatus              : 0,
-            timeOutStatus              : 0,
+            timeOutStatus               : 0,
             active                      : 1,
             imageBrowserOpen            : false,
             cameraBrowserOpen           : false,
             photos                      : [],
             arrayInputs                 : [],
-            mainCat                 : null,
+            mainCat                     : null,
+            Additions                   : [],
+            imageId                     : null,
+            refreshed                   : false,
+            category_id                 : null,
+            isSubmitted                 : false,
 
         }
     }
@@ -82,49 +97,15 @@ class AddProduct extends Component {
 
     }
 
-    joinData = () => {
-
-        this.state.arrayInputs.push(<View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}><Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}><Input placeholder={i18n.translate('addpro')} style={[styles.input, styles.height_50]}/></Item></View>);
-        this.setState({ arrayInputs: this.state.arrayInputs });
-
-    }
-
-    onEditPressed() {
-
-        this.setState({spinner: true});
-
-        this.props.navigation.navigate('Home');
-
+    onConfirm() {
+        this.setState({ isSubmitted: true });
+       alert(base64.length);
+        this.props.addMeal( this.props.lang , this.state.price , this.state.timeOut , this.state.category_id, base64 , this.state.discount, this.state.Additions ,this.props.user.token , this.props );
     }
 
     onSubCategories ( id ){
         this.setState({spinner: true, active : id });
     }
-
-    askPermissionsAsync = async () => {
-        await Permissions.askAsync(Permissions.CAMERA);
-        await Permissions.askAsync(Permissions.CAMERA_ROLL);
-
-    };
-
-    _pickImage = async () => {
-
-        this.askPermissionsAsync();
-
-        let result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            aspect: [4, 3],
-            base64:true
-        });
-
-        if (!result.cancelled) {
-            this.setState({ userImage: result.uri ,base64:result.base64});
-        }
-    };
-
-    toggleModalFilter = () => {
-        this.setState({ selectFilter: !this.state.selectFilter});
-    };
 
     selectFilter(id, name , cat) {
         this.setState({
@@ -135,27 +116,88 @@ class AddProduct extends Component {
         this.setState({ selectFilter: !this.state.selectFilter});
     }
 
-    toggleModalSubKind = () => {
-        this.setState({ selectSubKind: !this.state.selectSubKind});
-    };
-
-    selectSubKind(id, name , child) {
-        this.setState({
-            subKindId      : id,
-            subKind        : name,
-            child          : child,
-        });
-        this.setState({ selectSubKind: !this.state.selectSubKind});
+    selectedId = (id) => {
+         alert(id)
+        this.setState({category_id:id})
     }
 
-
-
     componentWillMount() {
-        this.setState({spinner: true});
-        this.props.getDeliveryTypes(this.props.lang);
+        base64 = [];
+        this.setState({ isSubmitted: false });
         this.props.getCategories(this.props.lang ,null);
 
     }
+    renderConfirm(){
+        if (this.state.category_id === null || this.state.price == ''){
+            return (
+                <View
+                    style={[styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red , {backgroundColor:"#999"}]}>
+                    <Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+                        {i18n.translate('confirm')}
+                    </Text>
+                </View>
+            );
+        }
+        if (this.state.isSubmitted){
+            return(
+                <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
+                    <ActivityIndicator size="large" color={COLORS.red} style={{ alignSelf: 'center' }} />
+                </View>
+            )
+        }
+
+        return (
+            <TouchableOpacity
+                style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
+                onPress     = {() => this.onConfirm()}
+            >
+                <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+                    { i18n.t('confirm') }
+                </Text>
+            </TouchableOpacity>
+        );
+    }
+    componentWillReceiveProps(nextProps) {
+        this.setState({ isSubmitted: false});
+    }
+
+    createUI(){
+        return this.state.Additions.map((el, i) =>
+            <View key={i} style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
+                <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+                    <Input
+                        placeholder={i18n.translate('addpro')}
+                        value={el||''}
+                        style={[styles.input, styles.height_50,  styles.Active ]}
+                        onChangeText={this.handleChange.bind(this, i , el)}
+                    />
+                </Item>
+                <TouchableOpacity
+                    onPress     = {this.removeClick.bind(this, i)}
+                    style       = {[styles.position_A , styles.top_5 , {right:0 , zIndex:10 , borderRadius:50 , width: 20 , height: 20
+                        , alignItems:'center' , justifyContent:'center' , backgroundColor:"#d3292a"}]}>
+                    <Icon type  = {'EvilIcons'} name={'close'} style={[styles.text_White, styles.textSize_18]} />
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    handleChange(i, event , el) {
+        let Additions = [...this.state.Additions];
+        Additions[i] =el;
+        this.setState({ Additions });
+    }
+
+    addClick(){
+        this.setState(prevState => ({ Additions: [...prevState.Additions, '']}))
+    }
+
+    removeClick(i){
+        let Additions = [...this.state.Additions];
+        Additions.splice(i,1);
+        this.setState({ Additions });
+    }
+
 
     async componentDidMount() {
         base64 = [];
@@ -184,6 +226,7 @@ class AddProduct extends Component {
         let index = this.state.photos.indexOf(item);
         let photos = this.state.photos;
         photos.splice(index, 1);
+        base64.splice(index, 1);
         this.setState({ photos, refreshed: !this.state.refreshed, imageId: null })
     }
 
@@ -200,30 +243,25 @@ class AddProduct extends Component {
             for (var i =0; i < imgs.length; i++){
                 const imageURL = imgs[i].file;
                 Image.getSize(imageURL, (width, height) => {
-                    var imageSize = {
-                        size: {
+                    var imageSize = [{
+                        resize: {
                             width,
                             height
-                        },
-                        offset: {
-                            x: 0,
-                            y: 0,
-                        },
-                    };
+                        }
+                    }];
 
-                    ImageEditor.cropImage(imageURL, imageSize, (imageURI) => {
-                        console.log(imageURI);
-                        ImageStore.getBase64ForTag(imageURI, (base64Data) => {
-                            base64.push(base64Data);
-                            ImageStore.removeImageForTag(imageURI);
-                        }, (reason) => console.log(reason) )
-                    }, (reason) => console.log(reason) )
+                    console.log('imgURI', imageURL);
+                    ImageManipulator.manipulateAsync(imageURL, imageSize, { format: 'png', base64: true }).then(res => {
+                        base64.push(res.base64);
+                        console.log('res____', res)
+                    });
                 }, (reason) => console.log(reason))
             }
         }).catch((e) => console.log(e))
     };
 
     onFocus(){
+        base64 = [];
         this.componentWillMount();
     }
 
@@ -235,7 +273,6 @@ class AddProduct extends Component {
             return(<CameraBrowser base64={true} max={5} callback={this.imageBrowserCallback}/>);
         }
 
-        let image = this.state.userImage;
 
         return (
             <Container>
@@ -293,110 +330,10 @@ class AddProduct extends Component {
                         </View>
 
                         <View style={[ styles.marginVertical_10, styles.Width_85, styles.flexCenter ]}>
+                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
+                                <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
 
-                            <Form style={[styles.flexCenter, styles.marginVertical_10, styles.Width_100]}>
-
-                                <CategoryPicker categories={this.props.categories} />
-
-
-                                {/*<View style={[styles.overHidden, styles.rowGroup]}>*/}
-                                    {/*<TouchableOpacity onPress={() => this.toggleModalFilter()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.filterId !== null ? styles.border_red :  styles.border_gray )]}>*/}
-                                        {/*<Text style={[styles.textRegular, styles.textSize_14, (this.state.filterId !== null ? styles.text_red :  styles.text_black )]}>*/}
-                                            {/*{ this.state.filter }*/}
-                                        {/*</Text>*/}
-                                        {/*<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />*/}
-                                    {/*</TouchableOpacity>*/}
-                                {/*</View>*/}
-
-                                {/*<Modal isVisible={this.state.selectFilter} onBackdropPress={() => this.toggleModalFilter()}>*/}
-                                    {/*<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>*/}
-
-                                        {/*<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>*/}
-                                            {/*<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>*/}
-                                                {/*{i18n.t('filtermon')}*/}
-                                            {/*</Text>*/}
-                                        {/*</View>*/}
-
-                                        {/*<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>*/}
-
-                                            {/*{*/}
-                                                {/*this.props.categories.map((cat, i) => (*/}
-                                                    {/*<TouchableOpacity*/}
-                                                        {/*key={i}*/}
-                                                        {/*style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
-                                                        {/*onPress             = {() => this.selectFilter(cat.id, cat.name , cat)}*/}
-                                                    {/*>*/}
-                                                        {/*<View style={[styles.overHidden, styles.rowRight]}>*/}
-                                                            {/*<CheckBox*/}
-                                                                {/*style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
-                                                                {/*color               = {styles.text_red}*/}
-                                                                {/*selectedColor       = {styles.text_red}*/}
-                                                                {/*checked             = {this.state.filterId === 1}*/}
-                                                            {/*/>*/}
-                                                            {/*<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
-                                                                {/*{cat.name}*/}
-                                                            {/*</Text>*/}
-                                                        {/*</View>*/}
-                                                    {/*</TouchableOpacity>*/}
-                                                {/*))*/}
-                                            {/*}*/}
-                                        {/*</View>*/}
-
-                                    {/*</View>*/}
-                                {/*</Modal>*/}
-
-                                {/*{*/}
-                                    {/*this.state.mainCat !== null &&  this.state.mainCat.childes.length > 0 ?*/}
-                                         {/*<View>*/}
-                                             {/*<View style={[styles.overHidden, styles.rowGroup]}>*/}
-                                                 {/*<TouchableOpacity onPress={() => this.toggleModalSubKind()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.subKindId !== null ? styles.border_red :  styles.border_gray )]}>*/}
-                                                     {/*<Text style={[styles.textRegular, styles.textSize_14, (this.state.subKindId !== null ? styles.text_red :  styles.text_black )]}>*/}
-                                                         {/*{ this.state.subKind }*/}
-                                                     {/*</Text>*/}
-                                                     {/*<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />*/}
-                                                 {/*</TouchableOpacity>*/}
-                                             {/*</View>*/}
-
-                                             {/*<Modal isVisible={this.state.selectSubKind} onBackdropPress={() => this.toggleModalSubKind()}>*/}
-                                                 {/*<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>*/}
-
-                                                     {/*<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>*/}
-                                                         {/*<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>*/}
-                                                             {/*{i18n.t('filtersub')}*/}
-                                                         {/*</Text>*/}
-                                                     {/*</View>*/}
-
-                                                     {/*<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>*/}
-                                                         {/*{*/}
-                                                             {/*this.state.mainCat.childes.map((child, i) => (*/}
-                                                                 {/*<TouchableOpacity*/}
-                                                                     {/*key={i}*/}
-                                                                     {/*style               = {[styles.rowGroup, styles.marginVertical_10]}*/}
-                                                                     {/*onPress             = {() => this.selectSubKind(child.id, child.name , child)}*/}
-                                                                 {/*>*/}
-                                                                     {/*<View style={[styles.overHidden, styles.rowRight]}>*/}
-                                                                         {/*<CheckBox*/}
-                                                                             {/*style               = {[styles.checkBox, styles.bg_red, styles.border_red]}*/}
-                                                                             {/*color               = {styles.text_red}*/}
-                                                                             {/*selectedColor       = {styles.text_red}*/}
-                                                                             {/*checked             = {this.state.subKindId === 1}*/}
-                                                                         {/*/>*/}
-                                                                         {/*<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>*/}
-                                                                             {/*{child.name}*/}
-                                                                         {/*</Text>*/}
-                                                                     {/*</View>*/}
-                                                                 {/*</TouchableOpacity>*/}
-                                                             {/*))*/}
-                                                         {/*}*/}
-                                                     {/*</View>*/}
-
-                                                 {/*</View>*/}
-                                             {/*</Modal>*/}
-                                         {/*</View>*/}
-                                        {/*:*/}
-                                         {/*null*/}
-                                 {/*}*/}
-
+                                <CategoryPicker categories={this.props.categories} selectedId={this.selectedId}/>
 
                                 <View style={[styles.position_R, styles.overHidden, styles.height_70, styles.flexCenter]}>
                                     <Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
@@ -436,60 +373,24 @@ class AddProduct extends Component {
                                         />
                                     </Item>
                                 </View>
-
-
-
-                                <View>
-                                    {this.state.arrayInputs}
-                                </View>
+                                {this.createUI()}
 
                                 <View style={[styles.overHidden, styles.rowGroup]}>
                                     <TouchableOpacity
                                         style       = {[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, styles.border_gray]}
-                                        onPress     = {() => this.joinData()}
+                                        onPress     = {this.addClick.bind(this)}
                                     >
                                         <Text style={[styles.textRegular, styles.textSize_14]}>
                                             { i18n.t('adding') }
                                         </Text>
                                         <Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='plus' />
                                     </TouchableOpacity>
+
                                 </View>
 
-                                <View style={[ styles.marginVertical_10, styles.Width_100 ]}>
-                                    <Text style={[ styles.textRegular , styles.text_black, styles.textSize_14, styles.rowRight ]}>
-                                        { i18n.t('delver') }
-                                    </Text>
-                                </View>
-
-                                <View style={[ styles.height_40 ]}>
-                                    <ScrollView style={[ styles.scroll ]} horizontal={true} showsHorizontalScrollIndicator={false}>
-
-                                        {
-                                            this.props.deliveryTypes.map((type, i ) => {
-                                                return(
-                                                    <TouchableOpacity
-                                                        onPress         = {() => this.onSubCategories(this.state.deliveryTypesArr ,type.id , type.name)}
-                                                        style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.active === type.id  ? styles.bg_black : styles.bg_gray ) ]}>
-                                                        <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.active === type.id ? styles.text_White : styles.text_black_gray )]} >
-                                                            {type.name}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )
-                                            })
-                                        }
 
 
-                                    </ScrollView>
-                                </View>
-
-                                <TouchableOpacity
-                                    style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,]}
-                                    onPress     = {() => this.onEditPressed()}
-                                >
-                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                        { i18n.t('confirm') }
-                                    </Text>
-                                </TouchableOpacity>
+                               {this.renderConfirm()}
 
                                 <TouchableOpacity style={[ styles.marginVertical_10, styles.Width_100, styles.rowCenter ]} onPress={() => this.props.navigation.navigate('NewProduct')}>
                                     <Text style={[ styles.textRegular , styles.text_red, styles.textSize_14, styles.textDecoration ]}>
@@ -498,6 +399,7 @@ class AddProduct extends Component {
                                 </TouchableOpacity>
 
                             </Form>
+                            </KeyboardAvoidingView>
 
                         </View>
                     </View>
@@ -511,13 +413,12 @@ class AddProduct extends Component {
 }
 
 
-const mapStateToProps = ({ auth, profile, lang , deliveryTypes , categories}) => {
+const mapStateToProps = ({ auth, profile, lang , categories}) => {
     return {
         auth: auth.user,
         user: profile.user,
         lang: lang.lang,
-        deliveryTypes   : deliveryTypes.deliveryTypes,
         categories: categories.categories,
     };
 };
-export default connect(mapStateToProps, {getDeliveryTypes , getCategories})(AddProduct);
+export default connect(mapStateToProps, {getCategories , addMeal})(AddProduct);

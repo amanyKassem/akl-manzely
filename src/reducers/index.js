@@ -14,6 +14,15 @@ import deliveryTypes from './DeliveryTypesReducer';
 import countries from './CountriesReducer';
 import changePassword from './ChangePasswordReducer';
 import genders from './gendersReducer';
+import bill from './BillReducer';
+import carts from './CartsReducer';
+import cartInfo from './CartInfoReducer';
+import banners from './BannersReducer';
+import meals from './MealsReducer';
+import offers from './OffersReducer';
+import favorites from './FavoritesReducer';
+import orders from './OrdersReducer';
+import orderInfo from './OrderInfoReducer';
 
 export default combineReducers({
     lang,
@@ -31,4 +40,13 @@ export default combineReducers({
     countries,
     changePassword,
     genders,
+    bill,
+    carts,
+    cartInfo,
+    banners,
+    meals,
+    offers,
+    favorites,
+    orders,
+    orderInfo,
 });

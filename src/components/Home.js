@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView} from "react-native";
+import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView, Linking, Dimensions} from "react-native";
 import {
     Container,
     Content,
@@ -18,7 +18,7 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {getCategories , getProviderHome} from "../actions";
+import {getCategories , getProviderHome, getBanners , getMeals} from "../actions";
 import COLORS from "../consts/colors";
 import Swiper from 'react-native-swiper';
 import * as Animatable from 'react-native-animatable';
@@ -27,7 +27,11 @@ import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
 import Spinner from "react-native-loading-spinner-overlay";
 import SearchInput from './SearchInput'
-const isIOS = Platform.OS === 'ios';
+import Product from './Product'
+
+const isIOS     = Platform.OS === 'ios';
+const height    = Dimensions.get('window').height;
+let children    = [];
 
 class Home extends Component {
     constructor(props){
@@ -51,7 +55,9 @@ class Home extends Component {
             checked2                : '',
             cityName                : i18n.translate('mapname'),
             latitude                : null,
-            longitude               : null
+            longitude               : null,
+			activeParent            : null,
+            children                : []
         }
     }
 
@@ -103,9 +109,52 @@ class Home extends Component {
 
     }
 
-    onSubCategories ( id ){
-        this.setState({spinner: true, active : id });
-        this.props.getProviderHome(this.props.lang , id , this.props.user.token)
+    renderNoData() {
+        if (this.props.providerHome.meals && (this.props.providerHome.meals).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
+    renderMealsNoData() {
+        if (this.props.meals && (this.props.meals).length <= 0) {
+            return (
+                <View style={[styles.flexColumnCenter , styles.Width_100]}>
+                    <Image source={require('../../assets/img/no_data.png')} resizeMode={'contain'}
+                           style={{alignSelf: 'center', width: 200, height: 200}}/>
+                </View>
+            );
+        }
+
+        return <View/>
+    }
+
+    onSubCategories ( id, subcategories, mainCat ){
+        if (mainCat) children = [];
+
+		if (subcategories.length > 0){
+			subcategories.map((subcategory) => {
+				if (children.includes(subcategory)){
+					const index = children.indexOf(subcategory);
+					children.splice(index, 1)
+				} else
+					children.push(subcategory);
+
+			})
+		}
+
+		this.setState({ activeParent: id, children });
+
+        this.setState({spinner: true, active: mainCat ? id : this.state.active});
+        this.props.auth.data.type === 'provider'?
+        this.props.getProviderHome(this.props.lang , id , this.props.user.token) :
+        this.props.getMeals(this.props.lang , id , this.props.auth.data.latitude , this.props.auth.data.longitude , this.props.auth.data.token);
     }
 
     toggleModalFilter = () => {
@@ -144,8 +193,10 @@ class Home extends Component {
 
     componentWillMount() {
         this.setState({spinner: true});
-        this.props.getCategories(this.props.lang ,this.props.auth.data.type === 'provider'? null : 0);
+        this.props.getCategories(this.props.lang ,this.props.auth.data.type === 'provider'? null : null);
         this.props.getProviderHome(this.props.lang , null , this.props.auth.data.token);
+        this.props.getMeals(this.props.lang , null , this.props.auth.data.latitude , this.props.auth.data.longitude , this.props.auth.data.token);
+        this.props.getBanners(this.props.lang , this.props.auth.data.token);
     }
 
     static navigationOptions = () => ({
@@ -154,7 +205,40 @@ class Home extends Component {
         drawerIcon      : (<Image style={[styles.headImage]} source={require('../../assets/img/home.png')} resizeMode={'contain'}/>)
     });
 
-    onFocus(){
+	setSub(children, activeParent){
+	    if (children.length > 0)
+	        this.setState({ activeParent, children });
+    }
+
+
+	RenderChildren = (subcategories) => {
+
+	    const { children } = this.state;
+
+	    // alert(children.length);
+
+		return children.map((child, j) =>{
+            return (
+                <View>
+                    <TouchableOpacity onPress={() => this.onSubCategories(child.id, child.childes, false)} key={j} style={{ backgroundColor: '#f6d4d4', marginVertical: 2, height: 30 }}>
+                        <Text style={{ color: '#dd5c5a', textAlign: 'center' }}>{ (child.name).substr(0, 10) }</Text>
+                    </TouchableOpacity>
+                    <View >
+                        {
+							child.childes.map((sub, i) => (
+                                <TouchableOpacity onPress={() => this.onSubCategories(sub.id, sub.childes, false)} key={i} style={{ backgroundColor: '#fff', borderWidth: 1, borderColor: '#dd5c5a', marginVertical: 2, height: 30 }}>
+                                    <Text style={{ color: '#dd5c5a', textAlign: 'center' }}>{ (sub.name).substr(0, 10) }</Text>
+                                </TouchableOpacity>
+                            ))
+                        }
+                    </View>
+                </View>
+            )
+		})
+	}
+
+
+	onFocus(){
         this.componentWillMount();
     }
 
@@ -229,7 +313,7 @@ class Home extends Component {
                                         </View>
 
                                         <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-
+                                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
                                             <Form
                                                 style={[styles.Width_90, styles.marginVertical_10, styles.flexCenter]}>
 
@@ -294,7 +378,7 @@ class Home extends Component {
                                                 </TouchableOpacity>
 
                                             </Form>
-
+                                            </KeyboardAvoidingView>
                                         </View>
 
                                     </View>
@@ -421,361 +505,90 @@ class Home extends Component {
                                         loop={true}
                                         autoplayTimeout={2}>
 
-                                        <View style={[styles.viewBlock]}>
-                                            <Image style={[styles.Width_95, styles.swiper]}
-                                                   source={require('../../assets/img/4.png')}/>
-                                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
-                                                             style={[styles.blockContent, styles.Width_50]}>
-                                                <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        home
-                                                    </Text>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        description
-                                                    </Text>
-                                                    <View>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
-                                                            numberOfLines={1} prop with ellipsizeMode="tail">
-                                                            {i18n.t('here')}
-                                                        </Text>
+                                        {
+                                            this.props.banners?
+                                                this.props.banners.map((banner, i) => (
+                                                    <View key={i} style={[styles.viewBlock]}>
+                                                        <Image style={[styles.Width_95, styles.swiper]}
+                                                               source={{uri:banner.image}}/>
+                                                        <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
+                                                                         style={[styles.blockContent, styles.Width_50]}>
+                                                            <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
+                                                                    numberOfLines={1} prop with ellipsizeMode="tail">
+                                                                    {banner.title}
+                                                                </Text>
+                                                                <Text
+                                                                    style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
+                                                                    numberOfLines={1} prop with ellipsizeMode="tail">
+                                                                    {banner.description}
+                                                                </Text>
+                                                                <TouchableOpacity onPress={() => Linking.openURL(banner.url)}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
+                                                                        numberOfLines={1} prop with ellipsizeMode="tail">
+                                                                        {i18n.t('here')}
+                                                                    </Text>
+                                                                </TouchableOpacity>
+                                                            </View>
+                                                        </Animatable.View>
                                                     </View>
-                                                </View>
-                                            </Animatable.View>
-                                        </View>
-
-                                        <View style={[styles.viewBlock]}>
-                                            <Image style={[styles.Width_95, styles.swiper]}
-                                                   source={require('../../assets/img/4.png')}/>
-                                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
-                                                             style={[styles.blockContent, styles.Width_50]}>
-                                                <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        home
-                                                    </Text>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        description
-                                                    </Text>
-                                                    <View>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
-                                                            numberOfLines={1} prop with ellipsizeMode="tail">
-                                                            {i18n.t('here')}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                            </Animatable.View>
-                                        </View>
-
-                                        <View style={[styles.viewBlock]}>
-                                            <Image style={[styles.Width_95, styles.swiper]}
-                                                   source={require('../../assets/img/4.png')}/>
-                                            <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
-                                                             style={[styles.blockContent, styles.Width_50]}>
-                                                <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        home
-                                                    </Text>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft]}
-                                                        numberOfLines={1} prop with ellipsizeMode="tail">
-                                                        description
-                                                    </Text>
-                                                    <View>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_White, styles.Width_100, styles.textSize_12, styles.textLeft, styles.textDecoration]}
-                                                            numberOfLines={1} prop with ellipsizeMode="tail">
-                                                            {i18n.t('here')}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                            </Animatable.View>
-                                        </View>
+                                                ))
+                                                :
+                                                null
+                                        }
 
                                     </Swiper>
-
                                 </View>
 
-                                <View style={[styles.height_40]}>
-                                    <ScrollView style={[styles.scroll]} horizontal={true} showsHorizontalScrollIndicator={false}>
+                                <View style={{ zIndex: 3 }}>
+                                    <ScrollView style={[styles.scroll, { maxHeight: height, zIndex: 10, flex: 1, height: 200 }]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
                                         <TouchableOpacity
-                                            onPress={() => this.onSubCategories(1)}
-                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === 1 ? '#d3292a' : '#f8dede'}]}>
+                                            onPress={() => this.onSubCategories(null, [], true)}
+                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === null ? '#d3292a' : '#eee', height: 30}]}>
                                             <Text
-                                                style={[styles.textRegular, styles.textSize_12, {color: this.state.active === 1 ? '#FFF' : '#a09f9f'}]}>
-                                                { i18n.t('all') }
+                                                style={[styles.textRegular, styles.textSize_12, {color: this.state.active === null ? '#FFF' : '#a09f9f'}]}>
+                                                {i18n.translate('all')}
+
                                             </Text>
                                         </TouchableOpacity>
                                         {
                                             this.props.categories.map(( category, i ) => (
-												<TouchableOpacity key={i}
-													onPress={() => this.onSubCategories(category.id)}
-													style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#f8dede'}]}>
-													<Text
-														style={[styles.textRegular, styles.textSize_12, {color: this.state.active === category.id ? '#FFF' : '#a09f9f'}]}>
-                                                        { category.name }
-													</Text>
-												</TouchableOpacity>
+                                                <View key={i}>
+													<TouchableOpacity
+														onPress={() => this.onSubCategories(category.id, category.childes, true)}
+														style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#f8dede'}]}>
+														<Text
+															style={[styles.textRegular, styles.textSize_12, {color: this.state.active === category.id ? '#FFF' : '#a09f9f'}]}>
+															{ category.name }
+														</Text>
+													</TouchableOpacity>
+                                                    {
+														category.childes.length > 0 && this.state.active === category.id ?
+															<ScrollView vertical={true}  style={{ backgroundColor: '#fff', width: '100%', position: 'absolute', top: 35, zIndex: 1, padding: 3, maxHeight: 200 }}>
+                                                                { this.RenderChildren(category.childes) }
+															</ScrollView> : null
+                                                    }
+                                                </View>
                                             ))
                                         }
-
 
                                     </ScrollView>
                                 </View>
 
-                                <View
-                                    style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100]}>
+                                <View style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100, { zIndex: -1, marginTop: 170 , position: 'absolute' }]}>
+                                    {this.renderMealsNoData()}
+                                    {
+                                        this.props.meals?
+                                            this.props.meals.map((meal, i) => (
+                                                <Product key={meal.id} data={meal} navigation={this.props.navigation} />
+                                            ))
+                                            :
+                                            null
+                                    }
 
-                                    <View
-                                        style={[styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('Details')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/1.png')}/>
-                                                    <View
-                                                        style={[styles.Width_100, styles.position_A, styles.right_0, styles.bottom_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.rowGroup]}>
-                                                        <View style={[styles.rowRight]}>
-                                                            <Icon
-                                                                style={[styles.text_green, styles.textSize_5, styles.marginHorizontal_5]}
-                                                                type="FontAwesome"
-                                                                name='circle'
-                                                            />
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.textSize_10]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                اسم الشيف
-                                                            </Text>
-                                                        </View>
-                                                        <TouchableOpacity>
-                                                            <Icon
-                                                                style={[styles.text_gray, styles.textSize_20]}
-                                                                type="MaterialIcons"
-                                                                name='favorite-border'
-                                                            />
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                        <StarRating
-                                                            disabled={true}
-                                                            maxStars={5}
-                                                            rating={3}
-                                                            fullStarColor={COLORS.red}
-                                                            starSize={12}
-                                                            starStyle={styles.starStyle}
-                                                        />
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10
-                                                            ر.س</Text>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>25
-                                                            كم</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('Details')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/2.png')}/>
-                                                    <View
-                                                        style={[styles.Width_100, styles.position_A, styles.right_0, styles.bottom_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.rowGroup]}>
-                                                        <View style={[styles.rowRight]}>
-                                                            <Icon
-                                                                style={[styles.text_green, styles.textSize_5, styles.marginHorizontal_5]}
-                                                                type="FontAwesome"
-                                                                name='circle'
-                                                            />
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.textSize_10]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                اسم الشيف
-                                                            </Text>
-                                                        </View>
-                                                        <TouchableOpacity>
-                                                            <Icon
-                                                                style={[styles.text_gray, styles.textSize_20]}
-                                                                type="MaterialIcons"
-                                                                name='favorite-border'
-                                                            />
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                        <StarRating
-                                                            disabled={true}
-                                                            maxStars={5}
-                                                            rating={3}
-                                                            fullStarColor={COLORS.red}
-                                                            starSize={12}
-                                                            starStyle={styles.starStyle}
-                                                        />
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10
-                                                            ر.س</Text>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>25
-                                                            كم</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('Details')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/3.png')}/>
-                                                    <View
-                                                        style={[styles.Width_100, styles.position_A, styles.right_0, styles.bottom_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.rowGroup]}>
-                                                        <View style={[styles.rowRight]}>
-                                                            <Icon
-                                                                style={[styles.text_green, styles.textSize_5, styles.marginHorizontal_5]}
-                                                                type="FontAwesome"
-                                                                name='circle'
-                                                            />
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.textSize_10]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                اسم الشيف
-                                                            </Text>
-                                                        </View>
-                                                        <TouchableOpacity>
-                                                            <Icon
-                                                                style={[styles.text_gray, styles.textSize_20]}
-                                                                type="MaterialIcons"
-                                                                name='favorite-border'
-                                                            />
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                        <StarRating
-                                                            disabled={true}
-                                                            maxStars={5}
-                                                            rating={3}
-                                                            fullStarColor={COLORS.red}
-                                                            starSize={12}
-                                                            starStyle={styles.starStyle}
-                                                        />
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10
-                                                            ر.س</Text>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>25
-                                                            كم</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
-
-                                    <View
-                                        style={[styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5]}>
-                                        <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                         style={[styles.Width_100]}>
-                                            <TouchableOpacity
-                                                onPress={() => this.props.navigation.navigate('Details')}
-                                                style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                                <View style={[styles.Width_100, styles.position_R]}>
-                                                    <Image style={[styles.Width_100, styles.height_100]}
-                                                           source={require('../../assets/img/4.png')}/>
-                                                    <View
-                                                        style={[styles.Width_100, styles.position_A, styles.right_0, styles.bottom_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.rowGroup]}>
-                                                        <View style={[styles.rowRight]}>
-                                                            <Icon
-                                                                style={[styles.text_green, styles.textSize_5, styles.marginHorizontal_5]}
-                                                                type="FontAwesome"
-                                                                name='circle'
-                                                            />
-                                                            <Text
-                                                                style={[styles.textRegular, styles.text_White, styles.textSize_10]}
-                                                                numberOfLines={1} prop with ellipsizeMode="tail">
-                                                                اسم الشيف
-                                                            </Text>
-                                                        </View>
-                                                        <TouchableOpacity>
-                                                            <Icon
-                                                                style={[styles.text_gray, styles.textSize_20]}
-                                                                type="MaterialIcons"
-                                                                name='favorite-border'
-                                                            />
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
-                                                <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                    <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر
-                                                            لحم</Text>
-                                                        <StarRating
-                                                            disabled={true}
-                                                            maxStars={5}
-                                                            rating={3}
-                                                            fullStarColor={COLORS.red}
-                                                            starSize={12}
-                                                            starStyle={styles.starStyle}
-                                                        />
-                                                    </View>
-                                                    <View style={[styles.rowGroup]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10
-                                                            ر.س</Text>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>25
-                                                            كم</Text>
-                                                    </View>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    </View>
 
                                 </View>
 
@@ -853,22 +666,25 @@ class Home extends Component {
                                             style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === null ? '#d3292a' : '#eee'}]}>
                                             <Text
                                                 style={[styles.textRegular, styles.textSize_12, {color: this.state.active === null ? '#FFF' : '#a09f9f'}]}>
-                                                الكل
+                                                {i18n.translate('all')}
                                             </Text>
                                         </TouchableOpacity>
 
                                         {
-                                            this.props.categories.map((cat, i) => (
-                                                <TouchableOpacity
-                                                    key={i}
-                                                    onPress={() => this.onSubCategories(cat.id)}
-                                                    style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
-                                                        {cat.name}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))
+                                            this.props.categories ?
+                                                this.props.categories.map((cat, i) => (
+                                                    <TouchableOpacity
+                                                        key={i}
+                                                        onPress={() => this.onSubCategories(cat.id)}
+                                                        style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
+                                                        <Text
+                                                            style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
+                                                            {cat.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))
+                                                :
+                                                null
                                         }
 
                                     </ScrollView>
@@ -876,40 +692,44 @@ class Home extends Component {
 
                                 <View
                                     style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100]}>
+                                    {this.renderNoData()}
                                     {
-                                        this.props.providerHome.meals.map((meal, i) => (
-                                            <View
-                                                key={i}
-                                                style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
-                                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
-                                                                 style={[styles.Width_100]}>
-                                                    <View
-                                                        style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
-                                                    <TouchableOpacity
-                                                        onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
-                                                        style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
-                                                        <View style={[styles.Width_100, styles.position_R]}>
-                                                            <Image style={[styles.Width_100, styles.height_100]}
-                                                                   source={require('../../assets/img/1.png')}/>
-                                                        </View>
-                                                        <View style={[styles.Width_100, styles.marginVertical_5]}>
-                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_black, styles.textSize_12]}>{meal.title}</Text>
+                                        this.props.providerHome && this.props.providerHome.meals ?
+                                            this.props.providerHome.meals.map((meal, i) => (
+                                                <View
+                                                    key={i}
+                                                    style={[styles.position_R, styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10]}>
+                                                    <Animatable.View animation="fadeInUp" easing="ease-out" delay={500}
+                                                                     style={[styles.Width_100]}>
+                                                        <View
+                                                            style={[styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full]}/>
+                                                        <TouchableOpacity
+                                                            onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
+                                                            style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
+                                                            <View style={[styles.Width_100, styles.position_R]}>
+                                                                <Image style={[styles.Width_100, styles.height_100]}
+                                                                       source={{uri : meal.image}}/>
                                                             </View>
-                                                            <View style={[styles.rowGroup]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>{meal.description}</Text>
+                                                            <View style={[styles.Width_100, styles.marginVertical_5]}>
+                                                                <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_black, styles.textSize_12]}>{meal.title}</Text>
+                                                                </View>
+                                                                <View style={[styles.rowGroup]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_light_gray, styles.textSize_12]}>{meal.description}</Text>
+                                                                </View>
+                                                                <View style={[styles.rowGroup, styles.marginVertical_5]}>
+                                                                    <Text
+                                                                        style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
+                                                                </View>
                                                             </View>
-                                                            <View style={[styles.rowGroup, styles.marginVertical_5]}>
-                                                                <Text
-                                                                    style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
-                                                            </View>
-                                                        </View>
-                                                    </TouchableOpacity>
-                                                </Animatable.View>
-                                            </View>
-                                        ))
+                                                        </TouchableOpacity>
+                                                    </Animatable.View>
+                                                </View>
+                                            ))
+                                            :
+                                            null
                                     }
 
                                 </View>
@@ -940,13 +760,15 @@ class Home extends Component {
 }
 
 
-const mapStateToProps = ({ auth, profile, lang , categories , providerHome}) => {
+const mapStateToProps = ({ auth, profile, lang , categories , providerHome , banners , meals}) => {
     return {
         auth: auth.user,
         user: profile.user,
         lang: lang.lang,
         categories: categories.categories,
         providerHome: providerHome.providerHome,
+        meals: meals.meals,
+        banners: banners.banners,
     };
 };
-export default connect(mapStateToProps, {getCategories , getProviderHome})(Home);
+export default connect(mapStateToProps, {getCategories , getProviderHome , getBanners , getMeals})(Home);

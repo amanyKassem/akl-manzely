@@ -63,6 +63,7 @@ class DrawerCustomization extends Component {
         this.props.logout(this.props.user.token);
         this.props.tempAuth();
     }
+
     registerChef(){
         this.props.navigation.closeDrawer();
         this.props.navigation.navigate('Register', {userType:'chef'})

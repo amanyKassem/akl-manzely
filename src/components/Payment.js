@@ -107,7 +107,7 @@ class Payment extends Component {
                         >
                             <Image style={[styles.iconBank, styles.marginHorizontal_10]} source={require('../../assets/img/mada_logo.png')} resizeMode={'contain'}/>
                             <Text style={[styles.textRegular, styles.textSize_13, styles.marginHorizontal_5, (this.state.active === 3 ? styles.text_red : styles.text_light_gray)]}>
-                                { i18n.t('payPal') }
+                                { i18n.t('mada') }
                             </Text>
                         </TouchableOpacity>
 

@@ -290,7 +290,7 @@ class AddProduct extends Component {
                             { i18n.t('addpro') }
                         </Title>
                     </Body>
-                    <Right style={styles.leftIcon}>
+                    <Right>
                         <Button style={styles.Button} transparent onPress= {() => this.props.navigation.navigate('TermsAddProduct')}>
                             <Text style={[ styles.textRegular , styles.text_black, styles.textSize_14, styles.textDecoration ]}>
                                 { i18n.t('termlern') }

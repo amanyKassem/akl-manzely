@@ -20,6 +20,8 @@ import * as Permissions from 'expo-permissions';
 import DateTimePicker from "react-native-modal-datetime-picker";
 import COLORS from "../consts/colors";
 
+let deliveryArr = [];
+
 class EditProfile extends Component {
     constructor(props){
         super(props);
@@ -48,6 +50,7 @@ class EditProfile extends Component {
             active                      : null,
             deliveryTypesArr            : this.props.user.delivery_types,
             isSubmitted: false,
+            deliveryArr,
         }
     }
     componentWillMount() {
@@ -104,7 +107,7 @@ class EditProfile extends Component {
             cover               : null,
             provider_details    : null,
             available           : this.props.user.available,
-            delivery_types      : ['1'],
+            delivery_types      : this.state.deliveryArr,
             qualification       : this.state.qualification,
             address             : this.state.cityName,
             lang                : this.props.lang,
@@ -211,20 +214,17 @@ class EditProfile extends Component {
         }
     };
 
-    onSubCategories ( deliveryTypesArr , id , name){
-        const found = deliveryTypesArr.some(item => item.id === id );
-        if (!found){
-            deliveryTypesArr.push({id , name});
-            this.setState({ active : id });
-            console.log('deliveryTypesArr +' , deliveryTypesArr) ;
+    onDeliveryTypeChecked (id){
+        if (deliveryArr.includes(id)){
+            let index = deliveryArr.indexOf(id);
+            deliveryArr.splice(index, 1);
+            this.setState({ deliveryArr });
         } else {
-            const filteredTypes = deliveryTypesArr.filter((item) => item.id !== id);
-            this.setState({deliveryTypesArr : filteredTypes})
-            // console.log('deliveryTypesArr -filteredTypes ' , filteredTypes , "dddd" , this.state.deliveryTypesArr) ;
+            deliveryArr.push(id);
+            this.setState({ deliveryArr });
         }
     }
 
-    checker = (arr, target) => target.every(v => arr.includes(v));
     componentWillReceiveProps(nextProps) {
         this.setState({ isSubmitted: false});
         if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
@@ -487,13 +487,11 @@ class EditProfile extends Component {
 
                                                     {
                                                         this.props.deliveryTypes.map((type, i) => {
-                                                            return (
-                                                                <TouchableOpacity
-                                                                    key={i}
-                                                                    onPress={() => this.onSubCategories(this.state.deliveryTypesArr, type.id, type.name)}
-                                                                    style={[styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, (this.state.active === type.id ? styles.bg_black : styles.bg_gray)]}>
-                                                                    <Text
-                                                                        style={[styles.textRegular, styles.textSize_12, (this.state.active === type.id ? styles.text_White : styles.text_black_gray)]}>
+                                                            return(
+                                                                <TouchableOpacity key={i}
+                                                                                  onPress         = {() => this.onDeliveryTypeChecked(type.id)}
+                                                                                  style           = {[ styles.paddingHorizontal_25, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, ( this.state.deliveryArr.includes(type.id) ? styles.bg_black : styles.bg_gray ) ]}>
+                                                                    <Text style     = {[ styles.textRegular, styles.textSize_12 , ( this.state.deliveryArr.includes(type.id) ? styles.text_White : styles.text_black_gray )]} >
                                                                         {type.name}
                                                                     </Text>
                                                                 </TouchableOpacity>

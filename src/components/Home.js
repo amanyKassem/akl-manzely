@@ -1,5 +1,16 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, ScrollView, FlatList, KeyboardAvoidingView, Linking, Dimensions} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    FlatList,
+    KeyboardAvoidingView,
+    Linking,
+    Dimensions,
+    I18nManager
+} from "react-native";
 import {
     Container,
     Content,
@@ -138,7 +149,8 @@ class Home extends Component {
     onSubCategories ( id, subcategories, mainCat ){
         if (mainCat) children = [];
 
-		if (subcategories.length > 0){
+
+		if (this.props.auth.data.type === 'user' && subcategories.length > 0){
 			subcategories.map((subcategory) => {
 				if (children.includes(subcategory)){
 					const index = children.indexOf(subcategory);
@@ -303,7 +315,7 @@ class Home extends Component {
                                        onBackdropPress={() => this.toggleModalFilter()}
                                        style={[styles.bottomCenter, styles.Width_100]}>
                                     <View
-                                        style={[styles.overHidden, styles.bg_White, styles.flexCenter, styles.Width_100, styles.position_R, styles.top_20]}>
+                                        style={[styles.overHidden, styles.bg_White, styles.flexCenter, styles.Width_100, styles.position_R, styles.top_45 , {height:500 , paddingTop:40}]}>
 
                                         <View style={[styles.paddingVertical_15]}>
                                             <Text
@@ -409,7 +421,7 @@ class Home extends Component {
                                                     />
                                                     <Text
                                                         style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        الآعلي تقييم
+                                                        {i18n.t('topRated')}
                                                     </Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -427,7 +439,7 @@ class Home extends Component {
                                                     />
                                                     <Text
                                                         style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        الآقل تقييم
+                                                        {i18n.t('lowRated')}
                                                     </Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -461,7 +473,7 @@ class Home extends Component {
                                                     />
                                                     <Text
                                                         style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        الآعلي سعر
+                                                        {i18n.t('topPrice')}
                                                     </Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -479,7 +491,7 @@ class Home extends Component {
                                                     />
                                                     <Text
                                                         style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        الآقل سعر
+                                                        {i18n.t('lowPrice')}
                                                     </Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -559,7 +571,7 @@ class Home extends Component {
                                                 <View key={i}>
 													<TouchableOpacity
 														onPress={() => this.onSubCategories(category.id, category.childes, true)}
-														style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#f8dede'}]}>
+														style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#eee'}]}>
 														<Text
 															style={[styles.textRegular, styles.textSize_12, {color: this.state.active === category.id ? '#FFF' : '#a09f9f'}]}>
 															{ category.name }
@@ -658,33 +670,36 @@ class Home extends Component {
                                 </View>
 
                                 <View style={[styles.height_40, styles.marginVertical_10]}>
-                                    <ScrollView style={[styles.scroll]} horizontal={true}
-                                                showsHorizontalScrollIndicator={false}>
+                                    <ScrollView style={[styles.scroll, { maxHeight: height, zIndex: 10, flex: 1, height: 200 }]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
                                         <TouchableOpacity
-                                            onPress={() => this.onSubCategories(null)}
-                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === null ? '#d3292a' : '#eee'}]}>
+                                            onPress={() => this.onSubCategories(null, [], true)}
+                                            style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === null ? '#d3292a' : '#eee', height: 30}]}>
                                             <Text
                                                 style={[styles.textRegular, styles.textSize_12, {color: this.state.active === null ? '#FFF' : '#a09f9f'}]}>
                                                 {i18n.translate('all')}
+
                                             </Text>
                                         </TouchableOpacity>
-
                                         {
-                                            this.props.categories ?
-                                                this.props.categories.map((cat, i) => (
+                                            this.props.categories.map(( category, i ) => (
+                                                <View key={i}>
                                                     <TouchableOpacity
-                                                        key={i}
-                                                        onPress={() => this.onSubCategories(cat.id)}
-                                                        style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === cat.id ? '#d3292a' : '#eee'}]}>
+                                                        onPress={() => this.onSubCategories(category.id, category.childes, true)}
+                                                        style={[styles.paddingHorizontal_15, styles.paddingVertical_5, styles.flexCenter, styles.marginVertical_5, styles.marginHorizontal_5, {backgroundColor: this.state.active === category.id ? '#d3292a' : '#eee'}]}>
                                                         <Text
-                                                            style={[styles.textRegular, styles.textSize_12, {color: this.state.active === cat.id ? '#FFF' : '#a09f9f'}]}>
-                                                            {cat.name}
+                                                            style={[styles.textRegular, styles.textSize_12, {color: this.state.active === category.id ? '#FFF' : '#a09f9f'}]}>
+                                                            { category.name }
                                                         </Text>
                                                     </TouchableOpacity>
-                                                ))
-                                                :
-                                                null
+                                                    {
+                                                        category.childes.length > 0 && this.state.active === category.id ?
+                                                            <ScrollView vertical={true}  style={{ backgroundColor: '#fff', width: '100%', position: 'absolute', top: 35, zIndex: 1, padding: 3, maxHeight: 200 }}>
+                                                                { this.RenderChildren(category.childes) }
+                                                            </ScrollView> : null
+                                                    }
+                                                </View>
+                                            ))
                                         }
 
                                     </ScrollView>
@@ -721,7 +736,7 @@ class Home extends Component {
                                                                 </View>
                                                                 <View style={[styles.rowGroup, styles.marginVertical_5]}>
                                                                     <Text
-                                                                        style={[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{meal.price}</Text>
+                                                                        style={[styles.textRegular, styles.text_red, styles.textSize_12,I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10]}>{meal.price} {i18n.t('RS')}</Text>
                                                                 </View>
                                                             </View>
                                                         </TouchableOpacity>

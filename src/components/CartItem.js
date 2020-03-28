@@ -67,7 +67,7 @@ class CartItem extends Component {
                             </View>
                             <View style={[ ]}>
                                 <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_12 , {alignSelf:'flex-start'}]}>{this.props.item.additions}</Text>
-                                <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, styles.border_right, styles.paddingHorizontal_10]}>{this.props.item.price} { i18n.t('RS') }</Text>
+                                <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12,I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10]}>{this.props.item.price} { i18n.t('RS') }</Text>
                             </View>
                         </View>
                         <TouchableOpacity

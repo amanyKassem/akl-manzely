@@ -948,6 +948,11 @@ const styles = ({
     },
 
     // Style Drawer
+    clickLogin : {
+        bottom                  : 100,
+        right                   : -57,
+        transform               : [{ rotate: '90deg' }] ,
+    },
 
     drawerItemStyle: {
         paddingHorizontal       : 20,
@@ -1003,8 +1008,16 @@ const styles = ({
         flexDirection:'column',
         justifyContent:'center',
         alignItems:'center'
-    }
-
+    },
+    bgModel : {
+        width                   : "100%",
+        // backgroundColor         : "rgba(0,0,0,0.8)",
+        flex                    : 1,
+        alignSelf               : 'center',
+        justifyContent          : 'flex-end',
+        bottom:-18,
+        height:500
+    },
 });
 
 export default styles;

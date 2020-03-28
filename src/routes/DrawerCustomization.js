@@ -142,17 +142,18 @@ class DrawerCustomization extends Component {
 
                 </Content>
 
+
                 {
                     (this.props.auth == null || this.props.user == null) ?
 
-                        <TouchableOpacity style={[styles.bg_red, styles.position_A, styles.bottom_40, styles.right_0, styles.height_150, styles.width_40 ]} onPress={() => this.props.navigation.navigate('Login')}>
-                            <Text style={[styles.textRegular, styles.textSize_16, styles.text_White,styles.paddingVertical_5, styles.textCenter, { transform: [{ rotate: '90deg' }], width: 100, height: 90, top: 30 }]}>{i18n.translate('login')}</Text>
+                        <TouchableOpacity style={[styles.clickLogin, styles.bg_red, styles.position_A, styles.width_150]} onPress={() => this.props.navigation.navigate('Login')}>
+                            <Text style={[styles.textRegular, styles.textSize_16, styles.text_White,styles.paddingVertical_5, styles.textCenter]}>{i18n.translate('login')}</Text>
                         </TouchableOpacity>
 
                         :
 
-                        <TouchableOpacity style={[styles.bg_red ,styles.position_A, styles.bottom_40, styles.right_0, styles.height_150, styles.width_40 ]} onPress={() => this.logout()}>
-                            <Text style={[styles.textRegular, styles.textSize_16, styles.text_White,styles.paddingVertical_5, styles.textCenter, { transform: [{ rotate: '90deg' }], width: 100, height: 90, top: 30 }]}>{i18n.translate('logout')}</Text>
+                        <TouchableOpacity style={[styles.clickLogin, styles.bg_red ,styles.position_A, styles.width_150]} onPress={() => this.logout()}>
+                            <Text style={[styles.textRegular, styles.textSize_16, styles.text_White,styles.paddingVertical_5, styles.textCenter]}>{i18n.translate('logout')}</Text>
                         </TouchableOpacity>
 
                 }

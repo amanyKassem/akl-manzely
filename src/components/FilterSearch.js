@@ -131,37 +131,12 @@ class FilterSearch extends Component {
         this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
-    incrementCount(){
-        this.setState({count: this.state.count + 1});
-    }
-    decrementCount(){
-        this.setState({count: this.state.count - 1});
-    }
-
-    toggleModalComment = () => {
-        this.setState({ isModalComment  : !this.state.isModalComment});
-    };
 
     componentWillMount() {
 
         this.setState({spinner: true});
 
     }
-
-    _keyExtractor = (item, index) => item.id;
-
-    renderItems = (item) => {
-        return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
-        );
-    };
 
     render() {
 
@@ -176,7 +151,7 @@ class FilterSearch extends Component {
                     </Left>
                     <Body style={styles.bodyText}>
                         <Title style={[styles.textRegular , styles.text_red, styles.textSize_16, styles.textLeft, styles.Width_100, styles.paddingHorizontal_5, styles.paddingVertical_0]}>
-                            مقدمي الخدمة
+                            {i18n.translate('providers')}
                         </Title>
                     </Body>
                 </Header>
@@ -206,7 +181,7 @@ class FilterSearch extends Component {
                     <View style={[ styles.boxUser ]}>
 
                         <Modal isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
-                            <View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R, styles.top_20]}>
+                            <View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R, styles.top_45 , {height:500 , paddingTop:40}]}>
 
                                 <View style={[styles.paddingVertical_15]}>
                                     <Text style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.textLeft , styles.SelfCenter]}>
@@ -296,7 +271,7 @@ class FilterSearch extends Component {
                                                 checked             = {this.state.reteId === 1}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآعلي تقييم
+                                                {i18n.t('topRated')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -313,7 +288,7 @@ class FilterSearch extends Component {
                                                 checked             = {this.state.reteId === 2}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآقل تقييم
+                                                {i18n.t('lowRated')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -344,7 +319,7 @@ class FilterSearch extends Component {
                                                 checked             = {this.state.SalleryId === 1}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآعلي سعر
+                                                {i18n.t('topPrice')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -361,7 +336,7 @@ class FilterSearch extends Component {
                                                 checked             = {this.state.SalleryId === 2}
                                             />
                                             <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                الآقل سعر
+                                                {i18n.t('lowPrice')}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>

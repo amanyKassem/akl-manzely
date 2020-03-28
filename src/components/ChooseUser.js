@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {View, Text, Image, TouchableOpacity} from "react-native";
-import {Container, Content} from 'native-base'
+import {Body, Button, Container, Content, Header, Left, Title} from 'native-base'
 import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
 import * as Animatable from 'react-native-animatable';
@@ -18,7 +18,11 @@ class ChooseUser extends Component {
         return (
 
             <Container>
-
+                <Header style={[styles.headerView , {justifyContent:"flex-start" , backgroundColor:'transparent'}]}>
+                    <TouchableOpacity style={styles.Button} transparent onPress={() => this.props.navigation.navigate('Login')}>
+                        <Image style={[styles.headImage]} source={require('../../assets/img/left.png')} resizeMode={'contain'}/>
+                    </TouchableOpacity>
+                </Header>
                 <Content contentContainerStyle={styles.bgFullWidth}>
                     <View style={[styles.position_R, styles.bgFullWidth, styles.flexCenter, styles.Width_100]}>
 

@@ -110,8 +110,8 @@ class MapLocation extends Component {
 
         }else{
 
-            if (pageName === 'Home'){
-                this.props.navigation.navigate('Home', {
+            if (pageName === 'Home' || pageName === 'FilterSearch'){
+                this.props.navigation.navigate(pageName, {
                     city_name       : this.state.city,
                     latitude        : this.state.mapRegion.latitude,
                     longitude       : this.state.mapRegion.longitude,

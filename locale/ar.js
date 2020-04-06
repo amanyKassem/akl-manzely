@@ -169,7 +169,7 @@ const ar = {
     'visa'                      : 'الدفع فيزا / ماستر كارد',
     'payPal'                    : 'الدفع باي بال',
     'sdad'                      : 'الدفع بسداد',
-    'mada'                              : 'مدي',
+    'mada'                      : 'مدي',
     'underProssess'             : 'تحت التاكيد',
     'accepted'                  : 'تمت الموافقه',
     'done'                      : 'منفذه',
@@ -252,6 +252,7 @@ const ar = {
     'topPrice'                  : 'الآعلي سعر',
     'lowRated'                  : 'الآقل تقييم',
     'lowPrice'                  : 'الآقل سعرا',
+    'chooseCategory'            : 'اختيار القسم',
 };
 
 export default ar;

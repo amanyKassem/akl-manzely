@@ -24,9 +24,9 @@ class ChooseUser extends Component {
                     </TouchableOpacity>
                 </Header>
                 <Content contentContainerStyle={styles.bgFullWidth}>
-                    <View style={[styles.position_R, styles.bgFullWidth, styles.flexCenter, styles.Width_100]}>
+                    <View style={[styles.position_R, styles.bgFullWidth, styles.Width_100]}>
 
-                        <View style={[styles.overHidden, styles.marginVertical_25, styles.icoImage]}>
+                        <View style={[styles.overHidden, styles.marginVertical_25, styles.flexCenter, styles.icoImage]}>
                             <Animatable.View animation="bounceIn" easing="ease-out" delay={500} style={[styles.flexCenter]}>
                                 <Image style={[styles.icoImage]} source={require('../../assets/img/icon.png')}/>
                             </Animatable.View>
@@ -61,7 +61,6 @@ class ChooseUser extends Component {
 
                                 </Animatable.View>
                             </View>
-
                         </View>
 
                     </View>

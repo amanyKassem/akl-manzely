@@ -277,7 +277,6 @@ class Home extends Component {
                                 </Title>
                         }
 
-
                     </Body>
                     <Right style={styles.rightIcon}>
                         {
@@ -601,7 +600,6 @@ class Home extends Component {
                                             null
                                     }
 
-
                                 </View>
 
                             </View>
@@ -623,8 +621,7 @@ class Home extends Component {
                                                   name='edit'/>
                                         </TouchableOpacity>
                                     </Animatable.View>
-                                    <Image style={[styles.Width_100, styles.height_200]}
-                                           source={{uri : this.props.providerHome.provider.cover}}/>
+                                    <Image style={[styles.Width_100, styles.height_200]} resizeMode={'cover'} source={{uri : this.props.providerHome.provider.cover}}/>
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
                                                      style={[styles.blockContent, styles.top_35, styles.overlay_black]}>
                                         <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>

@@ -2,7 +2,7 @@ import Reactotron from 'reactotron-react-native';
 import { reactotronRedux } from 'reactotron-redux';
 
 
-const reactotron = Reactotron.configure({ name: 'akl-mnzly', host : '192.168.1.4', port: 9090 })
+const reactotron = Reactotron.configure({ name: 'akl-mnzly', host : '192.168.1.3', port: 9090 })
                             .use(reactotronRedux()).useReactNative()
                             .connect();
 

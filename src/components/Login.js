@@ -187,7 +187,7 @@ class Login extends Component {
                 <NavigationEvents onWillFocus={() => this.onFocus()} />
 
                 <Content contentContainerStyle={styles.bgFullWidth}>
-                    <View style={[styles.position_R, styles.bgFullWidth, styles.marginVertical_15, styles.flexCenter, styles.Width_100]}>
+                    <View style={[styles.position_R, styles.bgFullWidth, styles.marginVertical_30, styles.flexCenter, styles.Width_100, { marginTop: 100 }]}>
                         <View style={[styles.overHidden, styles.marginVertical_15]}>
                             <Animatable.View animation="bounceIn" easing="ease-out" delay={500} style={[styles.flexCenter]}>
                                     <Image style={[styles.icoImage]} source={require('../../assets/img/icon.png')}/>

@@ -99,7 +99,16 @@ export default class App extends React.Component {
             </Root>
           </PersistGate>
         </Provider>
-
     );
   }
 }
+
+
+
+
+
+
+
+// Keystore password: 74be81dfdbc34c61bf78a46914e5550e
+// Key alias:         QHNoYW1zXzE0L2FrbC1tYW56ZWx5
+// Key password:      69a987c791e84941926478c930f44e55

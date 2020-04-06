@@ -165,7 +165,7 @@ const en = {
     'sdad'                              : 'sadad',
     'mada'                              : 'mada',
     'underProssess'                     : 'under confirmation',
-    'payer'                     : 'pay',
+    'payer'                             : 'pay',
     'accepted'                          : 'approved',
     'done'                              : 'executed',
     'canceled'                          : 'canceled',
@@ -249,6 +249,7 @@ const en = {
     'lowPrice'                          : 'low price',
     'numchef'                           : 'chef number',
     'eat'                               : 'add meals',
+	'chooseCategory'                    : 'Choose Category',
 };
 
 export default en;

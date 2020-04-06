@@ -16,13 +16,15 @@ import {
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
-import {chooseLang} from "../actions";
 import * as Animatable from 'react-native-animatable';
 import StarRating from "react-native-star-rating";
 import COLORS from "../consts/colors";
 import Modal from "react-native-modal";
-
-const isIOS = Platform.OS === 'ios';
+import axios from 'axios';
+import CONST from "../consts";
+import Spinner from "react-native-loading-spinner-overlay";
+import {NavigationEvents} from "react-navigation";
+import Product from './Product'
 
 class DetailsChef extends Component {
     constructor(props){
@@ -31,8 +33,11 @@ class DetailsChef extends Component {
             spinner                     : false,
             isModalInfo                 : false,
             isModalFilter               : false,
-            category                    : 'وجبات سريعه',
+            category                    : i18n.t('chooseCategory'),
             categoryId                  : null,
+            provider                    : [],
+            categories                  : [],
+            meals                       : []
         }
     }
 
@@ -44,40 +49,63 @@ class DetailsChef extends Component {
         this.setState({ isModalFilter   : !this.state.isModalFilter});
     };
 
-    selectCategoryId(id, name) {
+    selectCategoryId(categoryId, name) {
         this.setState({
-            checked         : id,
-            category        : name
+            checked         : categoryId,
+            categoryId      : categoryId,
+            category        : name,
+			spinner         : true
         });
+
+		let { id } = this.props.navigation.state.params;
+
+		axios({
+			method      : 'POST',
+			url         : CONST.url + 'meals',
+			data        : { provider_id: id, category_id: categoryId },
+			headers     : {Authorization: this.props.user.token}
+		}).then(response => {
+			this.setState({ meals: response.data.data, spinner: false });
+		});
+
         this.state.categoryId = id;
         this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     componentWillMount() {
-
         this.setState({spinner: true});
 
+        let { id } = this.props.navigation.state.params;
+
+		axios({
+			method      : 'POST',
+			url         : CONST.url + 'provider-info',
+			data        : { id },
+			headers     : {Authorization: this.props.user.token}
+		}).then(response => {
+			this.setState({ provider: response.data.data, categories: response.data.data.categories , spinner: false });
+		});
+
+		axios({
+			method      : 'POST',
+			url         : CONST.url + 'meals',
+			data        : { provider_id: id },
+			headers     : {Authorization: this.props.user.token}
+		}).then(response => {
+			this.setState({ meals: response.data.data, spinner: false });
+		})
     }
 
-    _keyExtractor = (item, index) => item.id;
-
-    renderItems = (item) => {
-        return(
-            <TouchableOpacity
-                onPress     = {() => this.props.navigation.navigate('FilterCategory')}
-                key         = { item.index }
-                style       = {[styles.position_R, styles.Width_50, styles.bg_red]}>
-                <Animatable.View animation="zoomIn" easing="ease-out" delay={500}>
-                    <Text>hello</Text>
-                </Animatable.View>
-            </TouchableOpacity>
-        );
-    };
+	onFocus(){
+		this.componentWillMount();
+	}
 
     render() {
 
         return (
             <Container>
+				<Spinner visible = { this.state.spinner } />
+				<NavigationEvents onWillFocus={() => this.onFocus()} />
 
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
@@ -87,7 +115,7 @@ class DetailsChef extends Component {
                     </Left>
                     <Body style={styles.bodyText}>
                         <Title style={[styles.textRegular , styles.text_red, styles.textSize_16, styles.textLeft, styles.Width_100, styles.paddingHorizontal_5, styles.paddingVertical_0]}>
-                            الشيف شعوذه
+							{ this.state.provider.provider_name }
                         </Title>
                     </Body>
                     <Right style={styles.rightIcon}>
@@ -114,7 +142,7 @@ class DetailsChef extends Component {
                                     <View style={[ styles.rowRight, styles.marginVertical_5]}>
                                         <Icon style={[styles.textSize_13, styles.text_black_gray, styles.marginHorizontal_5]} type="Feather" name='map-pin' />
                                         <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13]}>
-                                            شارع الندم التخصصي
+                                            { this.state.provider.address }
                                         </Text>
                                     </View>
                                     <View style={[ styles.rowRight, styles.paddingHorizontal_10, styles.marginVertical_5 ]}>
@@ -138,7 +166,7 @@ class DetailsChef extends Component {
                         <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
                                 <View style={[ styles.rowGroup, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
                                     <View style={[ styles.height_80 , styles.flex_25, styles.overHidden, styles.flexCenter, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
-                                        <Image style = {[styles.Width_100 , styles.height_80, styles.Border, styles.border_White]} source={require('../../assets/img/girl.png')}/>
+                                        <Image style = {[styles.Width_100 , styles.height_80, styles.Border, styles.border_White]} source={{ uri: this.state.provider.avatar }}/>
                                     </View>
                                     <View style={[ styles.flex_75 ]}>
                                         <View style={[ styles.rowRight]}>
@@ -148,17 +176,17 @@ class DetailsChef extends Component {
                                                 name    = 'circle'
                                             />
                                             <Text style={[styles.textBold, styles.text_black, styles.textSize_13]}>
-                                                بيتزا الندم
+                                                { this.state.provider.provider_name }
                                             </Text>
                                         </View>
                                         <Text style={[styles.textBold, styles.text_black, styles.textSize_12, styles.rowRight]}>
-                                            #30
+											#{ this.state.provider.identifier }
                                         </Text>
                                         <View style={[styles.rowRight, styles.marginVertical_5]}>
                                             <StarRating
                                                 disabled        = {true}
                                                 maxStars        = {5}
-                                                rating          = {3}
+                                                rating          = {this.state.provider.rate}
                                                 fullStarColor   = {COLORS.red}
                                                 starSize        = {12}
                                                 starStyle       = {styles.starStyle}
@@ -166,7 +194,7 @@ class DetailsChef extends Component {
                                         </View>
                                         <View style={[ styles.rowRight]}>
                                             <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10]}>
-                                                جميع انواع الماكولات بجميع انواع المشروبات
+                                                { this.state.provider.provider_details }
                                             </Text>
                                         </View>
                                     </View>
@@ -187,39 +215,27 @@ class DetailsChef extends Component {
                         <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
 
                             <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                <TouchableOpacity
-                                    style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                    onPress             = {() => this.selectCategoryId(1, 'وجبات بطيئه')}
-                                >
-                                    <View style={[styles.overHidden, styles.rowRight]}>
-                                        <CheckBox
-                                            style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                            color               = {styles.text_red}
-                                            selectedColor       = {styles.text_red}
-                                            checked             = {this.state.checked === 1}
-                                        />
-                                        <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                            وجبات بطيئه
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                    onPress             = {() => this.selectCategoryId(2, 'وجبات حاره')}
-                                >
-                                    <View style={[styles.overHidden, styles.rowRight]}>
-                                        <CheckBox
-                                            style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
-                                            color               = {styles.text_red}
-                                            selectedColor       = {styles.text_red}
-                                            checked             = {this.state.checked === 2}
-                                        />
-                                        <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                            وجبات حاره
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
+                                {
+                                    this.state.categories.map((category, i) => (
+										<TouchableOpacity key={i}
+											style               = {[styles.rowGroup, styles.marginVertical_10]}
+											onPress             = {() => this.selectCategoryId(category.id , category.name)}
+										>
+											<View style={[styles.overHidden, styles.rowRight]}>
+												<CheckBox
+													onPress             = {() => this.selectCategoryId(category.id , category.name)}
+													style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+													color               = {styles.text_red}
+													selectedColor       = {styles.text_red}
+													checked             = {this.state.checked === category.id}
+												/>
+												<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+                                                    { category.name }
+												</Text>
+											</View>
+										</TouchableOpacity>
+                                    ))
+                                }
                             </View>
 
                         </View>
@@ -228,87 +244,11 @@ class DetailsChef extends Component {
                     <View style={[ styles.marginVertical_10 ]}>
 
                         <View style={[ styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100 ]}>
-
-                            <View style={[ styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <TouchableOpacity
-                                        onPress     = {() => this.props.navigation.navigate('Details')}
-                                        style       = {[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                        <View style = {[ styles.Width_100, styles.position_R ]}>
-                                            <Image style            = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/1.png')}/>
-                                            <TouchableOpacity style = {[ styles.position_A, styles.right_0, styles.top_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.flexCenter ]}>
-                                                <Icon
-                                                    style       = {[styles.text_gray, styles.textSize_20]}
-                                                    type        = "MaterialIcons"
-                                                    name        = 'favorite-border'
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style = {[ styles.Width_100, styles.marginVertical_5 ]}>
-                                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر لحم</Text>
-                                            </View>
-                                            <View style={[ styles.rowGroup ]}>
-                                                <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10 ر.س</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-
-                            <View style={[ styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <TouchableOpacity
-                                        onPress     = {() => this.props.navigation.navigate('Details')}
-                                        style       = {[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                        <View style = {[ styles.Width_100, styles.position_R ]}>
-                                            <Image style            = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/2.png')}/>
-                                            <TouchableOpacity style = {[ styles.position_A, styles.right_0, styles.top_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.flexCenter ]}>
-                                                <Icon
-                                                    style       = {[styles.text_gray, styles.textSize_20]}
-                                                    type        = "MaterialIcons"
-                                                    name        = 'favorite-border'
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style = {[ styles.Width_100, styles.marginVertical_5 ]}>
-                                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر لحم</Text>
-                                            </View>
-                                            <View style={[ styles.rowGroup ]}>
-                                                <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10 ر.س</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
-
-                            <View style={[ styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5 ]}>
-                                <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
-                                    <TouchableOpacity
-                                        onPress     = {() => this.props.navigation.navigate('Details')}
-                                        style       = {[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
-                                        <View style = {[ styles.Width_100, styles.position_R ]}>
-                                            <Image style            = {[styles.Width_100 , styles.height_100]} source={require('../../assets/img/3.png')}/>
-                                            <TouchableOpacity style = {[ styles.position_A, styles.right_0, styles.top_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.flexCenter ]}>
-                                                <Icon
-                                                    style       = {[styles.text_gray, styles.textSize_20]}
-                                                    type        = "MaterialIcons"
-                                                    name        = 'favorite-border'
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
-                                        <View style = {[ styles.Width_100, styles.marginVertical_5 ]}>
-                                            <View style={[ styles.rowGroup, styles.marginVertical_5 ]}>
-                                                <Text style={[styles.textRegular, styles.text_red, styles.textSize_12]}>برجر لحم</Text>
-                                            </View>
-                                            <View style={[ styles.rowGroup ]}>
-                                                <Text style={[styles.textRegular, styles.text_black, styles.textSize_12]}>10 ر.س</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Animatable.View>
-                            </View>
+                            {
+                                this.state.meals.map(( meal, i ) => (
+									<Product key={meal.id} data={meal} navigation={this.props.navigation} />
+                                ))
+                            }
 
                         </View>
 
@@ -323,13 +263,12 @@ class DetailsChef extends Component {
     }
 }
 
-export default DetailsChef;
 
-// const mapStateToProps = ({ auth, profile, lang }) => {
-//     return {
-//         auth: auth.user,
-//         user: profile.user,
-//         lang: lang.lang
-//     };
-// };
-// export default connect(mapStateToProps, {})(Home);
+const mapStateToProps = ({ auth, profile, lang }) => {
+    return {
+        auth: auth.user,
+        user: profile.user,
+        lang: lang.lang
+    };
+};
+export default connect(mapStateToProps, {})(DetailsChef);

@@ -88,7 +88,7 @@ class Cart extends Component {
                 <NavigationEvents onWillFocus={() => this.onFocus()}/>
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
-                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
+                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.navigate('Home', { pageName: 'Cart' })}>
                             <Image style={[styles.headImage]} source={require('../../assets/img/left.png')} resizeMode={'contain'}/>
                         </Button>
                     </Left>
@@ -124,7 +124,7 @@ class Cart extends Component {
                                                                     {cart.name}
                                                                 </Text>
                                                             </View>
-                                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5]}>
+                                                            <Text style={[styles.textRegular, styles.text_light_gray, styles.textSize_13, styles.paddingHorizontal_5, { alignSelf: 'flex-start' }]}>
                                                                 {cart.category}
                                                             </Text>
                                                             <View style={[ styles.rowRight]}>

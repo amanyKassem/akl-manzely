@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "akl-manzely",
+    "name": "الأكل المنزلي",
     "slug": "akl-manzely",
     "privacy": "public",
     "sdkVersion": "36.0.0",
@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -35,7 +35,7 @@
     },
     "android": {
       "package": "com.aait.aklmanzly",
-      "versionCode": 1,
+      "versionCode": 5,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBQu-aDY--uY14s4U3ok-XwwqhsnhLFe5Q"

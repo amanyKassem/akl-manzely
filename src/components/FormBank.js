@@ -229,7 +229,7 @@ class FormBank extends Component {
                                             </TouchableOpacity>
                                         </View>
 
-                                        <Modal isVisible={this.state.isModalBank} onBackdropPress={() => this.toggleModalBank()}>
+                                        <Modal avoidKeyboard={true} isVisible={this.state.isModalBank} onBackdropPress={() => this.toggleModalBank()}>
                                             <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
                                                 <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>

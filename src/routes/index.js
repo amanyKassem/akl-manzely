@@ -45,12 +45,16 @@ import ShareApp                 from "../components/ShareApp";
 import Credit                   from "../components/Credit";
 import EditBankAcc              from "../components/EditBankAcc";
 import DrawerCustomization      from "./DrawerCustomization";
+import EditProduct 				from "../components/EditProduct";
+import DetermineLocation 		from "../components/DetermineLocation";
+import RegisterTerms from "../components/RegisterTerms";
 
 const width = Dimensions.get('window').width;
 const drawerCust = (props) => (<DrawerCustomization {...props} />);
 
 const drawerNavigator = createDrawerNavigator({
     Home                : Home,
+	DetermineLocation                : DetermineLocation,
     Profile             : Profile,
     MyOrders            : MyOrders,
     Offers              : Offers,
@@ -77,12 +81,6 @@ const drawerNavigator = createDrawerNavigator({
 
 
 
-
-
-
-
-
-
 const appStack =  createStackNavigator({
 	drawerNavigator: {
 		screen: drawerNavigator,
@@ -98,6 +96,12 @@ const appStack =  createStackNavigator({
 	},
 	AddProduct : {
 		screen : AddProduct,
+		navigationOptions: {
+			header: null
+		}
+	},
+	EditProduct : {
+		screen : EditProduct,
 		navigationOptions: {
 			header: null
 		}
@@ -146,6 +150,12 @@ const appStack =  createStackNavigator({
 	},
 	EditProfile : {
 		screen : EditProfile,
+		navigationOptions: {
+			header: null
+		}
+	},
+	DetermineLocation : {
+		screen : DetermineLocation,
 		navigationOptions: {
 			header: null
 		}
@@ -306,6 +316,12 @@ const authStack = createStackNavigator({
 	},
 	MapLocation : {
 		screen : MapLocation,
+		navigationOptions: {
+			header: null
+		}
+	},
+	RegisterTerms : {
+		screen : RegisterTerms,
 		navigationOptions: {
 			header: null
 		}

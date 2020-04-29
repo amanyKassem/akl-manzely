@@ -329,7 +329,7 @@ class EditProfile extends Component {
                                     </TouchableOpacity>
                                 </View>
 
-                                <Modal isVisible={this.state.isModalNationality} onBackdropPress={() => this.toggleModalNationality()}>
+                                <Modal avoidKeyboard={true} isVisible={this.state.isModalNationality} onBackdropPress={() => this.toggleModalNationality()}>
                                     <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
                                         <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
@@ -423,7 +423,7 @@ class EditProfile extends Component {
                                     </TouchableOpacity>
                                 </View>
 
-                                <Modal isVisible={this.state.isModalCountry} onBackdropPress={() => this.toggleModalCountry()}>
+                                <Modal avoidKeyboard={true} isVisible={this.state.isModalCountry} onBackdropPress={() => this.toggleModalCountry()}>
                                     <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
                                         <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>

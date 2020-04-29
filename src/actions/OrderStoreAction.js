@@ -13,6 +13,7 @@ export const getOrderStore = (lang , provider_id , delivery_type , latitude , lo
             if (response.data.success){
                 props.navigation.navigate('ConfirmPayment');
             }
+
             Toast.show({
                 text        : response.data.message,
                 type        : response.data.success ? "success" : "danger",
@@ -23,6 +24,8 @@ export const getOrderStore = (lang , provider_id , delivery_type , latitude , lo
                     textAlign   : 'center'
                 }
             });
+
+            dispatch({ type: 'setNewOrder', payload: response.data })
         });
 
     }

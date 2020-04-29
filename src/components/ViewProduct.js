@@ -36,6 +36,9 @@ import * as Animatable from 'react-native-animatable';
 import StarRating from "react-native-star-rating";
 import Modal from "react-native-modal";
 import {NavigationEvents} from "react-navigation";
+import ProgressImg from 'react-native-image-progress';
+import axios from 'axios';
+import CONST from '../consts'
 
 const isIOS = Platform.OS === 'ios';
 
@@ -146,7 +149,7 @@ class ViewProduct extends Component {
             <View key={i} style={[styles.rowGroup, styles.marginVertical_10]}>
                 <View
                     style={[styles.flex_15, styles.overHidden, styles.flexCenter]}>
-                    <Image
+                    <ProgressImg
                         style={[styles.width_40, styles.height_40, styles.Border, styles.border_red, styles.Radius_100]}
                         source={{uri:review.avatar}}/>
                 </View>
@@ -173,6 +176,19 @@ class ViewProduct extends Component {
             </View>
         )
 
+    }
+
+	deleteMeal(){
+        this.setState({ loader: true });
+        axios({
+            url: CONST.url + 'delete-meal',
+            method: 'POST',
+            headers: { Authorization: this.props.user.token },
+            data: { meal_id: this.props.mealInfo.id }
+        }).then(response => {
+			this.setState({ loader: false });
+            this.props.navigation.navigate('Home');
+        })
     }
 
     onFocus() {
@@ -221,11 +237,15 @@ class ViewProduct extends Component {
                                 <View style={[styles.position_R, styles.overHidden]}>
                                     <Animatable.View animation="fadeIn" easing="ease-out" delay={500}
                                                      style={[styles.width_40, styles.height_40, styles.position_A, styles.top_25, styles.left_0, styles.zIndex, styles.overlay_black]}>
-                                        <TouchableOpacity
+                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('EditProduct', { meal: this.props.mealInfo })}
                                             style={[styles.width_40, styles.height_40, styles.flexCenter]}>
-                                            <Icon style={[styles.text_White, styles.textSize_18]} type="AntDesign"
-                                                  name='edit'/>
+                                            <Icon style={[styles.text_White, styles.textSize_18]} type="AntDesign" name='edit'/>
                                         </TouchableOpacity>
+
+										<TouchableOpacity onPress={() => this.deleteMeal()}
+											style={[styles.width_40, styles.height_40, styles.flexCenter, { backgroundColor: 'red' }]}>
+											<Icon style={[styles.text_White, styles.textSize_18]} type="FontAwesome" name='trash-o'/>
+										</TouchableOpacity>
                                     </Animatable.View>
                                     <Swiper
                                         containerStyle={[styles.Width_95, styles.marginVertical_15, styles.height_200, styles.viewBlock]}
@@ -245,8 +265,7 @@ class ViewProduct extends Component {
                                             this.props.mealInfo.images ?
                                                 this.props.mealInfo.images.map((img , i) => (
                                                     <View key={i} style={[styles.viewBlock]}>
-                                                        <Image style={[styles.Width_95, styles.height_200]}
-                                                               source={{uri:img}}/>
+                                                        <ProgressImg style={[styles.Width_95, styles.height_200]} source={{uri:img.image}}/>
                                                     </View>
                                                 ))
                                                 :
@@ -359,7 +378,7 @@ class ViewProduct extends Component {
                                                         </View>
                                                     </TouchableOpacity>
                                                     :
-                                                    this.props.mealInfo.reviews.length !== 0 ?
+													this.props.mealInfo.reviews && this.props.mealInfo.reviews.length !== 0 ?
                                                         <TouchableOpacity onPress={() => this.toggleShowComments()}>
                                                             <Text style={[styles.textRegular, styles.text_red, styles.textSize_14, styles.textLeft , styles.marginHorizontal_5]}>
                                                                 {i18n.t('viewComments')}
@@ -383,7 +402,7 @@ class ViewProduct extends Component {
                                     </View>
                                 </View>
 
-                                <Modal isVisible={this.state.isModalComment}
+                                <Modal avoidKeyboard={true} isVisible={this.state.isModalComment}
                                        onBackdropPress={() => this.toggleModalComment()}
                                        style={[styles.bottomCenter, styles.Width_100]}>
                                     <View
@@ -452,7 +471,7 @@ class ViewProduct extends Component {
                                     </View>
                                 </Modal>
 
-                                <Modal isVisible={this.state.isShowComments}
+                                <Modal avoidKeyboard={true} isVisible={this.state.isShowComments}
                                        onBackdropPress={() => this.toggleShowComments()}
                                        style={[styles.bottomCenter, styles.Width_100]}>
                                     <View

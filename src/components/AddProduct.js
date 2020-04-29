@@ -9,15 +9,7 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView
 } from "react-native";
-import {
-    Container,
-    Content,
-    Header,
-    Button,
-    Left,
-    Body,
-    Title, Right, Icon, Form, Item, Input, CheckBox, Toast
-} from 'native-base'
+import { Container, Content, Header, Button, Left, Body, Title, Right, Icon, Form, Item, Input, CheckBox, Toast } from 'native-base'
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
 import {connect} from "react-redux";
@@ -29,6 +21,9 @@ import * as Permissions from 'expo-permissions';
 import * as Animatable from "react-native-animatable";
 import CategoryPicker from "./CategoryPicker"
 import COLORS from "../consts/colors";
+import * as ImagePicker from 'expo-image-picker';
+import meals from "../reducers/MealsReducer";
+
 
 let base64   = [];
 
@@ -99,13 +94,37 @@ class AddProduct extends Component {
 
     onConfirm() {
         this.setState({ isSubmitted: true });
-       alert(base64.length);
         this.props.addMeal( this.props.lang , this.state.price , this.state.timeOut , this.state.category_id, base64 , this.state.discount, this.state.Additions ,this.props.user.token , this.props );
     }
 
     onSubCategories ( id ){
         this.setState({spinner: true, active : id });
     }
+
+	askPermissionsAsync = async () => {
+		await Permissions.askAsync(Permissions.CAMERA);
+		await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+	};
+
+	_pickImage = async () => {
+
+		this.askPermissionsAsync();
+
+		let result = await ImagePicker.launchImageLibraryAsync({
+			allowsEditing: true,
+			aspect: [4, 3],
+			base64:true
+		});
+
+		if (!result.cancelled) {
+			let images = this.state.photos;
+			images.push(result.uri);
+			base64.push(result.base64);
+
+			this.setState({  photos: images, refreshed: !this.state.refreshed });
+		}
+	};
 
     selectFilter(id, name , cat) {
         this.setState({
@@ -117,7 +136,6 @@ class AddProduct extends Component {
     }
 
     selectedId = (id) => {
-         alert(id)
         this.setState({category_id:id})
     }
 
@@ -127,8 +145,9 @@ class AddProduct extends Component {
         this.props.getCategories(this.props.lang ,null);
 
     }
+
     renderConfirm(){
-        if (this.state.category_id === null || this.state.price == ''){
+        if (this.state.category_id === null || this.state.price == '' || this.state.timeOut == ''){
             return (
                 <View
                     style={[styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red , {backgroundColor:"#999"}]}>
@@ -138,6 +157,20 @@ class AddProduct extends Component {
                 </View>
             );
         }
+
+        if (this.state.discount !== '' && Number(this.state.discount) === 0 && Number(this.state.discount) > 100 ){
+			Toast.show({
+				text: i18n.t('discountNotValid'),
+				type: "danger",
+				duration: 3000,
+				textStyle: {
+					color: "white",
+					fontFamily: 'cairo',
+					textAlign: 'center',
+				}
+			});
+        }
+
         if (this.state.isSubmitted){
             return(
                 <View style={[{ justifyContent: 'center', alignItems: 'center' } , styles.marginVertical_15]}>
@@ -157,6 +190,7 @@ class AddProduct extends Component {
             </TouchableOpacity>
         );
     }
+
     componentWillReceiveProps(nextProps) {
         this.setState({ isSubmitted: false});
     }
@@ -211,7 +245,7 @@ class AddProduct extends Component {
             <View style={[ styles.width_70, styles.height_70, styles.marginHorizontal_5, styles.marginVertical_5]}>
                 <View style={[ styles.position_A, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white, { left : -5, top : -5 } ]} />
                 <View style={[ styles.bg_White, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.Border, styles.border_gray,styles.width_70, styles.height_70, styles.overHidden, styles.position_R]}>
-                    <Image style={[styles.Width_100, styles.height_full]} source={{uri: item.file}} resizeMode={'cover'}/>
+                    <Image style={[styles.Width_100, styles.height_full]} source={{uri: item}} resizeMode={'cover'}/>
                     <TouchableOpacity
                         onPress     = {() => this.deleteImage(item)}
                         style       = {[styles.position_A , styles.overlay_black, styles.Width_100, styles.height_full, styles.flexCenter, styles.top_5]}>
@@ -239,26 +273,39 @@ class AddProduct extends Component {
             });
 
             const imgs = this.state.photos;
-            console.log(imgs);
+          //  console.log(imgs);
             for (var i =0; i < imgs.length; i++){
                 const imageURL = imgs[i].file;
-                Image.getSize(imageURL, (width, height) => {
-                    var imageSize = [{
-                        resize: {
-                            width,
-                            height
-                        }
-                    }];
 
-                    console.log('imgURI', imageURL);
+                Image.getSize(imageURL, (width, height) => { var imageSize = [{ resize: { width, height } }];
+
                     ImageManipulator.manipulateAsync(imageURL, imageSize, { format: 'png', base64: true }).then(res => {
                         base64.push(res.base64);
-                        console.log('res____', res)
+                    //    console.log('res____', res)
                     });
                 }, (reason) => console.log(reason))
             }
         }).catch((e) => console.log(e))
     };
+
+    setDiscount(discount){
+        console.log('discount', discount);
+        if (Number(discount) > 0 && Number(discount) <= 100)
+		    this.setState({discount});
+        else if (discount === '')
+			this.setState({discount});
+        else
+			Toast.show({
+				text: i18n.t('discountNotValid'),
+				type: "danger",
+				duration: 3000,
+				textStyle: {
+					color: "white",
+					fontFamily: 'cairo',
+					textAlign: 'center',
+				}
+			});
+    }
 
     onFocus(){
         base64 = [];
@@ -266,6 +313,8 @@ class AddProduct extends Component {
     }
 
     render() {
+
+        console.log('dam images', this.state.photos);
 
         if (this.state.imageBrowserOpen) {
             return(<ImageBrowser base64={true} max={5} callback={this.imageBrowserCallback}/>);
@@ -312,7 +361,7 @@ class AddProduct extends Component {
                                 <View style={[ styles.position_R, styles.overHidden,styles.Width_100, styles.height_150, styles.flexCenter, styles.bg_White, styles.Border, styles.border_gray ]}>
                                     <TouchableOpacity
                                         style       = {[styles.width_40, styles.height_40, styles.bg_light_red, styles.flexCenter, styles.position_A, styles.right_10, styles.top_10, styles.zIndex]}
-                                        onPress     = {() => this.setState({imageBrowserOpen: true})}>
+                                        onPress     = {this._pickImage}>
                                         <Icon style = {[styles.text_red, styles.textSize_20]} type="AntDesign" name='plus' />
                                     </TouchableOpacity>
                                 </View>
@@ -344,6 +393,7 @@ class AddProduct extends Component {
                                             onBlur={() => this.unActiveInput('price')}
                                             onFocus= {() => this.activeInput('price')}
                                             value= {this.state.price}
+											keyboardType={'number-pad'}
                                         />
                                     </Item>
                                 </View>
@@ -353,10 +403,11 @@ class AddProduct extends Component {
                                         <Input
                                             placeholder={i18n.translate('sallproducer')}
                                             style={[styles.input, styles.height_50, (this.state.discountStatus === 1 ? styles.Active : styles.noActive)]}
-                                            onChangeText={(discount) => this.setState({discount})}
+                                            onChangeText={(discount) => this.setDiscount(discount)}
                                             onBlur={() => this.unActiveInput('discount')}
                                             onFocus= {() => this.activeInput('discount')}
                                             value= {this.state.discount}
+											keyboardType={'number-pad'}
                                         />
                                     </Item>
                                 </View>
@@ -370,6 +421,7 @@ class AddProduct extends Component {
                                             onBlur={() => this.unActiveInput('timeOut')}
                                             onFocus= {() => this.activeInput('timeOut')}
                                             value= {this.state.timeOut}
+											keyboardType={'number-pad'}
                                         />
                                     </Item>
                                 </View>
@@ -413,12 +465,13 @@ class AddProduct extends Component {
 }
 
 
-const mapStateToProps = ({ auth, profile, lang , categories}) => {
+const mapStateToProps = ({ auth, profile, lang , categories, meals}) => {
     return {
         auth: auth.user,
         user: profile.user,
         lang: lang.lang,
         categories: categories.categories,
+        meal: meals.meal
     };
 };
 export default connect(mapStateToProps, {getCategories , addMeal})(AddProduct);

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {View, Text, Image, TouchableOpacity, Share} from "react-native";
-import {Button, Container, Content, Icon} from 'native-base';
+import {Button, Container, Content, Icon, Toast} from 'native-base';
 import { DrawerItems } from 'react-navigation-drawer';
 
 import styles from "../../assets/style";
@@ -28,7 +28,7 @@ class DrawerCustomization extends Component {
             const result = await Share.share({
                 message:'dddddd'
                     // Platform.OS === 'ios'? 'https://apps.apple.com/us/app/reesh-ريش/id1490248883?ls=1' : 'https://play.google.com/store/apps/details?id=com.app.reesh',
-            })
+            });
 
             if (result.action === Share.sharedAction) {
                 if (result.activityType) {
@@ -43,6 +43,19 @@ class DrawerCustomization extends Component {
             alert(error.message);
         }
     };
+
+	DetermineLocation(){
+		Toast.show({
+			text: i18n.t('getLocation'),
+			type: "success",
+			duration: 3000,
+			textStyle: {
+				color: "white",
+				fontFamily: 'cairo',
+				textAlign: 'center',
+			}
+		});
+    }
 
     filterItems(item){
         if (this.props.user == null)
@@ -113,6 +126,8 @@ class DrawerCustomization extends Component {
                                  (route) => {
                                      if (route.route.key === 'logout') {
                                          this.logout()
+                                     }else if (route.route.key === 'DetermineLocation') {
+                                         this.DetermineLocation()
                                      }else {
                                          route.route.key === 'ShareApp' ? this.onShare(): this.props.navigation.navigate(route.route.key)
                                      }

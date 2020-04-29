@@ -83,7 +83,7 @@ class Terms extends Component {
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}>
                                         {
 											this.props.contactInfo && this.props.contactInfo.terms ?
-												<Text style={[{alignSelf: 'flex-start'} ,styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15]}>
+												<Text style={[{alignSelf: 'center'} ,styles.textRegular , styles.text_black, styles.rowRight, styles.Width_100, styles.marginVertical_15, { textAlign: 'center' }]}>
 													{this.props.contactInfo.terms}
 												</Text>
                                                 :

@@ -9,34 +9,27 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistedStore } from './src/store';
 import './ReactotronConfig';
-// import * as Permissions from "expo-permissions";
-// import { Notifications } from 'expo'
-
-
-
+import { Notifications } from 'expo'
 
 export default class App extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isReady: false,
-    };
-
-  }
+	constructor(props) {
+		super(props);
+		this.state = {
+			isReady: false,
+		};
+	}
 
   async componentDidMount() {
 
     console.disableYellowBox = true;
 
-    // if (Platform.OS === 'android') {
-    //   Notifications.createChannelAndroidAsync('orders', {
-    //     name: 'Chat messages',
-    //     sound: true,
-    //   });
-    // }
-
-    // Notifications.addListener(this.handleNotification);
+    if (Platform.OS === 'android') {
+      Notifications.createChannelAndroidAsync('notify', {
+        name: 'Chat messages',
+        sound: true,
+      });
+    }
 
 
     await Font.loadAsync({
@@ -50,38 +43,6 @@ export default class App extends React.Component {
     this.setState({ isReady: true });
 
   }
-
-  //
-  // handleNotification = (notification) => {
-  //   if (notification && notification.origin !== 'received') {
-  //     this.props.navigation.navigate('notifications');
-  //   }
-  // }
-
-
-  // async componentWillMount() {
-  //
-  //   const { status: existingStatus } = await Permissions.getAsync(
-  //       Permissions.NOTIFICATIONS
-  //   );
-  //
-  //   let finalStatus = existingStatus;
-  //
-  //   if (existingStatus !== 'granted') {
-  //     const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-  //     finalStatus = status;
-  //   }
-  //
-  //   if (finalStatus !== 'granted') {
-  //     return;
-  //   }
-  //
-  //   const deviceId = await Notifications.getExpoPushTokenAsync();
-  //   console.log('deviceIddeviceId' , deviceId)
-  //
-  //   AsyncStorage.setItem('deviceID', deviceId);
-  //
-  // }
 
   render() {
 
@@ -102,9 +63,6 @@ export default class App extends React.Component {
     );
   }
 }
-
-
-
 
 
 

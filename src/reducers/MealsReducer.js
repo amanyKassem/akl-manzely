@@ -1,4 +1,4 @@
-const INITIAL_STATE = { meals : [], loader : true };
+const INITIAL_STATE = { meals : [], loader : true, meal: [] };
 
 export default (state = INITIAL_STATE, action) => {
     switch (action.type) {
@@ -7,6 +7,8 @@ export default (state = INITIAL_STATE, action) => {
                 meals: action.payload.data,
                 loader: !!action.payload.success
             };
+        case 'setMeal':
+            return { meal: action.payload, loader: !!action.payload.success };
         default:
             return state;
     }

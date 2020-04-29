@@ -102,8 +102,8 @@ const ar = {
     'nameproducer'              : 'اسم المنتج',
     'producer'                  : 'نوع المنتج',
     'monyproducer'              : 'سعر المنتج',
-    'sallproducer'              : 'نسبه الخصم',
-    'searchCat'                 : 'بحث بالوجبه او الشيف',
+    'sallproducer'              : 'نسبه الخصم ٪',
+    'searchCat'                 : 'بحث الشيف',
     'searchcom'                 : 'آكتب شئ ف البحث',
     'nopro'                     : 'لا يوجد مزود خدمه',
     'searchchef'                : 'بحث عن الشيف',
@@ -183,7 +183,7 @@ const ar = {
     'delver'                    : 'طرق التوصيل',
     'timedelver'                : 'مسافه التوصيل',
     'eat'                       : 'إضافه وجبات',
-    'timeeat'                   : 'الوقت اللازم للتنفيذ',
+    'timeeat'                   : 'الوقت اللازم للتنفيذ بالدقائق',
     'tieat'                     : 'الوقت اللازم',
     'datapro'                   : 'بيانات مقدم الخدمة',
     'choose'                    : 'إختيار',
@@ -253,6 +253,13 @@ const ar = {
     'lowRated'                  : 'الآقل تقييم',
     'lowPrice'                  : 'الآقل سعرا',
     'chooseCategory'            : 'اختيار القسم',
+    'far'                       : 'يبعد : ',
+	'determineLocation'         : 'تحديد الموقع',
+	'getLocation'               : 'تم تحديد الموقع الحالي بنجاح',
+	'accept'                    : 'الموافقة',
+	'discountNotValid'          : 'نسبة الخصم غير صحيحة',
+	'_newNotification'          : 'يوجد اشعار جديد',
+	'newNotification'           : 'اشعار جديد',
 };
 
 export default ar;

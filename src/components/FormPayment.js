@@ -127,10 +127,11 @@ class FormPayment extends Component {
         this.props.getOrderStore(this.props.lang, provider_id , delivery_type , latitude , longitude , this.props.user.token  , this.props )
 
     }
+
     componentWillReceiveProps(nextProps) {
         this.setState({ isSubmitted: false});
-
     }
+
     render() {
 
         return (
@@ -235,10 +236,11 @@ class FormPayment extends Component {
     }
 }
 
-const mapStateToProps = ({lang , profile}) => {
+const mapStateToProps = ({lang , profile, orders}) => {
     return {
         lang: lang.lang,
         user: profile.user,
+		orders: orders.data,
     };
 };
 export default connect(mapStateToProps, {getOrderStore })(FormPayment);

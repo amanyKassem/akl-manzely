@@ -8,6 +8,7 @@ import StarRating from "react-native-star-rating";
 import COLORS from "../consts/colors";
 import {connect} from "react-redux";
 import { setFav } from '../actions';
+import ProgressImg from 'react-native-image-progress';
 
 
 class Product extends Component{
@@ -39,6 +40,7 @@ class Product extends Component{
     }
 
     render(){
+
         return(
             <View
                 style={[styles.overHidden, styles.Width_47, styles.marginHorizontal_5, styles.marginVertical_5]}>
@@ -48,8 +50,7 @@ class Product extends Component{
                         onPress={() => this.onPressMeal()}
                         style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5]}>
                         <View style={[styles.Width_100, styles.position_R]}>
-                            <Image style={[styles.Width_100, styles.height_100]}
-                                   source={{uri: this.props.data.image}}/>
+                            <ProgressImg style={[styles.Width_100, styles.height_100]} source={{uri: this.props.data.image}}/>
                             <View
                                 style={[styles.Width_100, styles.position_A, styles.right_0, styles.bottom_0, styles.paddingHorizontal_5, styles.paddingVertical_5, styles.overlay_black, styles.rowGroup]}>
                                 <View style={[styles.rowRight]}>

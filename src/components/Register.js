@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView, ScrollView} from "react-native";
+import {View, Text, Image, TouchableOpacity, KeyboardAvoidingView, ScrollView, SafeAreaView, Platform} from "react-native";
 import {Container, Content, Form, Input, Item, Toast, Icon, CheckBox} from 'native-base'
 import styles from '../../assets/style';
 import i18n from '../../locale/i18n'
@@ -9,9 +9,11 @@ import Modal from "react-native-modal";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import {connect} from 'react-redux';
 import {getDeliveryTypes , getCountries , register , getGenders } from "../actions";
+import { Appearance } from 'react-native-appearance';
 import Spinner from "react-native-loading-spinner-overlay";
 
-let deliveryArr = [];
+let deliveryArr 	= [];
+const colorScheme 	= Appearance.getColorScheme();
 
 class Register extends Component {
 	constructor(props){
@@ -22,7 +24,7 @@ class Register extends Component {
 			phone                       : '',
 			email                       : '',
 			birthday                    : null,
-			qualification               : null,
+			qualification               : '',
 			password                    : '',
 			confirmPassword             : '',
 			deviceId                    : '',
@@ -58,7 +60,6 @@ class Register extends Component {
 	}
 
 	activeInput(type) {
-
 		if (type === 'name' || this.state.name !== '') {
 			this.setState({nameStatus: 1})
 		}
@@ -150,7 +151,11 @@ class Register extends Component {
 			isError     = true;
 			msg         = i18n.t('providerNameRequired');
 			this.setState({ errorType: 'providerName' });
-		} else if (this.state.phone.length <= 0) {
+		} else if (this.state.phone.length <= 0 || this.state.phone.length !== 10) {
+			isError     = true;
+			msg         = i18n.t('phoneValidation');
+			this.setState({ errorType: 'phone' });
+		} else if (this.state.phone.length !== 10) {
 			isError     = true;
 			msg         = i18n.t('namereq');
 			this.setState({ errorType: 'phone' });
@@ -278,12 +283,11 @@ class Register extends Component {
 
 	componentWillReceiveProps(nextProps) {
 
-
 		this.setState({ spinner: false });
-		if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
-			this.state.cityName             = nextProps.navigation.state.params.city_name;
-			this.setState({latitude   : nextProps.navigation.state.params.latitude});
-			this.setState({longitude  : nextProps.navigation.state.params.longitude});
+		if( nextProps.navigation.state.params !== undefined ){
+			const { latitude, longitude, cityName, accept } = nextProps.navigation.state.params;
+			if (cityName) this.setState({latitude, longitude, cityName});
+			if (accept) this.setState({ checkTerms: true })
 		}else{
 			this.setState({cityName   : i18n.translate('mapname')});
 		}
@@ -313,7 +317,8 @@ class Register extends Component {
 								<Image style={[styles.icoImage]} source={require('../../assets/img/icon.png')}/>
 							</Animatable.View>
 						</View>
-						<KeyboardAvoidingView behavior={'padding'}>
+
+						<SafeAreaView >
 							<Form style={[styles.flexCenter, styles.marginVertical_25, styles.Width_90]}>
 
 								<View style={[styles.position_R, styles.height_80, styles.flexCenter]}>
@@ -341,7 +346,7 @@ class Register extends Component {
 													onFocus={() => this.activeInput('providerName')}
 												/>
 											</Item>
-											{ this.state.errorType === 'name' ? <Text style={{ color: 'red', height: 40 }}>{ this.state.errorMsg }</Text> : null }
+											{ this.state.errorType === 'providerName' ? <Text style={{ color: 'red', height: 40 }}>{ this.state.errorMsg }</Text> : null }
 										</View> : null
 								}
 
@@ -375,22 +380,23 @@ class Register extends Component {
 								{
 									this.state.userType === 'chef' ?
 										<View style={[styles.overHidden, styles.rowGroup]}>
-											<TouchableOpacity onPress={this.toggleDatePicker} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.date !== '' ? styles.border_red :  styles.border_gray )]}>
-												<Text style={[styles.textRegular, styles.textSize_14, (this.state.date !== '' || this.state.errorType === 'date' ? styles.text_red :  styles.text_black )]}>
+											<TouchableOpacity onPress={this.toggleDatePicker} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.date ? styles.border_red :  styles.border_gray )]}>
+												<Text style={[styles.textRegular, styles.textSize_14, (this.state.date || this.state.errorType === 'date' ? styles.text_red :  styles.text_black )]}>
 													{i18n.translate('birthday')} : {this.state.date}
 												</Text>
 												<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='calendar' />
 											</TouchableOpacity>
 
 											<DateTimePicker
-												isVisible       = {this.state.isDatePickerVisible}
-												onConfirm       = {this.doneDatePicker}
-												onCancel        = {this.toggleDatePicker}
-												mode            = {'date'}
-                                                // minimumDate     = {new Date()}
+												isVisible       	= {this.state.isDatePickerVisible}
+												onConfirm       	= {this.doneDatePicker}
+												onCancel        	= {this.toggleDatePicker}
+												mode            	= {'date'}
+												isDarkModeEnabled 	= {colorScheme === 'dark'}
 											/>
 										</View> : null
 								}
+
 
 								<View style={[styles.overHidden, styles.rowGroup]}>
 									<TouchableOpacity onPress={() => this.toggleModalNationality()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.nationalityId !== null || this.state.errorType === 'nationality' ? styles.border_red :  styles.border_gray )]}>
@@ -402,7 +408,7 @@ class Register extends Component {
 									{ this.state.errorType === 'nationality' ? <Text style={{ color: 'red', height: 40 }}>{ this.state.errorMsg }</Text> : null }
 								</View>
 
-								<Modal isVisible={this.state.isModalNationality} onBackdropPress={() => this.toggleModalNationality()}>
+								<Modal avoidKeyboard={true} isVisible={this.state.isModalNationality} onBackdropPress={() => this.toggleModalNationality()}>
 									<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
 										<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
@@ -451,7 +457,7 @@ class Register extends Component {
 									{ this.state.errorType === 'city' ? <Text style={{ color: 'red', height: 20, textAlign: 'center' }}>{ this.state.errorMsg }</Text> : null }
 								</View>
 
-								<Modal isVisible={this.state.isModalCountry} onBackdropPress={() => this.toggleModalCountry()}>
+								<Modal  avoidKeyboard={true} isVisible={this.state.isModalCountry} onBackdropPress={() => this.toggleModalCountry()}>
 									<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
 										<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
@@ -508,10 +514,10 @@ class Register extends Component {
 
 								<View style={[styles.overHidden, styles.rowGroup]}>
 									<TouchableOpacity
-										style       = {[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.latitude !== null || this.state.longitude !== null ? styles.border_red : styles.border_gray)]}
+										style       = {[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.latitude && this.state.longitude ? styles.border_red : styles.border_gray)]}
 										onPress     = {() => this.getLocation()}
 									>
-										<Text style={[styles.textRegular, styles.textSize_14, styles.width_150, (this.state.latitude !== null ||  this.state.longitude !== null ? styles.text_red : styles.text_black)]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
+										<Text style={[styles.textRegular, styles.textSize_14, styles.width_150, (this.state.latitude &&  this.state.longitude  ? styles.text_red : styles.text_black)]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
 											{this.state.cityName}
 										</Text>
 										<Icon style={[styles.textSize_20, styles.text_light_gray]} type="Feather" name='map-pin' />
@@ -570,7 +576,7 @@ class Register extends Component {
 								}
 
 								<View style={[styles.rowCenter, styles.marginVertical_20]}>
-									<TouchableOpacity style={[styles.rowRight, styles.marginVertical_10]}>
+									<View style={[styles.rowRight, styles.marginVertical_15, { marginRight: 10 }]}>
 										<CheckBox
 											style={[styles.checkBox, styles.Border, styles.bg_red, styles.Border, styles.border_red]}
 											color={styles.text_gray}
@@ -578,8 +584,8 @@ class Register extends Component {
 											onPress={() => this.setState({checkTerms: !this.state.checkTerms})}
 											checked={this.state.checkTerms}
 										/>
-									</TouchableOpacity>
-									<TouchableOpacity onPress={() => this.props.navigation.navigate('Terms')}>
+									</View>
+									<TouchableOpacity onPress={() => this.props.navigation.navigate('RegisterTerms', { userType })}>
 										<Text
 											style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.paddingHorizontal_15, styles.textDecoration]}>
 											{i18n.t('agreTe')}
@@ -587,8 +593,7 @@ class Register extends Component {
 									</TouchableOpacity>
 								</View>
 
-								<TouchableOpacity
-									style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
+								<TouchableOpacity style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
 									onPress={() => this.onRegister()}>
 									<Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
 										{i18n.translate('doHaveAcc')}
@@ -596,7 +601,7 @@ class Register extends Component {
 								</TouchableOpacity>
 
 							</Form>
-						</KeyboardAvoidingView>
+						</SafeAreaView>
 						<TouchableOpacity
 							onPress         = {() => this.props.navigation.navigate('Login')}
 							style           = {[styles.marginVertical_10, styles.flexCenter, styles.zIndex]}>

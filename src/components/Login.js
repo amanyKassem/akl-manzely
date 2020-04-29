@@ -8,7 +8,7 @@ import {NavigationEvents} from "react-navigation";
 import {connect} from 'react-redux';
 import {chooseLang, profile, userLogin} from '../actions'
 import * as Permissions from 'expo-permissions';
-import {Notifications} from 'expo'
+import { Notifications } from 'expo'
 import Spinner from "react-native-loading-spinner-overlay";
 
 class Login extends Component {
@@ -111,33 +111,35 @@ class Login extends Component {
 
         if (!err){
             const {phone, password, deviceId , device_type} = this.state;
-            this.props.userLogin({ phone, password, deviceId:'11' , device_type}, this.props.lang);
+            this.props.userLogin({ phone, password, deviceId , device_type}, this.props.lang);
         }
 
     }
 
     async componentWillMount() {
+        setTimeout(() => this.getDeviceToken(), 5000)
+    }
 
-        const {status: existingStatus} = await Permissions.getAsync(
-            Permissions.NOTIFICATIONS
-        );
+    async getDeviceToken(){
+		const {status: existingStatus} = await Permissions.getAsync(
+			Permissions.NOTIFICATIONS
+		);
 
-        let finalStatus = existingStatus;
+		let finalStatus = existingStatus;
 
-        if (existingStatus !== 'granted') {
-            const {status} = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-            finalStatus = status;
-        }
+		if (existingStatus !== 'granted') {
+			const {status} = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+			finalStatus = status;
+		}
 
-        if (finalStatus !== 'granted') {
-            return;
-        }
+		if (finalStatus !== 'granted') {
+			return;
+		}
 
-        const deviceId = await Notifications.getExpoPushTokenAsync();
+		const deviceId = await Notifications.getExpoPushTokenAsync();
 
-        this.setState({deviceId, userId: null});
-        AsyncStorage.setItem('deviceID', deviceId);
-
+		this.setState({deviceId, userId: null});
+		AsyncStorage.setItem('deviceID', deviceId);
     }
 
     componentWillReceiveProps(newProps) {

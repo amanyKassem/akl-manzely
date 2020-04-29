@@ -9,7 +9,8 @@ import {
     KeyboardAvoidingView,
     Linking,
     Dimensions,
-    I18nManager
+    I18nManager,
+	Vibration
 } from "react-native";
 import {
     Container,
@@ -39,6 +40,8 @@ import {NavigationEvents} from "react-navigation";
 import Spinner from "react-native-loading-spinner-overlay";
 import SearchInput from './SearchInput'
 import Product from './Product'
+import { Notifications } from 'expo'
+import ProgressImg from 'react-native-image-progress';
 
 const isIOS     = Platform.OS === 'ios';
 const height    = Dimensions.get('window').height;
@@ -56,6 +59,7 @@ class Home extends Component {
             projects                : '',
             projects_string         : '',
             totalCases              : '',
+            height                  : 'auto',
             ActiveCases             : '',
             phone                   : '',
             rate                    : i18n.t('rate'),
@@ -72,6 +76,26 @@ class Home extends Component {
         }
     }
 
+	componentDidMount() {
+		Notifications.addListener(this.handleNotification);
+	}
+
+	handleNotification = (notification) => {
+		if (notification && notification.origin !== 'received') {
+			this.props.navigation.navigate('Notification');
+		}
+
+		if (notification.remote) {
+			Vibration.vibrate();
+			const notificationId = Notifications.presentLocalNotificationAsync({
+				title: notification.data.title  ? notification.data.title : i18n.t('newNotification'),
+				body: notification.data.body ? notification.data.body : i18n.t('_newNotification'),
+				ios: { _displayInForeground: true }
+			});
+		}
+	};
+
+
     activeInput(type) {
 
         if (type === 'phone' || this.state.phone !== '') {
@@ -85,39 +109,31 @@ class Home extends Component {
         if (type === 'phone' && this.state.phone === '') {
             this.setState({phoneStatus: 0})
         }
-
     }
 
     componentWillReceiveProps(nextProps) {
 
-        if( nextProps.navigation.state.params !== undefined ||  nextProps.navigation.state.params  !== undefined){
-            this.state.cityName             = nextProps.navigation.state.params.city_name;
-            this.setState({latitude   : nextProps.navigation.state.params.latitude});
-            this.setState({longitude  : nextProps.navigation.state.params.longitude});
+        if( nextProps.navigation.state.params !== undefined && nextProps.navigation.state.params.pageName === 'MapLocation'){
+            const { city_name, latitude, longitude } = nextProps.navigation.state.params;
+            this.setState({isModalFilter   : true, cityName: city_name, latitude, longitude});
         }else{
             this.setState({cityName  : i18n.translate('mapname')});
         }
 
-        this.setState({ spinner : false});
-        // this.setState({ isModalFilter   : !this.state.isModalFilter , spinner : false});
+       this.setState({ spinner : false});
 
     }
 
     getLocation(){
-
-        this.props.navigation.navigate('MapLocation', {
-            pageName : this.props.navigation.state.routeName
-        });
-
-        this.setState({ isModalFilter   : !this.state.isModalFilter});
-
+        this.props.navigation.navigate('MapLocation', { pageName : this.props.navigation.state.routeName });
+        this.setState({ isModalFilter : false});
     }
 
     onSearch(){
-        this.props.navigation.navigate('FilterSearch', {
-            pageName : this.props.navigation.state.routeName
-        });
+		this.setState({ isModalFilter : false});
 
+        const { SalleryId, rateId, latitude, longitude } = this.state;
+        this.props.navigation.navigate('FilterSearch', { pageName : this.props.navigation.state.routeName, SalleryId, rateId, latitude, longitude });
     }
 
     renderNoData() {
@@ -151,6 +167,8 @@ class Home extends Component {
 
 
 		if (this.props.auth.data.type === 'user' && subcategories.length > 0){
+		    this.setState({ height: 200 });
+
 			subcategories.map((subcategory) => {
 				if (children.includes(subcategory)){
 					const index = children.indexOf(subcategory);
@@ -161,7 +179,11 @@ class Home extends Component {
 			})
 		}
 
-		this.setState({ activeParent: id, children });
+		if (id == null && mainCat){
+			children = [];
+			this.setState({ height: 'auto' });
+        } else
+		    this.setState({ activeParent: id, children });
 
         this.setState({spinner: true, active: mainCat ? id : this.state.active});
         this.props.auth.data.type === 'provider'?
@@ -174,13 +196,11 @@ class Home extends Component {
     };
 
     toggleModalRate = () => {
-        // this.setState({ isModalFilter   : !this.state.isModalFilter});
         this.setState({ isModalRate     : !this.state.isModalRate});
     };
 
     toggleModalSallery = () => {
         this.setState({ isModalSallery  : !this.state.isModalSallery});
-        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     };
 
     selectRateId(id, name) {
@@ -190,7 +210,6 @@ class Home extends Component {
         });
         this.state.reteId = id;
         this.setState({ isModalRate     : !this.state.isModalRate});
-        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     selectSellaryId(id, name) {
@@ -200,7 +219,6 @@ class Home extends Component {
         });
         this.state.SalleId = id;
         this.setState({ isModalSallery  : !this.state.isModalSallery});
-        // this.setState({ isModalFilter   : !this.state.isModalFilter});
     }
 
     componentWillMount() {
@@ -221,6 +239,14 @@ class Home extends Component {
 	    if (children.length > 0)
 	        this.setState({ activeParent, children });
     }
+
+	renderItems(item){
+	    return(
+			<Product key={item.id} data={item} navigation={this.props.navigation} />
+        )
+    }
+
+	_keyExtractor = (item, index) => item.id;
 
 
 	RenderChildren = (subcategories) => {
@@ -287,9 +313,17 @@ class Home extends Component {
                                 :
                                 null
                         }
-                        <Button style={styles.Button} transparent onPress = {() => this.props.navigation.navigate('Notification')}>
-                            <Image style={[styles.headImage]} source={require('../../assets/img/alarm.png')} resizeMode={'contain'}/>
-                        </Button>
+                        <View>
+                            {
+								this.props.providerHome && this.props.providerHome.provider && this.props.providerHome.provider.has_notify ?
+									<View style={{ backgroundColor: 'red', borderRadius: 30, width: 20, height: 20, alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 5, left: 3 }}>
+										<Text style={{ color: '#fff', textAlign: 'center' }}>+1</Text>
+									</View> : null
+                            }
+                            <Button style={styles.Button} transparent onPress = {() => this.props.navigation.navigate('Notification')}>
+                                <Image style={[styles.headImage]} source={require('../../assets/img/alarm.png')} resizeMode={'contain'}/>
+                            </Button>
+                        </View>
                         {
                             this.props.user == null || this.props.user.type === 'user'?
                                 <Button style={styles.Button} transparent onPress = {() => this.props.navigation.navigate('Cart')}>
@@ -308,196 +342,175 @@ class Home extends Component {
 
                     {
                         this.props.user == null || this.props.user.type === 'user' ?
-                            <View style={[styles.boxUser]}>
+                            <View style={[styles.boxUser, { flex: 1, position: 'relative' }]}>
 
-                                <Modal isVisible={this.state.isModalFilter}
-                                       onBackdropPress={() => this.toggleModalFilter()}
-                                       style={[styles.bottomCenter, styles.Width_100]}>
-                                    <View
-                                        style={[styles.overHidden, styles.bg_White, styles.flexCenter, styles.Width_100, styles.position_R, styles.top_45 , {height:500 , paddingTop:40}]}>
+								<Modal avoidKeyboard={true} isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+									<View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R, styles.top_45 , {height:500 , paddingTop:40}]}>
 
-                                        <View style={[styles.paddingVertical_15]}>
-                                            <Text
-                                                style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.textLeft, styles.SelfCenter]}>
-                                                {i18n.t('searchchef')}
-                                            </Text>
-                                        </View>
+										<View style={[styles.paddingVertical_15]}>
+											<Text style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.textLeft , styles.SelfCenter]}>
+												{i18n.t('searchchef')}
+											</Text>
+										</View>
 
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
-                                            <Form
-                                                style={[styles.Width_90, styles.marginVertical_10, styles.flexCenter]}>
+										<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
+											<KeyboardAvoidingView behavior={'padding'} style={styles.keyboardAvoid}>
+												<Form style={[styles.Width_90, styles.marginVertical_10, styles.flexCenter]}>
 
-                                                <Item floatingLabel
-                                                      style={[styles.item, styles.position_R, styles.overHidden]}>
-                                                    <Input
-                                                        placeholder={i18n.translate('numchef')}
-                                                        style={[styles.input, styles.height_50, (this.state.phoneStatus === 1 ? styles.Active : styles.noActive)]}
-                                                        onChangeText={(phone) => this.setState({phone})}
-                                                        onBlur={() => this.unActiveInput('phone')}
-                                                        onFocus={() => this.activeInput('phone')}
-                                                        keyboardType={'number-pad'}
-                                                    />
-                                                </Item>
+													<Item floatingLabel style={[styles.item, styles.position_R, styles.overHidden]}>
+														<Input
+															placeholder={i18n.translate('numchef')}
+															style={[styles.input, styles.height_50, (this.state.phoneStatus === 1 ? styles.Active : styles.noActive)]}
+															onChangeText={(phone) => this.setState({phone})}
+															onBlur={() => this.unActiveInput('phone')}
+															onFocus={() => this.activeInput('phone')}
+															keyboardType={'number-pad'}
+														/>
+													</Item>
 
-                                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                                    <TouchableOpacity onPress={() => this.toggleModalRate()}
-                                                                      style={[styles.marginVertical_10, styles.Width_100, styles.height_50, styles.paddingHorizontal_20, styles.paddingVertical_10, styles.rowGroup, styles.Border, (this.state.rateId !== null ? styles.border_red : styles.border_gray)]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.textSize_14, (this.state.rateId !== null ? styles.text_red : styles.text_black)]}>
-                                                            {this.state.rate}
-                                                        </Text>
-                                                        <Icon style={[styles.textSize_20, styles.text_light_gray]}
-                                                              type="AntDesign" name='down'/>
-                                                    </TouchableOpacity>
-                                                </View>
+													<View style={[styles.overHidden, styles.rowGroup]}>
+														<TouchableOpacity onPress={() => this.toggleModalRate()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, ( this.state.rateId !== null ? styles.border_red : styles.border_gray )]}>
+															<Text style={[styles.textRegular, styles.textSize_14, ( this.state.rateId !== null ? styles.text_red : styles.text_black )]}>
+																{ this.state.rate }
+															</Text>
+															<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
+														</TouchableOpacity>
+													</View>
 
-                                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                                    <TouchableOpacity onPress={() => this.toggleModalSallery()}
-                                                                      style={[styles.marginVertical_10, styles.Width_100, styles.height_50, styles.paddingHorizontal_20, styles.paddingVertical_10, styles.rowGroup, styles.Border, (this.state.SalleryId !== null ? styles.border_red : styles.border_gray)]}>
-                                                        <Text
-                                                            style={[styles.textRegular, styles.textSize_14, (this.state.SalleryId !== null ? styles.text_red : styles.text_black)]}>
-                                                            {this.state.Sallery}
-                                                        </Text>
-                                                        <Icon style={[styles.textSize_20, styles.text_light_gray]}
-                                                              type="AntDesign" name='down'/>
-                                                    </TouchableOpacity>
-                                                </View>
+													<View style={[styles.overHidden, styles.rowGroup]}>
+														<TouchableOpacity onPress={() => this.toggleModalSallery()} style={[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, ( this.state.SalleryId !== null ? styles.border_red : styles.border_gray )]}>
+															<Text style={[styles.textRegular, styles.textSize_14, ( this.state.SalleryId !== null ? styles.text_red : styles.text_black )]}>
+																{ this.state.Sallery }
+															</Text>
+															<Icon style={[styles.textSize_20, styles.text_light_gray]} type="AntDesign" name='down' />
+														</TouchableOpacity>
+													</View>
 
-                                                <View style={[styles.overHidden, styles.rowGroup]}>
-                                                    <TouchableOpacity
-                                                        style={[styles.marginVertical_10, styles.Width_100, styles.height_50, styles.paddingHorizontal_20, styles.paddingVertical_10, styles.rowGroup, styles.Border, (this.state.latitude !== null || this.state.longitude !== null ? styles.border_red : styles.border_gray)]}
-                                                        onPress={() => this.getLocation()}
-                                                    >
-                                                        <Text
-                                                            style={[styles.textRegular, styles.textSize_14, styles.width_150, (this.state.latitude !== null || this.state.longitude !== null ? styles.text_red : styles.text_black)]}
-                                                            numberOfLines={1} prop with ellipsizeMode="tail">
-                                                            {this.state.cityName}
-                                                        </Text>
-                                                        <Icon style={[styles.textSize_20, styles.text_light_gray]}
-                                                              type="Feather" name='map-pin'/>
-                                                    </TouchableOpacity>
-                                                </View>
+													<View style={[styles.overHidden, styles.rowGroup]}>
+														<TouchableOpacity
+															style       = {[ styles.marginVertical_10 , styles.Width_100, styles.height_50 , styles.paddingHorizontal_20, styles.paddingVertical_10 , styles.rowGroup, styles.Border, (this.state.latitude !== null ||  this.state.longitude !== null ? styles.border_red : styles.border_gray)]}
+															onPress     = {() => this.getLocation()}
+														>
+															<Text style={[styles.textRegular, styles.textSize_14, styles.width_150, (this.state.latitude !== null ||  this.state.longitude !== null ? styles.text_red : styles.text_black)]} numberOfLines = { 1 } prop with ellipsizeMode = "tail">
+																{this.state.cityName}
+															</Text>
+															<Icon style={[styles.textSize_20, styles.text_light_gray]} type="Feather" name='map-pin' />
+														</TouchableOpacity>
+													</View>
 
-                                                <TouchableOpacity
-                                                    style={[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
-                                                    onPress={() => this.toggleModalFilter()}>
-                                                    <Text
-                                                        style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
-                                                        {i18n.translate('search')}
-                                                    </Text>
-                                                </TouchableOpacity>
+													<TouchableOpacity
+														style       = {[styles.bg_red, styles.width_150, styles.flexCenter, styles.marginVertical_15, styles.height_40]}
+														onPress     = {() => this.onSearch()}>
+														<Text style={[styles.textRegular, styles.textSize_14, styles.text_White]}>
+															{i18n.translate('search')}
+														</Text>
+													</TouchableOpacity>
 
-                                            </Form>
-                                            </KeyboardAvoidingView>
-                                        </View>
+												</Form>
+											</KeyboardAvoidingView>
+										</View>
+									</View>
 
-                                    </View>
-                                </Modal>
+									<Modal avoidKeyboard={true} isVisible={this.state.isModalRate} onBackdropPress={() => this.toggleModalRate()}>
+										<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
-                                <Modal isVisible={this.state.isModalRate}
-                                       onBackdropPress={() => this.toggleModalRate()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
+											<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
+												<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
+													{i18n.t('starrate')}
+												</Text>
+											</View>
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text
-                                                style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft, styles.SelfCenter]}>
-                                                {i18n.t('starrate')}
-                                            </Text>
-                                        </View>
+											<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
+												<TouchableOpacity
+													style               = {[styles.rowGroup, styles.marginVertical_10]}
+													onPress             = {() => this.selectRateId('heigh', i18n.t('topRated'))}
+												>
+													<View style={[styles.overHidden, styles.rowRight]}>
+														<CheckBox
+															style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+															color               = {styles.text_red}
+															selectedColor       = {styles.text_red}
+															onPress             = {() => this.selectRateId('heigh', i18n.t('topRated'))}
+															checked             = {this.state.rateId === 'heigh'}
+														/>
+														<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+															{i18n.t('topRated')}
+														</Text>
+													</View>
+												</TouchableOpacity>
 
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style={[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress={() => this.selectRateId(1, 'الآعلي تقييم')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style={[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color={styles.text_red}
-                                                        selectedColor={styles.text_red}
-                                                        checked={this.state.reteId === 1}
-                                                    />
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        {i18n.t('topRated')}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+												<TouchableOpacity
+													style               = {[styles.rowGroup, styles.marginVertical_10]}
+													onPress             = {() => this.selectRateId('low', i18n.t('lowRated'))}
+												>
+													<View style={[styles.overHidden, styles.rowRight]}>
+														<CheckBox
+															style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+															color               = {styles.text_red}
+															onPress             = {() => this.selectRateId('low', i18n.t('lowRated'))}
+															selectedColor       = {styles.text_red}
+															checked             = {this.state.rateId === 'low'}
+														/>
+														<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+															{i18n.t('lowRated')}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											</View>
 
-                                            <TouchableOpacity
-                                                style={[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress={() => this.selectRateId(2, 'الآقل تقييم')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style={[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color={styles.text_red}
-                                                        selectedColor={styles.text_red}
-                                                        checked={this.state.reteId === 2}
-                                                    />
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        {i18n.t('lowRated')}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
+										</View>
+									</Modal>
 
-                                    </View>
-                                </Modal>
+									<Modal avoidKeyboard={true} isVisible={this.state.isModalSallery} onBackdropPress={() => this.toggleModalSallery()}>
+										<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
-                                <Modal isVisible={this.state.isModalSallery}
-                                       onBackdropPress={() => this.toggleModalSallery()}>
-                                    <View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
+											<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
+												<Text style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft , styles.SelfCenter]}>
+													{i18n.t('price')}
+												</Text>
+											</View>
 
-                                        <View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
-                                            <Text
-                                                style={[styles.textRegular, styles.text_black, styles.textSize_14, styles.textLeft, styles.SelfCenter]}>
-                                                {i18n.t('price')}
-                                            </Text>
-                                        </View>
+											<View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
+												<TouchableOpacity
+													style               = {[styles.rowGroup, styles.marginVertical_10]}
+													onPress             = {() => this.selectSellaryId('heigh', i18n.t('topPrice'))}
+												>
+													<View style={[styles.overHidden, styles.rowRight]}>
+														<CheckBox
+															style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+															color               = {styles.text_red}
+															selectedColor       = {styles.text_red}
+															onPress             = {() => this.selectSellaryId('heigh', i18n.t('topPrice'))}
+															checked             = {this.state.SalleryId === 'heigh'}
+														/>
+														<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+															{i18n.t('topPrice')}
+														</Text>
+													</View>
+												</TouchableOpacity>
 
-                                        <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
-                                            <TouchableOpacity
-                                                style={[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress={() => this.selectSellaryId(1, 'الآعلي سعر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style={[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color={styles.text_red}
-                                                        selectedColor={styles.text_red}
-                                                        checked={this.state.SalleId === 1}
-                                                    />
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        {i18n.t('topPrice')}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
+												<TouchableOpacity
+													style               = {[styles.rowGroup, styles.marginVertical_10]}
+													onPress             = {() => this.selectSellaryId('low', i18n.t('lowPrice'))}
+												>
+													<View style={[styles.overHidden, styles.rowRight]}>
+														<CheckBox
+															style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
+															color               = {styles.text_red}
+															selectedColor       = {styles.text_red}
+															onPress             = {() => this.selectSellaryId('low', i18n.t('lowPrice'))}
+															checked             = {this.state.SalleryId === 'low'}
+														/>
+														<Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
+															{i18n.t('lowPrice')}
+														</Text>
+													</View>
+												</TouchableOpacity>
+											</View>
 
-                                            <TouchableOpacity
-                                                style={[styles.rowGroup, styles.marginVertical_10]}
-                                                onPress={() => this.selectSellaryId(2, 'الآقل سعر')}
-                                            >
-                                                <View style={[styles.overHidden, styles.rowRight]}>
-                                                    <CheckBox
-                                                        style={[styles.checkBox, styles.bg_red, styles.border_red]}
-                                                        color={styles.text_red}
-                                                        selectedColor={styles.text_red}
-                                                        checked={this.state.SalleId === 2}
-                                                    />
-                                                    <Text
-                                                        style={[styles.textRegular, styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
-                                                        {i18n.t('lowPrice')}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-
-                                    </View>
-                                </Modal>
+										</View>
+									</Modal>
+								</Modal>
 
                                 <View style={styles.viewBlock}>
 
@@ -520,8 +533,7 @@ class Home extends Component {
                                             this.props.banners?
                                                 this.props.banners.map((banner, i) => (
                                                     <View key={i} style={[styles.viewBlock]}>
-                                                        <Image style={[styles.Width_95, styles.swiper]}
-                                                               source={{uri:banner.image}}/>
+                                                        <ProgressImg style={[styles.Width_95, styles.swiper]} source={{uri:banner.image}}/>
                                                         <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
                                                                          style={[styles.blockContent, styles.Width_50]}>
                                                             <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
@@ -554,7 +566,7 @@ class Home extends Component {
                                 </View>
 
                                 <View style={{ zIndex: 3 }}>
-                                    <ScrollView style={[styles.scroll, { maxHeight: height, zIndex: 10, flex: 1, height: 200 }]} horizontal={true} showsHorizontalScrollIndicator={false}>
+                                    <ScrollView style={[styles.scroll, { maxHeight: height, zIndex: 10, flex: 1, height: this.state.height }]} horizontal={true} showsHorizontalScrollIndicator={false}>
 
                                         <TouchableOpacity
                                             onPress={() => this.onSubCategories(null, [], true)}
@@ -589,13 +601,16 @@ class Home extends Component {
                                     </ScrollView>
                                 </View>
 
-                                <View style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100, { zIndex: -1, marginTop: 170 , position: 'absolute' }]}>
+                                <View style={[styles.rowGroup, styles.paddingHorizontal_10, styles.marginVertical_10, styles.overHidden, styles.Width_100, { zIndex: -1, marginTop: 170 , position: 'absolute', top: 0, right: 0, left: 0, bottom: 0 }]}>
                                     {this.renderMealsNoData()}
                                     {
                                         this.props.meals?
-                                            this.props.meals.map((meal, i) => (
-                                                <Product key={meal.id} data={meal} navigation={this.props.navigation} />
-                                            ))
+											<FlatList
+                                                data                    = {this.props.meals}
+                                                renderItem              = {({item}) => this.renderItems(item)}
+                                                numColumns              = {2}
+                                                keyExtractor            = {this._keyExtractor}
+										    />
                                             :
                                             null
                                     }
@@ -607,7 +622,7 @@ class Home extends Component {
                             null
                     }
                     {
-                        this.props.user != null && this.props.user.type === 'provider' && this.props.providerHome.provider?
+                        this.props.user != null && this.props.user.type === 'provider' && this.props.providerHome && this.props.providerHome.provider?
                             <View style={[styles.position_R, styles.top_10, styles.paddingVertical_30]}>
 
                                 <View style={[styles.viewBlock, styles.bg_White, styles.Width_90, styles.overHidden]}>
@@ -621,7 +636,7 @@ class Home extends Component {
                                                   name='edit'/>
                                         </TouchableOpacity>
                                     </Animatable.View>
-                                    <Image style={[styles.Width_100, styles.height_200]} resizeMode={'cover'} source={{uri : this.props.providerHome.provider.cover}}/>
+                                    <ProgressImg style={[styles.Width_100, styles.height_200]} resizeMode={'cover'} source={{uri : this.props.providerHome.provider.cover}}/>
                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500}
                                                      style={[styles.blockContent, styles.top_35, styles.overlay_black]}>
                                         <View style={[styles.paddingVertical_10, styles.paddingHorizontal_10]}>
@@ -719,8 +734,7 @@ class Home extends Component {
                                                             onPress={() => this.props.navigation.navigate('ViewProduct' , {meal_id : meal.id , latitude:this.props.providerHome.provider.latitude, longitude:this.props.providerHome.provider.longitude})}
                                                             style={[styles.position_R, styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5, styles.paddingHorizontal_5, styles.overHidden, styles.bg_White]}>
                                                             <View style={[styles.Width_100, styles.position_R]}>
-                                                                <Image style={[styles.Width_100, styles.height_100]}
-                                                                       source={{uri : meal.image}}/>
+                                                                <ProgressImg style={[styles.Width_100, styles.height_100]} source={{uri : meal.image}}/>
                                                             </View>
                                                             <View style={[styles.Width_100, styles.marginVertical_5]}>
                                                                 <View style={[styles.rowGroup, styles.marginVertical_5]}>

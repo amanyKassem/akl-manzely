@@ -264,8 +264,7 @@ class DetailsOrder extends Component {
                                     {
                                         this.props.orderInfo.meals?
                                             this.props.orderInfo.meals.map((meal, i) => (
-                                                <View key={i}
-                                                      style={[ styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10 ]}>
+                                                <View key={i} style={[ styles.Width_45, styles.marginHorizontal_5, styles.marginVertical_10 ]}>
                                                     <Animatable.View animation="fadeInRight" easing="ease-out" delay={500} style={[ styles.Width_100, styles.position_R ]}>
                                                         <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
                                                         <View style = {[styles.position_R, styles.bg_White , styles.Width_100, styles.Border, styles.border_gray, styles.paddingVertical_5]}>
@@ -280,7 +279,7 @@ class DetailsOrder extends Component {
                                                                 </View>
                                                                 <View style={[ ]}>
                                                                     <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_10 , {alignSelf:"flex-start"}]}>{meal.additions}</Text>
-                                                                    <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10, styles.marginVertical_5]}>{meal.price} { i18n.t('RS') }</Text>
+                                                                    <Text style = {[styles.textRegular, styles.text_red, styles.textSize_12, I18nManager.isRTL ? styles.border_right : styles.border_left, styles.paddingHorizontal_10, styles.marginVertical_5, { alignSelf: 'flex-start' }]}>{meal.price} { i18n.t('RS') }</Text>
                                                                 </View>
                                                             </View>
                                                             <View style={[ styles.Border, styles.border_red ,styles.flexCenter, styles.position_A, styles.bottom_10, styles.right_5, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
@@ -353,64 +352,67 @@ class DetailsOrder extends Component {
                                     <View style={[ styles.position_R,styles.marginVertical_20 ]}>
                                         <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
                                         <View style={[styles.bg_White, styles.borderRed, styles.paddingHorizontal_10, styles.paddingVertical_10 ]}>
-                                            <Text style={[ styles.textRegular, styles.text_black, styles.textSize_14 ]}>
+                                            <Text style={[ styles.textRegular, styles.text_black, styles.textSize_14, { alignSelf: 'flex-start' } ]}>
                                                 { i18n.t('orderStatus') }
                                             </Text>
-                                            <Text style={[ styles.textRegular, styles.text_red, styles.textSize_14 ]}>
+                                            <Text style={[ styles.textRegular, styles.text_red, styles.textSize_14, { alignSelf: 'flex-start' } ]}>
                                                 {this.props.orderInfo.status_name}
                                             </Text>
                                         </View>
                                     </View>
 
-                                    <View style= {[ styles.rowCenter ]}>
-                                        {
-                                            (this.state.status === 2&& this.props.user.type === 'user') ?
-                                                <View style={[styles.rowGroup]}>
-                                                    <TouchableOpacity
-                                                        style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,styles.marginHorizontal_5]}
-                                                        onPress     = {() => this.props.navigation.navigate('Payment' ,
-                                                            {fromNav:'DetailsOrder' , order_id :this.props.navigation.state.params.order_id
-                                                                , delivery_type:this.props.orderInfo.delivery_type})}
-                                                    >
-                                                        <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                                            { i18n.t('payer') }
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                    {
-                                                        this.renderFinishOrder()
-                                                    }
-                                                </View>
-                                                :
-                                                <View/>
-                                        }
-                                        {
-                                            (this.state.status === 1 && this.props.user.type === 'user') ?
-                                                <TouchableOpacity
-                                                    style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_light_gray,styles.marginHorizontal_5 ,{alignSelf:'center'}]}
-                                                    onPress     = {() => this.toggleModalComment()}
-                                                >
-                                                    <Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
-                                                        { i18n.t('cancelOrder') }
-                                                    </Text>
-                                                </TouchableOpacity>
-                                                :
-                                                <View/>
-                                        }
-                                        {
-                                            (this.state.status === 1 && this.props.user.type === 'provider') ?
-                                                this.renderAcceptOrder()
-                                                :
-                                                <View/>
-                                        }
-                                        {
-                                            (this.props.user.type === 'provider') ?
-                                                this.renderUnderApprovalOrder()
-                                                :
-                                                <View/>
-                                        }
-                                    </View>
+                                    {
+                                        this.state.status !== null ?
+											<View style= {[ styles.rowCenter ]}>
+												{
+													(this.state.status === 2 && this.props.user.type === 'user') ?
+														<View style={[styles.rowGroup]}>
+															<TouchableOpacity
+																style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_red,styles.marginHorizontal_5]}
+																onPress     = {() => this.props.navigation.navigate('Payment' ,
+																	{fromNav:'DetailsOrder' , order_id :this.props.navigation.state.params.order_id
+																		, delivery_type:this.props.orderInfo.delivery_type})}
+															>
+																<Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+																	{ i18n.t('payer') }
+																</Text>
+															</TouchableOpacity>
+															{
+																this.renderFinishOrder()
+															}
+														</View>
+														:
+														<View/>
+												}
+												{
+													(this.state.status === 1 && this.props.user.type === 'user') ?
+														<TouchableOpacity
+															style       = {[ styles.marginVertical_25 , styles.width_150, styles.paddingHorizontal_10, styles.paddingVertical_10 , styles.flexCenter, styles.bg_light_gray,styles.marginHorizontal_5 ,{alignSelf:'center'}]}
+															onPress     = {() => this.toggleModalComment()}
+														>
+															<Text style={[styles.textRegular, styles.textSize_13, styles.text_White]}>
+																{ i18n.t('cancelOrder') }
+															</Text>
+														</TouchableOpacity>
+														:
+														<View/>
+												}
+												{
+													(this.state.status === 1 && this.props.user.type === 'provider') ?
+														this.renderAcceptOrder()
+														:
+														<View/>
+												}
+												{
+													(this.props.user.type === 'provider') ?
+														this.renderUnderApprovalOrder()
+														:
+														<View/>
+												}
+											</View> : null
+                                    }
 
-                                    <Modal isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                                    <Modal  avoidKeyboard={true} isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                                         <View style={[styles.overHidden, styles.bg_White , styles.Width_100, styles.position_R, styles.top_20]}>
 
                                             <View style={[styles.paddingVertical_15]}>

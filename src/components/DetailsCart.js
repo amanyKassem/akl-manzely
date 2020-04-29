@@ -31,6 +31,7 @@ class DetailsCart extends Component {
             delivery                    : i18n.t('delver'),
             deliveryId                  : null,
             isModalDelivery             : false,
+			deliveryprice: 0,
             totalPrice: 0,
 
         }
@@ -41,7 +42,7 @@ class DetailsCart extends Component {
         this.setState({ totalPrice: 0 , loader: true});
         const provider_id = this.props.navigation.state.params.provider_id;
         this.props.getCartInfo(this.props.lang , provider_id , this.props.user.token);
-        this.props.getDeliveryTypes(this.props.lang);
+        this.props.getDeliveryTypes(this.props.lang, provider_id , this.props.user.token);
     }
     renderLoader(){
         if (this.state.loader){
@@ -78,9 +79,10 @@ class DetailsCart extends Component {
         this.setState({ isModalDelivery: !this.state.isModalDelivery});
     };
 
-    selectDeliveryId(id, name) {
+    selectDeliveryId(id, name, price) {
         this.setState({
             deliveryId      : id,
+			deliveryprice   : price,
             delivery        : name
         });
         this.setState({ isModalDelivery: !this.state.isModalDelivery});
@@ -172,7 +174,7 @@ class DetailsCart extends Component {
                                         </TouchableOpacity>
                                     </View>
 
-                                    <Modal isVisible={this.state.isModalDelivery} onBackdropPress={() => this.toggleModalDelivery()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                                    <Modal avoidKeyboard={true} isVisible={this.state.isModalDelivery} onBackdropPress={() => this.toggleModalDelivery()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                                         <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
 
                                             <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>
@@ -184,14 +186,14 @@ class DetailsCart extends Component {
                                                                 <TouchableOpacity
                                                                     key={i}
                                                                     style               = {[styles.rowGroup, styles.marginVertical_10]}
-                                                                    onPress             = {() => this.selectDeliveryId(type.id, type.name)}
+                                                                    onPress             = {() => this.selectDeliveryId(type.id, type.name, type.price)}
                                                                 >
                                                                     <View style={[styles.overHidden, styles.rowRight]}>
                                                                         <CheckBox
                                                                             style               = {[styles.checkBox, styles.bg_red, styles.border_red]}
                                                                             color               = {styles.text_red}
                                                                             selectedColor       = {styles.text_red}
-                                                                            checked             = {this.state.deliveryId === 1}
+                                                                            checked             = {this.state.deliveryId === type.id}
                                                                             onPress             = {() => this.selectDeliveryId(type.id, type.name)}
                                                                         />
                                                                         <Text style={[styles.textRegular , styles.text_black, styles.textSize_16, styles.paddingHorizontal_20]}>
@@ -223,7 +225,7 @@ class DetailsCart extends Component {
                                             { i18n.t('deliveryprice') }
                                         </Text>
                                         <Text style={[styles.textBold, styles.textSize_13, styles.text_black]}>
-                                            {this.props.cartInfo.delivery_price} { i18n.t('RS') }
+                                            {this.state.deliveryprice} { i18n.t('RS') }
                                         </Text>
                                     </View>
 

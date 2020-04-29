@@ -7,7 +7,7 @@ import {
     ScrollView,
     FlatList,
     KeyboardAvoidingView,
-    ActivityIndicator
+    ActivityIndicator, I18nManager
 } from "react-native";
 import {
     Container,
@@ -22,7 +22,7 @@ import {
     Item,
     Input,
     Title,
-    CheckBox, Form, Textarea
+    CheckBox, Form,
 } from 'native-base'
 import styles from '../../assets/style';
 import i18n from "../../locale/i18n";
@@ -93,7 +93,7 @@ class Notification extends Component {
                 <NavigationEvents onWillFocus={() => this.onFocus()} />
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
-                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
+                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.navigate('Home', { pageName: 'Notification' })}>
                             <Image style={[styles.headImage]} source={require('../../assets/img/left.png')} resizeMode={'contain'}/>
                         </Button>
                     </Left>
@@ -115,7 +115,7 @@ class Notification extends Component {
                             {
                                 this.props.notifications ?
                                     this.props.notifications.map((notification, i) => (
-                                        <View key={i} style={[ styles.marginVertical_10 ]}>
+                                        <TouchableOpacity onPress = {() => this.props.navigation.navigate(notification.order_id ? 'DetailsOrder' : '', {status: null , order_id : notification.order_id})} key={i} style={[ styles.marginVertical_10 ]}>
                                             <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
                                                 <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
                                                 <View>
@@ -129,11 +129,11 @@ class Notification extends Component {
                                                                     <Icon style={[styles.textSize_16, styles.text_red]} type="AntDesign" name='closecircle' />
                                                                 </TouchableOpacity>
                                                             </View>
-                                                            <View style={[ styles.rowGroup]}>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , styles.Width_86]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'space-between' }}>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , styles.Width_86, { alignSelf: 'flex-start', textAlign: I18nManager.isRTL ? 'left' : 'right',}]}>
                                                                     {notification.body}
                                                                 </Text>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , {right:5 , position:'absolute' , bottom:0}]} >
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_12 , {right:5 , position:'absolute' , bottom:0, width: '30%'}]} >
                                                                     {notification.created_at}
                                                                 </Text>
                                                             </View>
@@ -141,7 +141,7 @@ class Notification extends Component {
                                                     </View>
                                                 </View>
                                             </Animatable.View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))
                                     :
                                     null

@@ -8,6 +8,7 @@ import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import axios from "axios";
 import MapView from 'react-native-maps';
+import {getOrderStore} from "../actions";
 
 class MapLocation extends Component {
     constructor(props){
@@ -115,27 +116,38 @@ class MapLocation extends Component {
                     city_name       : this.state.city,
                     latitude        : this.state.mapRegion.latitude,
                     longitude       : this.state.mapRegion.longitude,
+                    pageName        : 'MapLocation'
                 })
             }else if (pageName === 'Details'){
                 this.props.navigation.navigate('Details', {
                     city_name       : this.state.city,
                     latitude        : this.state.mapRegion.latitude,
                     longitude       : this.state.mapRegion.longitude,
+					pageName        : 'MapLocation'
                 })
             }else if (pageName === 'Register'){
                 this.props.navigation.navigate('Register', {
-                    city_name       : this.state.city,
+                    cityName       : this.state.city,
                     latitude        : this.state.mapRegion.latitude,
                     longitude       : this.state.mapRegion.longitude,
                 })
             }else if (pageName === 'DetailsCart'){
-                this.props.navigation.navigate('Payment', {
-                    city_name               : this.state.city,
-                    latitude                : this.state.mapRegion.latitude,
-                    longitude               : this.state.mapRegion.longitude,
-                    provider_id             : this.props.navigation.state.params.provider_id,
-                    delivery_type           : this.props.navigation.state.params.delivery_type,
-                })
+                // this.props.navigation.navigate('Payment', {
+                //     city_name               : this.state.city,
+                //     latitude                : this.state.mapRegion.latitude,
+                //     longitude               : this.state.mapRegion.longitude,
+                //     provider_id             : this.props.navigation.state.params.provider_id,
+                //     delivery_type           : this.props.navigation.state.params.delivery_type,
+                // })
+
+				const latitude                = this.state.mapRegion.latitude;
+				const longitude               = this.state.mapRegion.longitude;
+				const provider_id             = this.props.navigation.state.params.provider_id;
+				const delivery_type           = this.props.navigation.state.params.delivery_type;
+
+
+				this.props.getOrderStore(this.props.lang, provider_id , delivery_type , latitude , longitude , this.props.user.token  , this.props )
+
             }else if (pageName === 'EditProfile'){
                 this.props.navigation.navigate('EditProfile', {
                     city_name       : this.state.city,
@@ -217,9 +229,10 @@ class MapLocation extends Component {
     }
 }
 
-const mapStateToProps = ({ lang }) => {
+const mapStateToProps = ({ lang, profile }) => {
     return {
-        lang        : lang.lang,
+        lang    : lang.lang,
+		user    : profile.user,
     };
 };
-export default connect(mapStateToProps, { })(MapLocation);
+export default connect(mapStateToProps, { getOrderStore })(MapLocation);

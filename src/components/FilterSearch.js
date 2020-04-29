@@ -153,9 +153,12 @@ class FilterSearch extends Component {
     componentWillMount() {
         this.setState({spinner: true});
 
-        const { keyword, phone, SalleryId, rateId, latitude, longitude } = this.state;
+        let { keyword, phone, SalleryId, rateId, latitude, longitude } = this.state;
+        const { params } = this.props.navigation.state;
 
-        console.log('keyword__', keyword);
+		if ( params.SalleryId ) SalleryId = params.SalleryId;
+		if ( params.rateId ) rateId = params.rateId;
+		if ( params.latitude && params.longitude ) latitude = params.latitude; longitude = params.longitude;
 
 		axios({
 			method      : 'POST',
@@ -173,7 +176,6 @@ class FilterSearch extends Component {
 	}
 
     render() {
-
         return (
             <Container>
 				<Spinner visible = { this.state.spinner } />
@@ -181,7 +183,7 @@ class FilterSearch extends Component {
 
                 <Header style={styles.headerView}>
                     <Left style={styles.leftIcon}>
-                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.goBack()}>
+                        <Button style={styles.Button} transparent onPress={() => this.props.navigation.navigate('Home', { pageName: 'FilterSearch' })}>
                             <Image style={[styles.headImage]} source={require('../../assets/img/left.png')} resizeMode={'contain'}/>
                         </Button>
                     </Left>
@@ -216,7 +218,7 @@ class FilterSearch extends Component {
 
                     <View style={[ styles.boxUser ]}>
 
-                        <Modal isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                        <Modal avoidKeyboard={true} isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                             <View style={[styles.overHidden, styles.bg_White, styles.flexCenter , styles.Width_100, styles.position_R, styles.top_45 , {height:500 , paddingTop:40}]}>
 
                                 <View style={[styles.paddingVertical_15]}>
@@ -283,7 +285,7 @@ class FilterSearch extends Component {
                                 </View>
                             </View>
 
-							<Modal isVisible={this.state.isModalRate} onBackdropPress={() => this.toggleModalRate()}>
+							<Modal avoidKeyboard={true} isVisible={this.state.isModalRate} onBackdropPress={() => this.toggleModalRate()}>
 								<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
 									<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>
@@ -333,7 +335,7 @@ class FilterSearch extends Component {
 								</View>
 							</Modal>
 
-							<Modal isVisible={this.state.isModalSallery} onBackdropPress={() => this.toggleModalSallery()}>
+							<Modal avoidKeyboard={true} isVisible={this.state.isModalSallery} onBackdropPress={() => this.toggleModalSallery()}>
 								<View style={[styles.overHidden, styles.bg_White, styles.Radius_5]}>
 
 									<View style={[styles.Border, styles.border_gray, styles.paddingVertical_15]}>

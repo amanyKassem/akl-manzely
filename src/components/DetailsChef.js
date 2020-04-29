@@ -127,7 +127,7 @@ class DetailsChef extends Component {
 
                 <Content contentContainerStyle={styles.bgFullWidth} style={styles.contentView}>
 
-                    <Modal isVisible={this.state.isModalInfo} onBackdropPress={() => this.toggleModalInfo()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                    <Modal avoidKeyboard={true} isVisible={this.state.isModalInfo} onBackdropPress={() => this.toggleModalInfo()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                         <View style={[styles.overHidden, styles.bg_White , styles.Width_100, styles.position_R, styles.top_20]}>
 
                             <View style={[styles.paddingVertical_15]}>
@@ -211,7 +211,7 @@ class DetailsChef extends Component {
                         </TouchableOpacity>
                     </View>
 
-                    <Modal isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                    <Modal avoidKeyboard={true} isVisible={this.state.isModalFilter} onBackdropPress={() => this.toggleModalFilter()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                         <View style={[styles.overHidden, styles.bg_White, styles.Width_100, styles.position_R, styles.top_20]}>
 
                             <View style={[styles.paddingHorizontal_10, styles.marginVertical_10]}>

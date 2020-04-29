@@ -156,7 +156,7 @@ class MyOrders extends Component {
                                         <View key={i} style={[ styles.marginVertical_10 ]}>
                                             <Animatable.View animation="fadeInUp" easing="ease-out" delay={500} style={[ styles.Width_100 ]}>
                                                 <View style={[ styles.position_A, styles.shapeBlock, styles.Border, styles.border_gray, styles.Width_100, styles.height_full, styles.overlay_white ]} />
-                                                <TouchableOpacity onPress = {() => this.props.navigation.navigate('DetailsOrder', {status : this.state.active , order_id : order.id})}>
+                                                <TouchableOpacity onPress = {() => this.props.navigation.navigate('DetailsOrder', {status: this.state.active , order_id : order.id})}>
                                                     <View style={[ styles.rowGroup, styles.bg_White, styles.Border, styles.border_gray, styles.paddingHorizontal_5, styles.paddingVertical_5 ]}>
                                                         <View style={[ styles.flex_100 ]}>
                                                             <View style={[ styles.rowGroup]}>
@@ -165,11 +165,11 @@ class MyOrders extends Component {
                                                                 </Text>
                                                             </View>
                                                             <View style={[ styles.rowRight]}>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100]}>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.width_100, { alignSelf: 'flex-start' }]}>
                                                                     { i18n.t('numorders') }
                                                                 </Text>
                                                                 <Text style={[styles.text_black_gray, styles.textSize_13]}>:</Text>
-                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5]}>
+                                                                <Text style={[styles.textRegular, styles.text_black_gray, styles.textSize_13, styles.marginHorizontal_5, { alignSelf: 'flex-start' }]}>
                                                                     {order.id}
                                                                 </Text>
                                                             </View>

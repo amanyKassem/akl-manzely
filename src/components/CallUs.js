@@ -188,7 +188,7 @@ class CallUs extends Component {
                             null
                     }
 
-                    <Modal isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
+                    <Modal avoidKeyboard={true} isVisible={this.state.isModalComment} onBackdropPress={() => this.toggleModalComment()} style={[ styles.bottomCenter, styles.Width_100 ]}>
                         <View style={[styles.overHidden, styles.bg_White , styles.Width_100, styles.position_R, styles.top_20]}>
 
                             <View style={[styles.paddingVertical_15]}>
@@ -228,7 +228,6 @@ class CallUs extends Component {
 
                         </View>
                     </Modal>
-
 
                 </Content>
 
